@@ -10,6 +10,6 @@ github_mirror:
         # Reemplaza TU_USUARIO_GITHUB y TU_REPOSITORIO con tus datos reales
         - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/Tyliz/KanbanMoon.git || true
         # Forzamos el empuje de la rama principal a GitHub
-        - git push --prune github HEAD:main
+        - git push --force github HEAD:refs/heads/main
     only:
         - main
