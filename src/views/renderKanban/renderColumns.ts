@@ -136,6 +136,28 @@ const createColumnElement = (
 
 					const date = new Date().toISOString().split('T')[0]
 
+					if (columnSetting.title === t('COLUMN_COMPLETED')) {
+						let history = frontmatter.history || []
+						history.push({
+							state: columnSetting.title,
+							date,
+							from: lastState,
+						})
+
+						frontmatter.history = history
+
+						frontmatter[
+							view.plugin.settings.propertyCompleted ||
+								'completed'
+						] = true
+
+						frontmatter[view.plugin.settings.propertyState] =
+							columnSetting.title
+
+						new Notice(`${t('COMPLETE_NOTE')}`, 3000)
+						return
+					}
+
 					frontmatter[view.plugin.settings.propertyState] =
 						columnSetting.title
 
