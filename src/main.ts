@@ -20,7 +20,7 @@ export default class KanbanMoonlightPlugin extends Plugin {
 		this.addRibbonIcon(
 			'lucide-kanban',
 			t('VIEW_TITLE'),
-			(evt: MouseEvent) => {
+			(_evt: MouseEvent) => {
 				this.activeView()
 			},
 		)

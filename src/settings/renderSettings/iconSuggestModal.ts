@@ -1,4 +1,4 @@
-import { App, getIcon, getIconIds, setIcon, SuggestModal } from 'obsidian'
+import { App, getIcon, setIcon, SuggestModal } from 'obsidian'
 import { icons } from 'lucide'
 
 export class IconSuggestModal extends SuggestModal<string> {

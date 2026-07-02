@@ -1,7 +1,7 @@
-import { ItemView, Notice, WorkspaceLeaf, TFile, setIcon } from 'obsidian'
+import { ItemView, WorkspaceLeaf, TFile, setIcon } from 'obsidian'
 import { t } from '../lang/helpers' // Importamos la función de traducción
 import type KanbanMoonlight from '../main'
-import { Column } from '../settings/kanbanSettings'
+import { renderKanbanColumns } from './renderKanban/renderColumns'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
 
@@ -19,6 +19,10 @@ export class KanbanMoonlightView extends ItemView {
 
 	getDisplayText() {
 		return t('VIEW_TITLE')
+	}
+
+	getIcon() {
+		return 'lucide-kanban'
 	}
 
 	async onOpen() {
@@ -90,10 +94,10 @@ export class KanbanMoonlightView extends ItemView {
 			cls: 'kanban-board',
 		})
 
-		this.renderKanbanColumns(notesWithTag)
+		renderKanbanColumns(this, notesWithTag)
 	}
 
-	filterKanbanBoard = async (allNotes: any[], searchTerm: string) => {
+	filterKanbanBoard = async (allNotes: TFile[], searchTerm: string) => {
 		const filteredNotes = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
 			if (!cache) return false
@@ -119,226 +123,8 @@ export class KanbanMoonlightView extends ItemView {
 			)
 		})
 
-		this.renderKanbanColumns(filteredNotes)
+		renderKanbanColumns(this, filteredNotes)
 	}
 
 	debounceTimer: number | null = null
-
-	createColumnElement = (
-		container: HTMLElement,
-		columnSetting: Column,
-		notes: any[],
-	) => {
-		notes = notes.sort((a, b) => {
-			const aDate =
-				this.app.metadataCache.getFileCache(a)?.frontmatter?.modified
-			const bDate =
-				this.app.metadataCache.getFileCache(b)?.frontmatter?.modified
-
-			if (!aDate || !bDate) return 0
-			if (aDate === bDate) return 0
-
-			return aDate && bDate
-				? new Date(aDate).getTime() - new Date(bDate).getTime()
-				: 0
-		})
-
-		const count = notes.length
-
-		const columnEl = container.createEl('div', {
-			cls: 'kanban-column',
-		})
-		columnEl.style.borderColor = columnSetting.color || '#ac46ff'
-
-		columnEl.addEventListener('drop', async (event) => {
-			event.preventDefault()
-			const notePath = event.dataTransfer?.getData('text/plain')
-
-			const note = this.app.vault.getAbstractFileByPath(
-				notePath || '',
-			) as TFile | null
-
-			if (!note) {
-				new Notice(t('NOTE_NOT_FOUND'), 3000)
-				return
-			}
-
-			try {
-				await this.app.fileManager.processFrontMatter(
-					note,
-					(frontmatter) => {
-						const lastState =
-							frontmatter[this.plugin.settings.propertyState] ||
-							'Pending'
-
-						if (lastState === columnSetting.title) return
-
-						const date = new Date().toISOString().split('T')[0]
-
-						frontmatter[this.plugin.settings.propertyState] =
-							columnSetting.title
-
-						let history = frontmatter.history || []
-						history.push({
-							state: columnSetting.title,
-							date,
-							from: lastState,
-						})
-
-						frontmatter.history = history
-
-						new Notice(
-							`${t('MOVED_NOTE_TO')} "${columnSetting.title}"`,
-							3000,
-						)
-					},
-				)
-			} catch (error) {
-				new Notice(t('NOTE_NOT_FOUND'), 3000)
-			}
-
-			columnEl.classList.remove('kanban-column--drag-over')
-		})
-
-		columnEl.addEventListener('dragover', (event) => {
-			event.preventDefault()
-			columnEl.classList.add('kanban-column--drag-over')
-		})
-		columnEl.addEventListener('dragleave', () => {
-			columnEl.classList.remove('kanban-column--drag-over')
-		})
-
-		const headerEl = columnEl.createEl('div', {
-			cls: 'kanban-column__header',
-		})
-
-		const headerLink = headerEl.createEl('a', {
-			cls: 'kanban-column__header-link',
-			attr: {
-				href: '#',
-			},
-		})
-
-		const iconEl = headerLink.createEl('span', {
-			cls: `kanban-column__icon`,
-		})
-
-		setIcon(iconEl, `${columnSetting.icon.toLowerCase()}`)
-
-		iconEl.style.color = columnSetting.color || '#ac46ff'
-
-		headerLink.createEl('h4', {
-			cls: 'kanban-column__title',
-			text: `${columnSetting.title}`,
-		})
-
-		headerEl.createEl('span', {
-			text: `${count}`,
-			cls: 'kanban-column__color-indicator',
-			attr: {
-				style: `background-color: ${columnSetting.color || '#ac46ff'}`,
-			},
-		})
-
-		notes.forEach((note) => {
-			const cardBorderColor = columnSetting.color || '#ac46ff'
-
-			const cardEl = columnEl.createEl('div', {
-				cls: 'kanban-card',
-				attr: {
-					style: `border-left-color: ${cardBorderColor};`,
-					draggable: 'true',
-				},
-			})
-
-			cardEl.addEventListener('dragstart', (event) => {
-				event.dataTransfer?.setData('text/plain', note.path)
-				cardEl.classList.add('kanban-card--dragging')
-			})
-
-			cardEl.addEventListener('dragend', () => {
-				cardEl.classList.remove('kanban-card--dragging')
-			})
-
-			const cardHeaderEl = cardEl.createEl('div', {
-				cls: 'kanban-card__header',
-			})
-
-			// const btnCopy = cardHeaderEl.createEl('button', {
-			// 	cls: 'btn-copy',
-			// 	attr: {
-			// 		title: t('COPY_NOTE'),
-			// 	},
-			// })
-
-			const noteTitle = note.basename
-
-			const cardTitleEl = cardHeaderEl.createEl('h5', {
-				text: noteTitle,
-				cls: 'kanban-card__title',
-			})
-
-			cardTitleEl.addEventListener('click', async () => {
-				const leaf = this.app.workspace.getLeaf(true)
-				await leaf.openFile(note)
-			})
-
-			// Description
-
-			const noteCache = this.app.metadataCache.getFileCache(note)
-
-			const description =
-				noteCache?.frontmatter?.[
-					this.plugin.settings.propertyDescription
-				] || ''
-
-			const descriptionShorted =
-				description.length > 55
-					? description.substring(0, 55) + '...'
-					: description
-
-			cardEl.createEl('div', {
-				text: descriptionShorted,
-				cls: 'kanban-card__description',
-			})
-
-			const tagContainer = cardEl.createEl('div', {
-				cls: 'kanban-card__tag-container',
-			})
-
-			const tags = noteCache?.frontmatter?.tags
-			const tagsNotes = Array.isArray(tags) ? tags : tags ? [tags] : []
-			const relevantTags = tagsNotes.filter(
-				(tag: string) =>
-					tag !==
-					`#${this.plugin.settings.tagNotes.replace('#', '')}`,
-			)
-
-			relevantTags.slice(0, 2).forEach((tag: any) => {
-				tagContainer.createEl('span', {
-					text: tag,
-					cls: 'kanban-card__tag',
-				})
-			})
-		})
-	}
-
-	renderKanbanColumns = (notes: any[]) => {
-		const container =
-			this.contentEl.querySelector<HTMLElement>('.kanban-board')
-		if (!container) return
-		container.empty()
-
-		this.plugin.settings.columns.forEach((columna) => {
-			const columnNotes = notes.filter((note) => {
-				const state =
-					this.app.metadataCache.getFileCache(note)?.frontmatter?.[
-						this.plugin.settings.propertyState
-					] || 'Pending'
-				return state === columna.title
-			})
-
-			this.createColumnElement(container, columna, columnNotes)
-		})
-	}
 }

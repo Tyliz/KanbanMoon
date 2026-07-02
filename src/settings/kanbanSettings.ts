@@ -1,9 +1,26 @@
 import { t } from '../lang/helpers' // Importamos la función de traducción
 
-export interface Column {
+export interface IColumn {
 	id: string
 	icon: string
 	title: string
+	color: string
+}
+
+export enum TimeOptions {
+	day,
+	week,
+	month,
+	year,
+}
+
+export interface ICompletedColumn extends IColumn {
+	limitDate: TimeOptions
+}
+
+export interface IType {
+	id: string
+	name: string
 	color: string
 }
 
@@ -11,13 +28,19 @@ export interface IKanbanSettings {
 	tagNotes: string
 	propertyState: string
 	propertyDescription: string
-	columns: Column[]
+	propertyType: string
+	propertyCompleted: string
+	columns: IColumn[]
+	types: IType[]
+	completedColumn: ICompletedColumn
 }
 
 export const DEFAULT_SETTINGS: IKanbanSettings = {
 	tagNotes: '#project',
 	propertyState: 'state',
 	propertyDescription: 'description',
+	propertyType: 'type',
+	propertyCompleted: 'completed',
 	columns: [
 		{
 			id: 'pending',
@@ -43,11 +66,13 @@ export const DEFAULT_SETTINGS: IKanbanSettings = {
 			title: t('COLUMN_CANCELED'),
 			color: '#e74c3c',
 		},
-		{
-			id: 'done',
-			icon: 'check',
-			title: t('COLUMN_DONE'),
-			color: '#27ae60',
-		},
 	],
+	types: [],
+	completedColumn: {
+		id: 'completed',
+		icon: 'check-check',
+		title: t('COLUMN_COMPLETED'),
+		color: '#27ae60',
+		limitDate: TimeOptions.week,
+	},
 }

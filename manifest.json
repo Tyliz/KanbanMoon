@@ -1,6 +1,7 @@
 {
 	"id": "kanban-moonlight-plugin",
 	"name": "Kanban Moonlight",
+	"icon": "lucide-kanban",
 	"version": "0.0.1",
 	"minAppVersion": "0.0.1",
 	"description": "A simple awesome Kanban plugin for Obsidian.",
