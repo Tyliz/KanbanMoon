@@ -31,6 +31,20 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			)
 			.setClass('kanban-setting-section')
 
+		new Setting(containerEl)
+			.setName(t('FOLDER_LABEL'))
+			.setDesc(t('FOLDER_DESC'))
+			.addText((text) =>
+				text
+					.setValue(this.plugin.settings.folderNotes)
+					.setPlaceholder('Projects/MyProject')
+					.onChange(async (value) => {
+						this.plugin.settings.folderNotes = value
+						await this.plugin.saveSettings()
+					}),
+			)
+			.setClass('kanban-setting-section')
+
 		renderColumnSettings(this.plugin, containerEl, this.display.bind(this))
 
 		renderCompletedSettings(
