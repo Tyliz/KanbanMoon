@@ -72,20 +72,12 @@ export class KanbanMoonlightView extends ItemView {
 			const searchTerm = (
 				event.target as HTMLInputElement
 			).value.toLowerCase()
-			this.filterKanbanBoard(notesWithTag, searchTerm)
-		})
 
-		let debounceTimer: number | null = null
-		searchInput.addEventListener('input', (event) => {
-			const searchTerm = (
-				event.target as HTMLInputElement
-			).value.toLowerCase()
-
-			if (debounceTimer) {
-				clearTimeout(debounceTimer)
+			if (this.debounceTimer) {
+				clearTimeout(this.debounceTimer)
 			}
 
-			debounceTimer = window.setTimeout(() => {
+			this.debounceTimer = window.setTimeout(() => {
 				this.filterKanbanBoard(notesWithTag, searchTerm)
 			}, 300)
 		})
