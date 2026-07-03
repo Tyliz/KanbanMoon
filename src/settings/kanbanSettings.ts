@@ -29,7 +29,6 @@ export interface IKanbanSettings {
 	propertyState: string
 	propertyDescription: string
 	propertyType: string
-	propertyCompleted: string
 	columns: IColumn[]
 	types: IType[]
 	completedColumn: ICompletedColumn
@@ -40,7 +39,6 @@ export const DEFAULT_SETTINGS: IKanbanSettings = {
 	propertyState: 'state',
 	propertyDescription: 'description',
 	propertyType: 'type',
-	propertyCompleted: 'completed',
 	columns: [
 		{
 			id: 'pending',

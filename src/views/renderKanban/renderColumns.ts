@@ -17,16 +17,13 @@ export const renderKanbanColumns = (
 	view.plugin.settings.columns.forEach((columna) => {
 		const columnNotes = notes
 			.filter((note) => {
-				const state =
-					view.app.metadataCache.getFileCache(note)?.frontmatter?.[
-						view.plugin.settings.propertyState
-					] || 'Pending'
+				const defaultId = view.plugin.settings.columns[0]?.id || 'pending'
+				const state = (view.app.metadataCache.getFileCache(note)
+					?.frontmatter?.[view.plugin.settings.propertyState] ||
+					defaultId) as string
 
-				const completed =
-					view.app.metadataCache.getFileCache(note)?.frontmatter?.[
-						view.plugin.settings.propertyCompleted
-					] || false
-				return state === columna.title && !completed
+				return state.toLowerCase() === columna.id.toLowerCase() ||
+				state.toLowerCase() === columna.title.toLowerCase()
 			})
 			.sort((a, b) => {
 				const aDate = a.stat.mtime || a.stat.ctime
@@ -67,13 +64,14 @@ export const renderKanbanColumns = (
 	const completedNotes = notes
 		.filter((note) => {
 			const noteCache = view.app.metadataCache.getFileCache(note)
-			const completed =
-				noteCache?.frontmatter?.[
-					view.plugin.settings.propertyCompleted
-				] || false
+			const state =
+				noteCache?.frontmatter?.[view.plugin.settings.propertyState] ||
+				''
 
 			const noteDate = new Date(note.stat.mtime || note.stat.ctime)
-			return completed && noteDate > limitDate
+			return (state === completedColumn.id ||
+				state === completedColumn.title) &&
+				noteDate > limitDate
 		})
 		.sort((a, b) => {
 			const aDate = a.stat.mtime || a.stat.ctime
@@ -144,54 +142,41 @@ const createColumnElement = (
 			await view.app.fileManager.processFrontMatter(
 				note,
 				(frontmatter) => {
-					const lastState =
+					const lastStateId =
 						frontmatter[view.plugin.settings.propertyState] ||
-						'Pending'
+						view.plugin.settings.columns[0]?.id || 'pending'
+					const allColumns = [
+						...view.plugin.settings.columns,
+						view.plugin.settings.completedColumn,
+					]
+					const lastColumn = allColumns.find(
+						(c) => c.id === lastStateId,
+					)
+					const lastStateTitle = lastColumn?.title || lastStateId
 
-					if (lastState === columnSetting.title) return
+					if (lastStateId === columnSetting.id) return
 
 					const date = new Date().toISOString().split('T')[0]
+					const history = frontmatter.history || []
 
-					if (columnSetting.title === t('COLUMN_COMPLETED')) {
-						let history = frontmatter.history || []
-						history.push({
-							state: columnSetting.title,
-							date,
-							from: lastState,
-						})
-
-						frontmatter.history = history
-
-						frontmatter[
-							view.plugin.settings.propertyCompleted ||
-								'completed'
-						] = true
-
-						frontmatter[view.plugin.settings.propertyState] =
-							columnSetting.title
-
-						new Notice(`${t('COMPLETE_NOTE')}`, 3000)
-						return
-					}
-
-					frontmatter[view.plugin.settings.propertyState] =
-						columnSetting.title
-
-					let history = frontmatter.history || []
 					history.push({
 						state: columnSetting.title,
+						stateId: columnSetting.id,
 						date,
-						from: lastState,
+						from: lastStateTitle,
 					})
 
 					frontmatter.history = history
+					frontmatter[view.plugin.settings.propertyState] =
+						columnSetting.id
 
-					frontmatter[
-						view.plugin.settings.propertyCompleted || 'completed'
-					] = false
-
+					const isCompleted =
+						columnSetting.id ===
+						view.plugin.settings.completedColumn.id
 					new Notice(
-						`${t('MOVED_NOTE_TO')} "${columnSetting.title}"`,
+						isCompleted
+							? `${t('COMPLETE_NOTE')}`
+							: `${t('MOVED_NOTE_TO')} "${columnSetting.title}"`,
 						3000,
 					)
 				},
@@ -401,9 +386,8 @@ const createColumnElement = (
 		if (
 			noteCache &&
 			noteCache.frontmatter &&
-			noteCache.frontmatter[
-				view.plugin.settings.propertyCompleted || 'completed'
-			]
+			noteCache.frontmatter[view.plugin.settings.propertyState] ===
+				view.plugin.settings.completedColumn.id
 		)
 			return
 
@@ -429,19 +413,19 @@ const createColumnElement = (
 				file,
 				(frontmatter) => {
 					const today = new Date().toISOString().split('T')[0]
+					const history = frontmatter['history'] || []
 
-					let history = frontmatter['history'] || []
 					history.push({
-						state: 'completed',
+						state: columnSetting.title,
+						stateId: view.plugin.settings.completedColumn.id,
 						date: today,
 						from: columnSetting.title,
 					})
 
 					frontmatter['history'] = history
 
-					frontmatter[
-						view.plugin.settings.propertyCompleted || 'completed'
-					] = true
+					frontmatter[view.plugin.settings.propertyState ?? 'state'] =
+						view.plugin.settings.completedColumn.id
 
 					new Notice(t('NOTICE_COMPLETED'))
 				},

@@ -19,9 +19,6 @@ const AUTHORS_LANGS = {
 		COMPLETE_SETTING_TIME: 'Historical task limit',
 		COMPLETE_SETTING_TIME_DESC:
 			'Define how far back in time your past tasks will be displayed.',
-		COMPLETE_SETTING_PROPERTY: 'Property for completion',
-		COMPLETE_SETTING_PROPERTY_DESC:
-			'Property used for tracking completed tasks',
 		DAY: 'Day',
 		ADD_COLUMN_BTN: '+ Add Column',
 		DELETE_BTN: 'Delete',
@@ -60,9 +57,6 @@ const AUTHORS_LANGS = {
 			'Configuraciones para la columna de completada',
 		COMPLETE_SETTING_BASIC: 'Estilos de la columna de completados',
 		COMPLETE_SETTING_BASIC_DESC: `Cambia el icono y color de la columna de 'completado'`,
-		COMPLETE_SETTING_PROPERTY: 'Propiedad para el completado',
-		COMPLETE_SETTING_PROPERTY_DESC:
-			'Propiedad utilizada para el control de tareas completadas',
 		COMPLETE_SETTING_TIME: 'Límite de tareas históricas',
 		COMPLETE_SETTING_TIME_DESC:
 			'Define hasta qué punto en el tiempo se mostrarán tus tareas anteriores.',

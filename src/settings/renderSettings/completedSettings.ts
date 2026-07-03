@@ -13,11 +13,9 @@ export const renderCompletedSettings = (
 
 	const columnSettingStyle = new Setting(containerEl)
 	const columnSettingTime = new Setting(containerEl)
-	const columnSettingProperty = new Setting(containerEl)
 
 	columnSettingStyle.setClass('kanban-column-setting')
 	columnSettingTime.setClass('kanban-column-setting')
-	columnSettingProperty.setClass('kanban-column-setting')
 
 	columnSettingStyle
 		.setName(t('COMPLETE_SETTING_BASIC'))
@@ -42,18 +40,6 @@ export const renderCompletedSettings = (
 					await plugin.saveSettings()
 				}),
 		)
-
-	columnSettingProperty
-		.setName(t('COMPLETE_SETTING_PROPERTY'))
-		.setDesc(t('COMPLETE_SETTING_PROPERTY_DESC'))
-		.addText((text) => {
-			text.setValue(plugin.settings.propertyCompleted).onChange(
-				async (value) => {
-					plugin.settings.propertyCompleted = value
-					await plugin.saveSettings()
-				},
-			)
-		})
 
 	columnSettingTime
 		.setName(t('COMPLETE_SETTING_TIME'))
