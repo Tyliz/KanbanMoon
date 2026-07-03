@@ -1,30 +1,32 @@
-# Moonligth Kanban Board for Obsidian
+# Kanban Moonlight
 
-Una vista personalizada e interactiva para transformar tus notas de Obsidian en un tablero Kanban ágil y visual. Este plugin evoluciona la lógica de tus scripts de `dataviewjs` integrándola de forma nativa en la interfaz de Obsidian.
+A native Kanban board plugin for Obsidian. Transform your markdown notes into an interactive, visual Kanban board using frontmatter metadata.
 
----
+## Features
 
-## ✨ Características
+- **Kanban Board View**: Renders notes tagged with a configurable tag (default `#project`) as cards in customizable columns.
+- **Drag & Drop**: Move notes between columns by dragging cards — frontmatter state is updated automatically.
+- **Search / Filter**: Real-time search across note titles, descriptions, types, and tags.
+- **Customizable Columns**: Add, remove, reorder and rename columns. Configure each column's icon and color.
+- **Types System**: Define types with custom colors to categorize notes (displayed as colored borders and tags).
+- **Completion Tracking**: Mark tasks as complete with a single click. Completed notes appear in a dedicated column with a configurable time window (day/week/month/year).
+- **History Log**: Every state change and completion is recorded in the note's frontmatter `history` array.
+- **Auto-refresh**: The board refreshes automatically when notes are modified, created, or deleted.
+- **i18n**: English and Spanish built-in.
 
-- **Vistas Personalizadas (`Custom Views`):** Renderizado nativo integrado en los paneles o pestañas de Obsidian.
-- **Filtros Inteligentes:** Clasificación automática de notas en columnas (To Do, In Progress, Done) basándose en las propiedades de tus archivos (Frontmatter / Tags).
-- **Alto Rendimiento:** Desarrollado sobre la API nativa de Obsidian en TypeScript, ofreciendo una carga mucho más rápida que los scripts convencionales.
+## How it works
 
----
+Notes are displayed as Kanban cards based on their frontmatter:
 
-## 🛠️ Desarrollo Local
+| Frontmatter property | Default | Description |
+|---|---|---|
+| `tags` | `#project` | Tag that determines which notes appear on the board |
+| `state` | `Pending` | Current column (Pending, Working On, Review, Canceled, Completed) |
+| `description` | — | Short description shown on the card |
+| `type` | — | Category for color-coded borders |
+| `completed` | `false` | Whether the task is completed |
+| `history` | — | Auto-generated log of state changes |
 
-Si quieres clonar este repositorio para modificarlo o experimentar con el código, sigue estos pasos:
+## Screenshots
 
-### Requisitos previos
-
-- **Node.js** (Versión 18 o superior recomendada)
-- **npm** (Instalado automáticamente con Node)
-
-### Configuración del entorno
-
-1. Clona este repositorio en tu máquina local.
-2. Abre la terminal en la carpeta del proyecto e instala las dependencias:
-    ```bash
-    npm install
-    ```
+> Coming soon. Add your screenshots here.
