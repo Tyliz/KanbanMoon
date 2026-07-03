@@ -1,11 +1,12 @@
 {
-	"id": "kanban-Moon-plugin",
-	"name": "Kanban Moon",
-	"version": "1.0.0",
-	"minAppVersion": "1.0.0",
-	"description": "A simple aweasome Kanban plugin for Obsidian.",
+	"id": "kanban-moonlight-plugin",
+	"name": "Kanban Moonlight",
+	"icon": "lucide-kanban",
+	"version": "0.0.1",
+	"minAppVersion": "0.0.1",
+	"description": "A simple awesome Kanban plugin for Obsidian.",
 	"author": "Tyliz",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://github.com/Tyliz",
+	"fundingUrl": "https://buymeacoffee.com/tyliz",
 	"isDesktopOnly": false
 }

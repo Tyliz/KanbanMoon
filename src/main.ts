@@ -1,47 +1,85 @@
-import { Plugin } from 'obsidian';
-import { IKanbanSettings, DEFAULT_SETTINGS } from './settings/kanbanSettings';
-import { KanbanMoonlightSettingTab } from './settings/settingsTab';
-import { KanbanMoonlightView, VIEW_TYPE_KANBAN } from './views/kanbanView';
-import { t } from './lang/helpers'; // Importamos la función de traducción
+import { Plugin } from 'obsidian'
+import { IKanbanSettings, DEFAULT_SETTINGS } from './settings/kanbanSettings'
+import { KanbanMoonlightSettingTab } from './settings/settingsTab'
+import { KanbanMoonlightView, VIEW_TYPE_KANBAN } from './views/kanbanView'
+import { t } from './lang/helpers' // Importamos la función de traducción
 
 export default class KanbanMoonlightPlugin extends Plugin {
-	settings: IKanbanSettings = DEFAULT_SETTINGS;
+	settings: IKanbanSettings = DEFAULT_SETTINGS
 
 	async onload() {
-		await this.loadSettings();
+		await this.loadSettings()
 
 		// Registrar la Vista pasando "this" (el plugin) como argumento
 		this.registerView(
 			VIEW_TYPE_KANBAN,
 			(leaf) => new KanbanMoonlightView(leaf, this),
-		);
+		)
 		// 2. AÑADIR EL ICONO A LA BARRA LATERAL (RIBBON)
 		// Usamos el icono 'lucide-kanban' (Obsidian incluye la librería Lucide Icons)
 		this.addRibbonIcon(
 			'lucide-kanban',
 			t('VIEW_TITLE'),
-			(evt: MouseEvent) => {
-				this.activarVista();
+			(_evt: MouseEvent) => {
+				this.activeView()
 			},
-		);
+		)
+
+		this.registerEvent(
+			this.app.metadataCache.on('changed', (file) => {
+				// Si el archivo que cambió tiene la etiqueta de proyecto, recargamos la vista
+				const cache = this.app.metadataCache.getFileCache(file)
+				if (cache && cache.frontmatter?.tags) {
+					const hasProjectTag = cache.frontmatter?.tags.some(
+						(tag: string) =>
+							tag.startsWith(
+								`#${this.settings.tagNotes.replace('#', '')}`,
+							),
+					)
+					if (hasProjectTag) {
+						this.refreshView()
+					}
+				}
+			}),
+		)
+
+		this.registerEvent(
+			this.app.metadataCache.on('resolve', (file) => {
+				this.refreshView()
+			}),
+		)
+
+		this.registerEvent(
+			this.app.vault.on('delete', (file) => {
+				this.refreshView()
+			}),
+		)
 
 		// Registrar la pestaña de ajustes
-		this.addSettingTab(new KanbanMoonlightSettingTab(this.app, this));
+		this.addSettingTab(new KanbanMoonlightSettingTab(this.app, this))
 	}
 
 	// Función para abrir o enfocar la pestaña del Kanban
-	async activarVista() {
-		const { workspace } = this.app;
-		let leaf = workspace.getLeavesOfType(VIEW_TYPE_KANBAN)[0];
+	async activeView() {
+		const { workspace } = this.app
+		let leaf = workspace.getLeavesOfType(VIEW_TYPE_KANBAN)[0]
 
 		if (!leaf) {
-			leaf = workspace.getLeaf('tab');
+			leaf = workspace.getLeaf('tab')
 			await leaf.setViewState({
 				type: VIEW_TYPE_KANBAN,
 				active: true,
-			});
+			})
 		}
-		workspace.revealLeaf(leaf);
+		workspace.revealLeaf(leaf)
+	}
+
+	refreshView = async () => {
+		this.app.workspace.getLeavesOfType(VIEW_TYPE_KANBAN).forEach((leaf) => {
+			if (leaf.view instanceof KanbanMoonlightView) {
+				leaf.view.drawKanbanBoard()
+			}
+		})
 	}
 
 	async loadSettings() {
@@ -49,10 +87,11 @@ export default class KanbanMoonlightPlugin extends Plugin {
 			{},
 			DEFAULT_SETTINGS,
 			await this.loadData(),
-		);
+		)
 	}
 
 	async saveSettings() {
-		await this.saveData(this.settings);
+		await this.saveData(this.settings)
+		this.refreshView()
 	}
 }
