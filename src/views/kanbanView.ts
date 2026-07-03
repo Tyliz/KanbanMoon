@@ -29,9 +29,12 @@ export class KanbanMoonlightView extends ItemView {
 		const container = this.contentEl
 		container.empty()
 
-		// ¡Aquí usas tus configuraciones!
 		const tag = this.plugin.settings.tagNotes
-		container.createEl('h3', { text: t('FILTER_NOTICE') + ` ${tag}` })
+		const folder = this.plugin.settings.folderNotes
+		const filters = [tag, folder].filter(Boolean).join(', ')
+		container.createEl('h3', {
+			text: t('FILTER_NOTICE') + ` ${filters}`,
+		})
 
 		this.drawKanbanBoard()
 	}
@@ -57,15 +60,20 @@ export class KanbanMoonlightView extends ItemView {
 		})
 
 		const tagNotes = this.plugin.settings.tagNotes
+		const folderNotes = this.plugin.settings.folderNotes
 		const allNotes = this.app.vault.getMarkdownFiles()
 
 		const notesWithTag = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
-			if (!cache || !cache.frontmatter?.tags) return false
-
-			return cache.frontmatter?.tags.some((tag: string) =>
+			const hasTag = cache?.frontmatter?.tags?.some((tag: string) =>
 				tag.startsWith(`#${tagNotes.replace('#', '')}`),
 			)
+			const normalizedFolder = folderNotes
+				? folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
+				: ''
+			const inFolder =
+				normalizedFolder && note.path.startsWith(normalizedFolder)
+			return hasTag || inFolder
 		})
 
 		searchInput.addEventListener('input', (event) => {
@@ -90,38 +98,43 @@ export class KanbanMoonlightView extends ItemView {
 	}
 
 	filterKanbanBoard = async (allNotes: TFile[], searchTerm: string) => {
+		const tagNotes = this.plugin.settings.tagNotes
+		const folderNotes = this.plugin.settings.folderNotes
+		const normalizedFolder = folderNotes
+			? folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
+			: ''
+
 		const filteredNotes = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
-			if (!cache) return false
-			if (!cache.frontmatter) return false
+
+			const hasTag = cache?.frontmatter?.tags?.some((tag: string) =>
+				tag.toLowerCase().includes(tagNotes.toLowerCase()),
+			)
+			const inFolder =
+				normalizedFolder && note.path.startsWith(normalizedFolder)
+			const isProjectNote = hasTag || inFolder
+			if (!isProjectNote) return false
+			if (!searchTerm) return true
 
 			const title = note.basename.toLowerCase()
-			const content = (cache.frontmatter[
+			const content = (cache?.frontmatter?.[
 				this.plugin.settings.propertyDescription || 'description'
 			] || '') as string
-			const type = (cache.frontmatter[
+			const type = (cache?.frontmatter?.[
 				this.plugin.settings.propertyType || 'type'
 			] || '') as string
 
-			const tags = cache.frontmatter?.tags
-				? cache.frontmatter.tags.map((tag: string) => tag.toLowerCase())
-				: []
-
-			if (!searchTerm)
-				return tags.some((tag: string) =>
-					tag.includes(this.plugin.settings.tagNotes.toLowerCase()),
-				)
+			const tags = (cache?.frontmatter?.tags as string[] | undefined)?.map(
+				(t: string) => t.toLowerCase(),
+			) ?? []
 
 			return (
+				title.includes(searchTerm) ||
+				content.toLowerCase().includes(searchTerm) ||
+				type.toLowerCase().includes(searchTerm) ||
 				tags.some((tag: string) =>
-					tag.includes(this.plugin.settings.tagNotes.toLowerCase()),
-				) &&
-				(title.includes(searchTerm) ||
-					content.toLowerCase().includes(searchTerm) ||
-					type.toLowerCase().includes(searchTerm) ||
-					tags.some((tag: string) =>
-						tag.toLowerCase().includes(searchTerm),
-					))
+					tag.toLowerCase().includes(searchTerm),
+				)
 			)
 		})
 

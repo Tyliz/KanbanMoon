@@ -21,6 +21,55 @@ export const setupColumnDragDrop = (
 			return
 		}
 
+		const draggedCard = view.containerEl.querySelector(
+			`[data-path="${note.path}"]`,
+		) as HTMLElement | null
+
+		if (draggedCard) {
+			const sourceColumn = draggedCard.closest(
+				'.kanban-column',
+			) as HTMLElement | null
+
+			const sourceCounter =
+				sourceColumn?.querySelector('.kanban-column__color-indicator')
+			const sourceCount = parseInt(
+				sourceCounter?.textContent || '0',
+			)
+
+			const targetCounter = columnEl.querySelector(
+				'.kanban-column__color-indicator',
+			)
+			const targetCount = parseInt(
+				targetCounter?.textContent || '0',
+			)
+
+			if (sourceCounter)
+				sourceCounter.textContent = String(
+					Math.max(0, sourceCount - 1),
+				)
+			if (targetCounter)
+				targetCounter.textContent = String(targetCount + 1)
+
+			columnEl.appendChild(draggedCard)
+
+			if (sourceCount - 1 === 0 && sourceColumn) {
+				const emptyMsg = sourceColumn.querySelector(
+					'.kanban-column__empty-message',
+				)
+				if (!emptyMsg) {
+					sourceColumn.createEl('div', {
+						text: t('EMPTY_COLUMN'),
+						cls: 'kanban-column__empty-message',
+					})
+				}
+			}
+
+			const emptyMsg = columnEl.querySelector(
+				'.kanban-column__empty-message',
+			)
+			if (emptyMsg) emptyMsg.remove()
+		}
+
 		try {
 			await view.app.fileManager.processFrontMatter(
 				note,

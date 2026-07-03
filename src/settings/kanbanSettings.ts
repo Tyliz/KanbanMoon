@@ -26,6 +26,7 @@ export interface IType {
 
 export interface IKanbanSettings {
 	tagNotes: string
+	folderNotes: string
 	propertyState: string
 	propertyDescription: string
 	propertyType: string
@@ -36,6 +37,7 @@ export interface IKanbanSettings {
 
 export const DEFAULT_SETTINGS: IKanbanSettings = {
 	tagNotes: '#project',
+	folderNotes: '',
 	propertyState: 'state',
 	propertyDescription: 'description',
 	propertyType: 'type',

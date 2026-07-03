@@ -5,6 +5,8 @@ const AUTHORS_LANGS = {
 	en: {
 		TAG_LABEL: 'Project Tag',
 		TAG_DESC: 'The tag that notes must have to appear on the Kanban board.',
+		FOLDER_LABEL: 'Project Folder',
+		FOLDER_DESC: 'Optional folder path. Notes inside will appear on the board. Leave empty to use only the tag.',
 		COLUMN_NAME: 'Column',
 		COLUMNS_TITLE: 'Board Columns',
 		COLUMN_CANCELED: 'Canceled',
@@ -37,7 +39,7 @@ const AUTHORS_LANGS = {
 		TYPE_ICON: 'Type Icon',
 		MONTH: 'Month',
 		NEW_TYPE_PLACEHOLDER: 'New Type',
-		NOTICE_COMPLETED: 'Note was mark as completed',
+		NOTICE_COMPLETED: 'Note was marked as completed',
 		WEEK: 'Week',
 		YEAR: 'Year',
 	},
@@ -45,6 +47,9 @@ const AUTHORS_LANGS = {
 		TAG_LABEL: 'Etiqueta de Proyectos',
 		TAG_DESC:
 			'La etiqueta (tag) que deben tener tus notas para aparecer en el Kanban.',
+		FOLDER_LABEL: 'Carpeta de Proyectos',
+		FOLDER_DESC:
+			'Ruta de carpeta opcional. Las notas dentro aparecerán en el tablero. Dejar vacío para usar solo la etiqueta.',
 		COLUMN_NAME: 'Columna',
 		COLUMNS_TITLE: 'Columnas del Tablero',
 		COLUMN_CANCELED: 'Cancelado',
@@ -54,7 +59,7 @@ const AUTHORS_LANGS = {
 		COLUMN_COMPLETED: 'Completado',
 		COMPLETE_NOTE: 'Completar',
 		COMPLETED_SETTINGS_TITLE:
-			'Configuraciones para la columna de completada',
+			'Configuraciones para la columna de completado',
 		COMPLETE_SETTING_BASIC: 'Estilos de la columna de completados',
 		COMPLETE_SETTING_BASIC_DESC: `Cambia el icono y color de la columna de 'completado'`,
 		COMPLETE_SETTING_TIME: 'Límite de tareas históricas',
@@ -64,7 +69,7 @@ const AUTHORS_LANGS = {
 		ADD_COLUMN_BTN: '+ Añadir Columna',
 		DELETE_BTN: 'Eliminar',
 		EMPTY_COLUMN: 'Sin tareas',
-		VIEW_TITLE: 'Kanban Moonlight Tablero',
+		VIEW_TITLE: 'Tablero Kanban Moonlight',
 		FILTER_NOTICE: 'Tablero: Filtrando por',
 		MOVED_NOTE_TO: 'Nota movida a',
 		NOTE_NOT_FOUND: 'Nota no encontrada.',

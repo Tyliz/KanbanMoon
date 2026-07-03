@@ -36,6 +36,7 @@ export const createCardElement = (
 		attr: {
 			style: `border-left-color: ${cardBorderColor};`,
 			draggable: 'true',
+			'data-path': note.path,
 		},
 	})
 
