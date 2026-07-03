@@ -117,11 +117,11 @@ export class KanbanMoonlightView extends ItemView {
 			if (!searchTerm) return true
 
 			const title = note.basename.toLowerCase()
-			const content = (cache?.frontmatter?.[
+			const description = (cache?.frontmatter?.[
 				this.plugin.settings.propertyDescription || 'description'
 			] || '') as string
-			const type = (cache?.frontmatter?.[
-				this.plugin.settings.propertyType || 'type'
+			const category = (cache?.frontmatter?.[
+				this.plugin.settings.propertyCategory || 'category'
 			] || '') as string
 
 			const tags = (cache?.frontmatter?.tags as string[] | undefined)?.map(
@@ -130,8 +130,8 @@ export class KanbanMoonlightView extends ItemView {
 
 			return (
 				title.includes(searchTerm) ||
-				content.toLowerCase().includes(searchTerm) ||
-				type.toLowerCase().includes(searchTerm) ||
+				description.toLowerCase().includes(searchTerm) ||
+				category.toLowerCase().includes(searchTerm) ||
 				tags.some((tag: string) =>
 					tag.toLowerCase().includes(searchTerm),
 				)

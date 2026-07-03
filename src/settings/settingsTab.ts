@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting } from 'obsidian'
 import type KanbanMoonlight from '../main' // Importamos el tipo del plugin principal
 import { t } from '../lang/helpers' // Importamos la función de traducción
-import { renderTypeSettings } from './renderSettings/typeSettings'
+import { renderCategorySettings } from './renderSettings/categorySettings'
 import { renderColumnSettings } from './renderSettings/columnSettings'
 import { renderCompletedSettings } from './renderSettings/completedSettings'
 
@@ -18,6 +18,25 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 		containerEl.empty()
 
 		containerEl.createEl('h2', { text: t('VIEW_TITLE') })
+
+		containerEl.createEl('h3', { text: t('PROPERTIES_TITLE') })
+		const propsEl = containerEl.createEl('div', {
+			cls: 'kanban-setting-section',
+		})
+		propsEl.createEl('p', {
+			text: `${t('PROPERTY_STATE')}: ${this.plugin.settings.propertyState}`,
+		})
+		propsEl.createEl('p', {
+			text: `${t('PROPERTY_DESCRIPTION')}: ${this.plugin.settings.propertyDescription}`,
+		})
+		propsEl.createEl('p', {
+			text: `${t('PROPERTY_CATEGORY')}: ${this.plugin.settings.propertyCategory}`,
+		})
+		propsEl.createEl('p', {
+			text: t('PROPERTIES_NOTE'),
+			attr: { style: 'opacity: 0.7; font-size: 0.85em;' },
+		})
+
 		new Setting(containerEl)
 			.setName(t('TAG_LABEL'))
 			.setDesc(t('TAG_DESC'))
@@ -53,6 +72,10 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			this.display.bind(this),
 		)
 
-		renderTypeSettings(this.plugin, containerEl, this.display.bind(this))
+		renderCategorySettings(
+			this.plugin,
+			containerEl,
+			this.display.bind(this),
+		)
 	}
 }

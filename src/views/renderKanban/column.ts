@@ -1,5 +1,5 @@
 import { setIcon, TFile } from 'obsidian'
-import { IColumn, IType } from '../../settings/kanbanSettings'
+import { IColumn, ICategory } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { setupColumnDragDrop } from './dragDrop'
@@ -58,12 +58,12 @@ export const createColumnElement = (
 		return
 	}
 
-	const types: IType[] = [
+	const categories: ICategory[] = [
 		{ id: '-', name: '', color: columnSetting.color || '#696969' },
-		...view.plugin.settings.types,
+		...view.plugin.settings.categories,
 	]
 
 	notes.forEach((note) => {
-		createCardElement(columnEl, view, note, columnSetting, types)
+		createCardElement(columnEl, view, note, columnSetting, categories)
 	})
 }
