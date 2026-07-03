@@ -6,6 +6,7 @@ import { t } from './lang/helpers' // Importamos la función de traducción
 
 export default class KanbanMoonlightPlugin extends Plugin {
 	settings: IKanbanSettings = DEFAULT_SETTINGS
+	private refreshTimer: number | null = null
 
 	async onload() {
 		await this.loadSettings()
@@ -27,18 +28,21 @@ export default class KanbanMoonlightPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.metadataCache.on('changed', (file) => {
-				// Si el archivo que cambió tiene la etiqueta de proyecto, recargamos la vista
 				const cache = this.app.metadataCache.getFileCache(file)
-				if (cache && cache.frontmatter?.tags) {
-					const hasProjectTag = cache.frontmatter?.tags.some(
-						(tag: string) =>
-							tag.startsWith(
-								`#${this.settings.tagNotes.replace('#', '')}`,
-							),
+				const hasTag =
+					cache?.frontmatter?.tags?.some((tag: string) =>
+						tag.startsWith(
+							`#${this.settings.tagNotes.replace('#', '')}`,
+						),
+					) ?? false
+				const folder = this.settings.folderNotes
+				const inFolder =
+					folder &&
+					file.path.startsWith(
+						folder.replace(/^\/+/, '').replace(/\/?$/, '/'),
 					)
-					if (hasProjectTag) {
-						this.refreshView()
-					}
+				if (hasTag || inFolder) {
+					this.refreshView()
 				}
 			}),
 		)
@@ -74,12 +78,15 @@ export default class KanbanMoonlightPlugin extends Plugin {
 		workspace.revealLeaf(leaf)
 	}
 
-	refreshView = async () => {
-		this.app.workspace.getLeavesOfType(VIEW_TYPE_KANBAN).forEach((leaf) => {
-			if (leaf.view instanceof KanbanMoonlightView) {
-				leaf.view.drawKanbanBoard()
-			}
-		})
+	refreshView = () => {
+		if (this.refreshTimer) clearTimeout(this.refreshTimer)
+		this.refreshTimer = window.setTimeout(() => {
+			this.app.workspace.getLeavesOfType(VIEW_TYPE_KANBAN).forEach((leaf) => {
+				if (leaf.view instanceof KanbanMoonlightView) {
+					leaf.view.drawKanbanBoard()
+				}
+			})
+		}, 100)
 	}
 
 	async loadSettings() {

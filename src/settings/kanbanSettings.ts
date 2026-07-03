@@ -26,10 +26,10 @@ export interface IType {
 
 export interface IKanbanSettings {
 	tagNotes: string
+	folderNotes: string
 	propertyState: string
 	propertyDescription: string
 	propertyType: string
-	propertyCompleted: string
 	columns: IColumn[]
 	types: IType[]
 	completedColumn: ICompletedColumn
@@ -37,10 +37,10 @@ export interface IKanbanSettings {
 
 export const DEFAULT_SETTINGS: IKanbanSettings = {
 	tagNotes: '#project',
+	folderNotes: '',
 	propertyState: 'state',
 	propertyDescription: 'description',
 	propertyType: 'type',
-	propertyCompleted: 'completed',
 	columns: [
 		{
 			id: 'pending',

@@ -125,7 +125,6 @@
 	margin: 12px;
 	margin-bottom: 12px;
 	cursor: grab;
-	transition: transform 0.2s ease-in-out;
 }
 
 .kanban-card--dragging {
@@ -213,7 +212,7 @@
 
 .btn-complete {
 	width: 100%;
-	background: var(--background-modifier-border);
+	background: var(--background-primary) !important;
 	color: var(--text-muted);
 	padding: 2px 5px;
 	border-radius: 4px;
@@ -227,6 +226,7 @@
 .btn-complete > span {
 	color: var(--text-success);
 }
+
 .btn-complete svg {
 	color: var(--text-success);
 }
