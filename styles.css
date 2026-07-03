@@ -230,3 +230,44 @@
 .btn-complete svg {
 	color: var(--text-success);
 }
+
+.kanban-new-task-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 16px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 50em;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	margin-left: 8px;
+	white-space: nowrap;
+}
+
+.kanban-new-task-btn:hover {
+	background: var(--interactive-accent-hover);
+}
+
+.kanban-new-task-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.kanban-create-task-modal textarea {
+	width: 100%;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	color: var(--text-normal);
+	padding: 8px;
+	font-size: 13px;
+	resize: vertical;
+}
+
+.kanban-create-task-modal textarea:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
+}

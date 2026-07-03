@@ -2,7 +2,7 @@ import { Notice, setIcon, TFile } from 'obsidian'
 import { IColumn, ICategory } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
-import { getContrastColor } from './utils'
+import { getContrastColor, normalizeTag } from './utils'
 
 export const createCardElement = (
 	columnEl: HTMLElement,
@@ -89,9 +89,9 @@ export const createCardElement = (
 
 	const tags = noteCache?.frontmatter?.tags
 	const tagsNotes = Array.isArray(tags) ? tags : tags ? [tags] : []
+	const normalizedProjectTag = normalizeTag(view.plugin.settings.tagNotes)
 	const relevantTags = tagsNotes.filter(
-		(tag: string) =>
-			tag !== `#${view.plugin.settings.tagNotes.replace('#', '')}`,
+		(tag: string) => normalizeTag(tag) !== normalizedProjectTag,
 	)
 
 	if (noteCategory && noteCategory.name !== '') {
