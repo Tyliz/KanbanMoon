@@ -1,5 +1,5 @@
 import { Notice, setIcon, TFile } from 'obsidian'
-import { IColumn, TimeOptions } from '../../settings/kanbanSettings'
+import { IColumn, IType, TimeOptions } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 
@@ -89,6 +89,22 @@ export const renderKanbanColumns = (
 
 	completedColumn.title = t('COLUMN_COMPLETED')
 	createColumnElement(container, view, completedColumn, completedNotes)
+}
+const getContrastColor = (hexColor: string) => {
+	// 1. Eliminar el '#' si existe
+	const hex = hexColor.replace('#', '')
+
+	// 2. Convertir de Hex a RGB
+	const r = parseInt(hex.substring(0, 2), 16)
+	const g = parseInt(hex.substring(2, 4), 16)
+	const b = parseInt(hex.substring(4, 6), 16)
+
+	// 3. Calcular la luminancia relativa (fórmula estándar)
+	const yiq = (r * 299 + g * 587 + b * 114) / 1000
+
+	// 4. Si es mayor a 128, es un color claro, por lo que usamos texto negro.
+	// Si es menor o igual, es oscuro, usamos texto blanco.
+	return yiq >= 128 ? '#000000' : '#ffffff'
 }
 
 /**
@@ -191,6 +207,7 @@ const createColumnElement = (
 		event.preventDefault()
 		columnEl.classList.add('kanban-column--drag-over')
 	})
+
 	columnEl.addEventListener('dragleave', () => {
 		columnEl.classList.remove('kanban-column--drag-over')
 	})
@@ -229,16 +246,48 @@ const createColumnElement = (
 
 	/*----------------------------------------------------------------------
 		Empty
-		----------------------------------------------------------------------*/
+	----------------------------------------------------------------------*/
 	if (count === 0) {
 		columnEl.createEl('div', {
 			text: t('EMPTY_COLUMN'),
 			cls: 'kanban-column__empty-message',
 		})
+
+		return
 	}
 
+	/*----------------------------------------------------------------------
+		Notes Rendering
+	----------------------------------------------------------------------*/
+
+	/* Types */
+
+	const types: IType[] = [
+		{ id: '-', name: '', color: columnSetting.color || '#696969' },
+		...view.plugin.settings.types,
+	]
+
+	const typeProperty = view.plugin.settings.propertyType || 'type'
+
 	notes.forEach((note) => {
-		const cardBorderColor = columnSetting.color || '#ac46ff'
+		const noteCache = view.plugin.app.metadataCache.getFileCache(note)
+
+		let noteTypeName = ''
+		if (
+			noteCache &&
+			noteCache.frontmatter &&
+			noteCache.frontmatter[typeProperty]
+		) {
+			noteTypeName = noteCache.frontmatter[typeProperty]
+			noteTypeName = noteTypeName.toLowerCase()
+		}
+
+		const noteType =
+			types.find(
+				(type) => type.name.toLocaleLowerCase() === noteTypeName,
+			) ?? types.first()
+
+		const cardBorderColor = noteType?.color
 
 		const cardEl = columnEl.createEl('div', {
 			cls: 'kanban-card',
@@ -273,10 +322,6 @@ const createColumnElement = (
 		const cardTitleEl = cardHeaderEl.createEl('a', {
 			text: noteTitle,
 			cls: 'kanban-card__title internal-link',
-			// href: note.path.replace(/\.md$/, ''),
-			// attr: {
-			// 	'data-href': note.path.replace(/\.md$/, ''),
-			// },
 		})
 		const cleanPath = note.path.replace(/\.md$/, '')
 		cardTitleEl.setAttribute('data-href', cleanPath)
@@ -288,8 +333,6 @@ const createColumnElement = (
 		})
 
 		// Description
-
-		const noteCache = view.plugin.app.metadataCache.getFileCache(note)
 
 		const description =
 			noteCache?.frontmatter?.[
@@ -316,6 +359,18 @@ const createColumnElement = (
 			(tag: string) =>
 				tag !== `#${view.plugin.settings.tagNotes.replace('#', '')}`,
 		)
+
+		if (noteType && noteType.name !== '') {
+			const fontColor = getContrastColor(noteType.color)
+
+			tagContainer.createEl('span', {
+				text: noteType?.name,
+				cls: 'kanban-card__tag',
+				attr: {
+					style: `background: ${noteType.color}; color: ${fontColor}; font-weight: normal !important;`,
+				},
+			})
+		}
 
 		relevantTags.slice(0, 2).forEach((tag: any) => {
 			tagContainer.createEl('span', {

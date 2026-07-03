@@ -101,9 +101,16 @@ export class KanbanMoonlightView extends ItemView {
 		const filteredNotes = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
 			if (!cache) return false
+			if (!cache.frontmatter) return false
 
 			const title = note.basename.toLowerCase()
-			const content = cache.frontmatter?.content?.toLowerCase() || ''
+			const content = (cache.frontmatter[
+				this.plugin.settings.propertyDescription || 'description'
+			] || '') as string
+			const type = (cache.frontmatter[
+				this.plugin.settings.propertyType || 'type'
+			] || '') as string
+
 			const tags = cache.frontmatter?.tags
 				? cache.frontmatter.tags.map((tag: string) => tag.toLowerCase())
 				: []
@@ -118,8 +125,11 @@ export class KanbanMoonlightView extends ItemView {
 					tag.includes(this.plugin.settings.tagNotes.toLowerCase()),
 				) &&
 				(title.includes(searchTerm) ||
-					content.includes(searchTerm) ||
-					tags.some((tag: string) => tag.includes(searchTerm)))
+					content.toLowerCase().includes(searchTerm) ||
+					type.toLowerCase().includes(searchTerm) ||
+					tags.some((tag: string) =>
+						tag.toLowerCase().includes(searchTerm),
+					))
 			)
 		})
 
