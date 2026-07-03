@@ -18,7 +18,7 @@ export interface ICompletedColumn extends IColumn {
 	limitDate: TimeOptions
 }
 
-export interface IType {
+export interface ICategory {
 	id: string
 	name: string
 	color: string
@@ -29,18 +29,18 @@ export interface IKanbanSettings {
 	folderNotes: string
 	propertyState: string
 	propertyDescription: string
-	propertyType: string
+	propertyCategory: string
 	columns: IColumn[]
-	types: IType[]
+	categories: ICategory[]
 	completedColumn: ICompletedColumn
 }
 
 export const DEFAULT_SETTINGS: IKanbanSettings = {
-	tagNotes: '#project',
+	tagNotes: '#task',
 	folderNotes: '',
 	propertyState: 'state',
 	propertyDescription: 'description',
-	propertyType: 'type',
+	propertyCategory: 'category',
 	columns: [
 		{
 			id: 'pending',
@@ -67,7 +67,7 @@ export const DEFAULT_SETTINGS: IKanbanSettings = {
 			color: '#e74c3c',
 		},
 	],
-	types: [],
+	categories: [],
 	completedColumn: {
 		id: 'completed',
 		icon: 'check-check',

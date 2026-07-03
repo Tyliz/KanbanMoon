@@ -2,6 +2,8 @@ import { Plugin } from 'obsidian'
 import { IKanbanSettings, DEFAULT_SETTINGS } from './settings/kanbanSettings'
 import { KanbanMoonlightSettingTab } from './settings/settingsTab'
 import { KanbanMoonlightView, VIEW_TYPE_KANBAN } from './views/kanbanView'
+import { CreateTaskModal } from './ui/createTaskModal'
+import { normalizeTag } from './views/renderKanban/utils'
 import { t } from './lang/helpers' // Importamos la función de traducción
 
 export default class KanbanMoonlightPlugin extends Plugin {
@@ -26,13 +28,21 @@ export default class KanbanMoonlightPlugin extends Plugin {
 			},
 		)
 
+		this.addCommand({
+			id: 'create-new-kanban-task',
+			name: t('CREATE_TASK_TITLE'),
+			callback: () => {
+				new CreateTaskModal(this.app, this).open()
+			},
+		})
+
 		this.registerEvent(
 			this.app.metadataCache.on('changed', (file) => {
 				const cache = this.app.metadataCache.getFileCache(file)
 				const hasTag =
 					cache?.frontmatter?.tags?.some((tag: string) =>
-						tag.startsWith(
-							`#${this.settings.tagNotes.replace('#', '')}`,
+						normalizeTag(tag).startsWith(
+							normalizeTag(this.settings.tagNotes),
 						),
 					) ?? false
 				const folder = this.settings.folderNotes

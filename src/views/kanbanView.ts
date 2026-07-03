@@ -2,6 +2,8 @@ import { ItemView, WorkspaceLeaf, TFile, setIcon } from 'obsidian'
 import { t } from '../lang/helpers' // Importamos la función de traducción
 import type KanbanMoonlight from '../main'
 import { renderKanbanColumns } from './renderKanban/renderColumns'
+import { normalizeTag } from './renderKanban/utils'
+import { CreateTaskModal } from '../ui/createTaskModal'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
 
@@ -59,6 +61,17 @@ export class KanbanMoonlightView extends ItemView {
 			},
 		})
 
+		const newTaskBtn = searchContainer.createEl('button', {
+			cls: 'kanban-new-task-btn',
+		})
+		setIcon(newTaskBtn, 'plus')
+		newTaskBtn.createEl('span', {
+			text: t('CREATE_TASK_BTN'),
+		})
+		newTaskBtn.addEventListener('click', () => {
+			new CreateTaskModal(this.app, this.plugin).open()
+		})
+
 		const tagNotes = this.plugin.settings.tagNotes
 		const folderNotes = this.plugin.settings.folderNotes
 		const allNotes = this.app.vault.getMarkdownFiles()
@@ -66,7 +79,8 @@ export class KanbanMoonlightView extends ItemView {
 		const notesWithTag = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
 			const hasTag = cache?.frontmatter?.tags?.some((tag: string) =>
-				tag.startsWith(`#${tagNotes.replace('#', '')}`),
+				normalizeTag(tag).startsWith(normalizeTag(tagNotes)),
+			
 			)
 			const normalizedFolder = folderNotes
 				? folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
@@ -107,8 +121,9 @@ export class KanbanMoonlightView extends ItemView {
 		const filteredNotes = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
 
+			const normalizedSearch = normalizeTag(tagNotes).toLowerCase()
 			const hasTag = cache?.frontmatter?.tags?.some((tag: string) =>
-				tag.toLowerCase().includes(tagNotes.toLowerCase()),
+				normalizeTag(tag).toLowerCase().includes(normalizedSearch),
 			)
 			const inFolder =
 				normalizedFolder && note.path.startsWith(normalizedFolder)
@@ -117,11 +132,11 @@ export class KanbanMoonlightView extends ItemView {
 			if (!searchTerm) return true
 
 			const title = note.basename.toLowerCase()
-			const content = (cache?.frontmatter?.[
+			const description = (cache?.frontmatter?.[
 				this.plugin.settings.propertyDescription || 'description'
 			] || '') as string
-			const type = (cache?.frontmatter?.[
-				this.plugin.settings.propertyType || 'type'
+			const category = (cache?.frontmatter?.[
+				this.plugin.settings.propertyCategory || 'category'
 			] || '') as string
 
 			const tags = (cache?.frontmatter?.tags as string[] | undefined)?.map(
@@ -130,8 +145,8 @@ export class KanbanMoonlightView extends ItemView {
 
 			return (
 				title.includes(searchTerm) ||
-				content.toLowerCase().includes(searchTerm) ||
-				type.toLowerCase().includes(searchTerm) ||
+				description.toLowerCase().includes(searchTerm) ||
+				category.toLowerCase().includes(searchTerm) ||
 				tags.some((tag: string) =>
 					tag.toLowerCase().includes(searchTerm),
 				)

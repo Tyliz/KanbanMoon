@@ -1,35 +1,35 @@
 import { Notice, setIcon, TFile } from 'obsidian'
-import { IColumn, IType } from '../../settings/kanbanSettings'
+import { IColumn, ICategory } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
-import { getContrastColor } from './utils'
+import { getContrastColor, normalizeTag } from './utils'
 
 export const createCardElement = (
 	columnEl: HTMLElement,
 	view: KanbanMoonlightView,
 	note: TFile,
 	columnSetting: IColumn,
-	types: IType[],
+	categories: ICategory[],
 ) => {
 	const noteCache = view.plugin.app.metadataCache.getFileCache(note)
 
-	let noteTypeName = ''
+	let noteCategoryName = ''
 	if (
 		noteCache &&
 		noteCache.frontmatter &&
-		noteCache.frontmatter[view.plugin.settings.propertyType || 'type']
+		noteCache.frontmatter[view.plugin.settings.propertyCategory || 'category']
 	) {
-		noteTypeName = noteCache.frontmatter[
-			view.plugin.settings.propertyType || 'type'
+		noteCategoryName = noteCache.frontmatter[
+			view.plugin.settings.propertyCategory || 'category'
 		].toLowerCase()
 	}
 
-	const noteType =
-		types.find(
-			(type) => type.name.toLocaleLowerCase() === noteTypeName,
-		) ?? types.first()
+	const noteCategory =
+		categories.find(
+			(category) => category.name.toLocaleLowerCase() === noteCategoryName,
+		) ?? categories.first()
 
-	const cardBorderColor = noteType?.color
+	const cardBorderColor = noteCategory?.color
 
 	const cardEl = columnEl.createEl('div', {
 		cls: 'kanban-card',
@@ -89,19 +89,19 @@ export const createCardElement = (
 
 	const tags = noteCache?.frontmatter?.tags
 	const tagsNotes = Array.isArray(tags) ? tags : tags ? [tags] : []
+	const normalizedProjectTag = normalizeTag(view.plugin.settings.tagNotes)
 	const relevantTags = tagsNotes.filter(
-		(tag: string) =>
-			tag !== `#${view.plugin.settings.tagNotes.replace('#', '')}`,
+		(tag: string) => normalizeTag(tag) !== normalizedProjectTag,
 	)
 
-	if (noteType && noteType.name !== '') {
-		const fontColor = getContrastColor(noteType.color)
+	if (noteCategory && noteCategory.name !== '') {
+		const fontColor = getContrastColor(noteCategory.color)
 
 		tagContainer.createEl('span', {
-			text: noteType?.name,
+			text: noteCategory?.name,
 			cls: 'kanban-card__tag',
 			attr: {
-				style: `background: ${noteType.color}; color: ${fontColor}; font-weight: normal !important;`,
+				style: `background: ${noteCategory.color}; color: ${fontColor}; font-weight: normal !important;`,
 			},
 		})
 	}

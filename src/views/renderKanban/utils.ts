@@ -1,5 +1,7 @@
 import { TFile } from 'obsidian'
 
+export const normalizeTag = (tag: string): string => tag.replace(/^#/, '')
+
 export const sortByMtime = (a: TFile, b: TFile) => {
 	const aDate = a.stat.mtime || a.stat.ctime
 	const bDate = b.stat.mtime || b.stat.ctime
