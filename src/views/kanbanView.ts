@@ -80,7 +80,6 @@ export class KanbanMoonlightView extends ItemView {
 			const cache = this.app.metadataCache.getFileCache(note)
 			const hasTag = cache?.frontmatter?.tags?.some((tag: string) =>
 				normalizeTag(tag).startsWith(normalizeTag(tagNotes)),
-			
 			)
 			const normalizedFolder = folderNotes
 				? folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
@@ -139,9 +138,10 @@ export class KanbanMoonlightView extends ItemView {
 				this.plugin.settings.propertyCategory || 'category'
 			] || '') as string
 
-			const tags = (cache?.frontmatter?.tags as string[] | undefined)?.map(
-				(t: string) => t.toLowerCase(),
-			) ?? []
+			const tags =
+				(cache?.frontmatter?.tags as string[] | undefined)?.map(
+					(t: string) => t.toLowerCase(),
+				) ?? []
 
 			return (
 				title.includes(searchTerm) ||
