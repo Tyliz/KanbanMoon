@@ -100,12 +100,18 @@ export const createCardElement = (
 	if (noteCategory && noteCategory.name !== '') {
 		const fontColor = getContrastColor(noteCategory.color)
 
-		tagContainer.createEl('span', {
-			text: noteCategory?.name,
+		const categoryTag = tagContainer.createEl('span', {
 			cls: 'kanban-card__tag',
 			attr: {
 				style: `background: ${noteCategory.color}; color: ${fontColor}; font-weight: normal !important;`,
 			},
+		})
+
+		const iconEl = categoryTag.createEl('span', { cls: 'kanban-card__tag-icon' })
+		setIcon(iconEl, noteCategory.icon || 'tag')
+
+		categoryTag.createEl('span', {
+			text: noteCategory.name,
 		})
 	}
 

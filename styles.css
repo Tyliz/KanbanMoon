@@ -169,12 +169,25 @@
 }
 
 .kanban-card__tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
 	background: var(--interactive-accent);
 	color: var(--text-on-accent-inverted);
 	font-weight: bold;
 	padding: 2px 5px;
 	border-radius: 4px;
 	font-size: 9px;
+}
+
+.kanban-card__tag-icon {
+	display: inline-flex;
+	align-items: center;
+}
+
+.kanban-card__tag-icon svg {
+	width: 10px;
+	height: 10px;
 }
 
 .kanban-card__date {

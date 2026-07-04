@@ -76,7 +76,7 @@ export const setupColumnDragDrop = (
 				(frontmatter) => {
 					const lastStateId =
 						frontmatter[view.plugin.settings.propertyState] ||
-						view.plugin.settings.columns[0]?.id || 'pending'
+						view.plugin.settings.columns[0]?.id || 'backlog'
 					const allColumns = [
 						...view.plugin.settings.columns,
 						view.plugin.settings.completedColumn,

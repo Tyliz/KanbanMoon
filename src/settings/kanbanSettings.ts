@@ -44,10 +44,16 @@ export const DEFAULT_SETTINGS: IKanbanSettings = {
 	propertyCategory: 'category',
 	columns: [
 		{
-			id: 'pending',
-			icon: 'clock',
-			title: t('COLUMN_PENDING'),
+			id: 'backlog',
+			icon: 'inbox',
+			title: t('COLUMN_BACKLOG'),
 			color: '#ac46ff',
+		},
+		{
+			id: 'todo',
+			icon: 'clipboard-list',
+			title: t('COLUMN_TODO'),
+			color: '#3498db',
 		},
 		{
 			id: 'workingOn',
@@ -60,12 +66,6 @@ export const DEFAULT_SETTINGS: IKanbanSettings = {
 			icon: 'eye',
 			title: t('COLUMN_REVIEW'),
 			color: '#f39c12',
-		},
-		{
-			id: 'canceled',
-			icon: 'x',
-			title: t('COLUMN_CANCELED'),
-			color: '#e74c3c',
 		},
 	],
 	categories: [],

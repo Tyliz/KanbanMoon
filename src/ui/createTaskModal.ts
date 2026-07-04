@@ -19,7 +19,7 @@ export class CreateTaskModal extends Modal {
 		let title = ''
 		let description = ''
 		let category = ''
-		let state = this.plugin.settings.columns[0]?.id || 'pending'
+		let state = this.plugin.settings.columns[0]?.id || 'backlog'
 
 		new Setting(contentEl)
 			.setName(t('CREATE_TASK_TITLE_LABEL'))
@@ -104,12 +104,26 @@ export class CreateTaskModal extends Modal {
 					return
 				}
 
+				const folderPath = filePath.includes('/')
+					? filePath.substring(0, filePath.lastIndexOf('/'))
+					: ''
+				if (folderPath && !this.app.vault.getFolderByPath(folderPath)) {
+					try {
+						await this.app.vault.createFolder(folderPath)
+					} catch (err) {
+						new Notice(t('CREATE_TASK_ERROR_CREATE'))
+						console.error('Error creating folder:', err)
+						return
+					}
+				}
+
 				try {
 					const file = await this.app.vault.create(filePath, '')
 					await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 						const tagValue = this.plugin.settings.tagNotes.replace('#', '')
 						frontmatter['tags'] = [tagValue]
-						frontmatter[this.plugin.settings.propertyState || 'state'] = state
+						const stateKey = this.plugin.settings.propertyState || 'state'
+						frontmatter[stateKey] = state
 						if (description.trim()) {
 							frontmatter[this.plugin.settings.propertyDescription || 'description'] =
 								description.trim()
@@ -118,6 +132,16 @@ export class CreateTaskModal extends Modal {
 							frontmatter[this.plugin.settings.propertyCategory || 'category'] =
 								category.trim()
 						}
+						const column = this.plugin.settings.columns.find((c) => c.id === state)
+						const today = new Date().toISOString().split('T')[0]
+						frontmatter['history'] = [
+							{
+								state: column?.title || state,
+								stateId: state,
+								date: today,
+								from: '',
+							},
+						]
 					})
 					new Notice(t('CREATE_TASK_SUCCESS'))
 					this.close()
