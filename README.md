@@ -46,7 +46,7 @@ Notes are displayed as Kanban cards based on their frontmatter:
 ### Manual install
 
 1. Download the latest release from the [releases page](https://github.com/Tyliz/kanban-moonlight/releases)
-2. Extract `main.js`, `manifest.json`, and `styles.css` (if present) to `<vault>/.obsidian/plugins/kanban-moonlight-plugin/`
+2. Extract `main.js`, `manifest.json`, and `styles.css` (if present) to `<vault>/.obsidian/plugins/kanban-moonlight/`
 3. Reload Obsidian and enable the plugin in **Settings** → **Community plugins**
 
 ## Usage
