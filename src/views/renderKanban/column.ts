@@ -14,7 +14,7 @@ export const createColumnElement = (
 	const columnEl = container.createEl('div', {
 		cls: 'kanban-column',
 	})
-	columnEl.style.borderColor = columnSetting.color || '#ac46ff'
+	columnEl.style.setProperty('--column-color', columnSetting.color || '#ac46ff')
 
 	setupColumnDragDrop(columnEl, view, columnSetting)
 

@@ -136,6 +136,9 @@ Follow Obsidian's **Developer Policies** and **Plugin Guidelines**. In particula
 - Bundle everything into `main.js` (no unbundled runtime deps).
 - Avoid Node/Electron APIs if you want mobile compatibility; set `isDesktopOnly` accordingly.
 - Prefer `async/await` over promise chains; handle errors gracefully.
+- **Avoid `async` callbacks in `addEventListener`**: Use `void (async () => { ... })()` instead to satisfy `@typescript-eslint/no-misused-promises`.
+- **Use `window.setTimeout`/`window.clearTimeout`** instead of bare `setTimeout`/`clearTimeout` for popout window compatibility (Obsidian rule `obsidianmd/prefer-window-timers`).
+- **Type-safe frontmatter access**: Use helper functions from `src/utils/frontmatter.ts` that cast `Record<string, any>` to `Record<string, unknown>` for safe property access. Never access `frontmatter[key]` directly — always use `toSafeFm()`, `getFmString()`, `getFmStringArray()`, or `getFmRecordArray()`.
 
 ## Mobile
 
@@ -229,8 +232,8 @@ interface MySettings { enabled: boolean }
 const DEFAULT_SETTINGS: MySettings = { enabled: true };
 
 async onload() {
-  this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MySettings>);
-  await this.saveData(this.settings);
+	this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MySettings>);
+	await this.saveData(this.settings);
 }
 ```
 

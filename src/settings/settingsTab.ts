@@ -39,7 +39,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			.addText((text) =>
 				text
 					.setValue(this.plugin.settings.folderNotes)
-					.setPlaceholder('projects/my-project')
+					.setPlaceholder('Projects/my-project')
 					.onChange(async (value) => {
 						this.plugin.settings.folderNotes = value
 						await this.plugin.saveSettings()

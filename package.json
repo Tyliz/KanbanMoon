@@ -1,7 +1,7 @@
 {
 	"name": "kanban-moonlight",
-	"version": "1.0.0",
-	"description": "This is a simple aweasome Kanban plugin for Obsidian.",
+	"version": "1.0.1",
+	"description": "This is a simple aweasome Kanban plugin for.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {

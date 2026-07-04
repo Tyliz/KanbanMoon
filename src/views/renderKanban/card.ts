@@ -4,6 +4,7 @@ import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { getContrastColor, normalizeTag } from './utils'
 import { DeleteConfirmModal } from '../../ui/deleteConfirmModal'
+import { toSafeFm, getFmString, getFmStringArray, getFmRecordArray } from '../../utils/frontmatter'
 
 export const createCardElement = (
 	columnEl: HTMLElement,
@@ -13,19 +14,14 @@ export const createCardElement = (
 	categories: ICategory[],
 ) => {
 	const noteCache = view.plugin.app.metadataCache.getFileCache(note)
+	const fm = toSafeFm(noteCache)
 
 	let noteCategoryName = ''
-	if (
-		noteCache &&
-		noteCache.frontmatter &&
-		noteCache.frontmatter[
-			view.plugin.settings.propertyCategory || 'category'
-		]
-	) {
-		noteCategoryName =
-			noteCache.frontmatter[
-				view.plugin.settings.propertyCategory || 'category'
-			].toLowerCase()
+	if (fm) {
+		const rawCategory = fm[view.plugin.settings.propertyCategory || 'category']
+		if (typeof rawCategory === 'string') {
+			noteCategoryName = rawCategory.toLowerCase()
+		}
 	}
 
 	const noteCategory =
@@ -68,13 +64,17 @@ export const createCardElement = (
 	cardTitleEl.setAttribute('data-href', cleanPath)
 	cardTitleEl.setAttribute('href', cleanPath)
 
-	cardTitleEl.addEventListener('click', async () => {
-		const leaf = view.plugin.app.workspace.getLeaf(true)
-		await leaf.openFile(note)
+	cardTitleEl.addEventListener('click', () => {
+		void (async () => {
+			const leaf = view.plugin.app.workspace.getLeaf(true)
+			await leaf.openFile(note)
+		})()
 	})
 
-	const description =
-		noteCache?.frontmatter?.[view.plugin.settings.propertyDescription] || ''
+	const description = getFmString(
+		fm,
+		view.plugin.settings.propertyDescription,
+	)
 
 	const descriptionShorted =
 		description.length > 55
@@ -90,8 +90,8 @@ export const createCardElement = (
 		cls: 'kanban-card__tag-container',
 	})
 
-	const tags = noteCache?.frontmatter?.tags
-	const tagsNotes = Array.isArray(tags) ? tags : tags ? [tags] : []
+	const tags = getFmStringArray(fm, 'tags')
+	const tagsNotes = tags
 	const normalizedProjectTag = normalizeTag(view.plugin.settings.tagNotes)
 	const relevantTags = tagsNotes.filter(
 		(tag: string) => normalizeTag(tag) !== normalizedProjectTag,
@@ -107,7 +107,9 @@ export const createCardElement = (
 			},
 		})
 
-		const iconEl = categoryTag.createEl('span', { cls: 'kanban-card__tag-icon' })
+		const iconEl = categoryTag.createEl('span', {
+			cls: 'kanban-card__tag-icon',
+		})
 		setIcon(iconEl, noteCategory.icon || 'tag')
 
 		categoryTag.createEl('span', {
@@ -115,7 +117,7 @@ export const createCardElement = (
 		})
 	}
 
-	relevantTags.slice(0, 2).forEach((tag: any) => {
+	relevantTags.slice(0, 2).forEach((tag: string) => {
 		tagContainer.createEl('span', {
 			text: tag,
 			cls: 'kanban-card__tag',
@@ -161,19 +163,21 @@ export const createCardElement = (
 			text: t('COMPLETE_NOTE'),
 		})
 
-		btnComplete.addEventListener('click', async () => {
-			const file = view.app.vault.getFileByPath(note.path)
+		btnComplete.addEventListener('click', () => {
+			void (async () => {
+				const file = view.app.vault.getFileByPath(note.path)
 
-			if (!file) {
-				new Notice(t('NOTE_NOT_FOUND'))
-				return
-			}
+				if (!file) {
+					new Notice(t('NOTE_NOT_FOUND'))
+					return
+				}
 
-			await view.app.fileManager.processFrontMatter(
+				await view.app.fileManager.processFrontMatter(
 				file,
 				(frontmatter) => {
-					const today = new Date().toISOString().split('T')[0]
-					const history = frontmatter['history'] || []
+					const fm = frontmatter as Record<string, unknown>
+					const today = new Date().toISOString().split('T')[0]!
+					const history = getFmRecordArray(fm, 'history')
 
 					history.push({
 						state: t('COLUMN_COMPLETED'),
@@ -182,14 +186,15 @@ export const createCardElement = (
 						from: columnSetting.title,
 					})
 
-					frontmatter['history'] = history
+					fm['history'] = history
 
-					frontmatter[view.plugin.settings.propertyState ?? 'state'] =
+					fm[view.plugin.settings.propertyState ?? 'state'] =
 						view.plugin.settings.completedColumn.id
 
 					new Notice(t('NOTICE_COMPLETED'))
 				},
 			)
+			})()
 		})
 	}
 

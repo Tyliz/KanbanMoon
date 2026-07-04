@@ -1,9 +1,9 @@
 .kanban-settings-container {
-	padding: 0 20px !important;
+	padding: 0 20px;
 }
 
 .kanban-setting-section {
-	padding: 15px !important;
+	padding: 15px;
 }
 
 .kanban-setting-note {
@@ -47,11 +47,6 @@
 	margin: 0 auto;
 }
 
-.kanban-search-input:placeholder {
-	color: var(--text-muted);
-	opacity: 1 !important;
-}
-
 .kanban-column {
 	position: relative;
 	min-width: 280px;
@@ -62,16 +57,12 @@
 	background-color: var(--background-primary);
 	padding: 0;
 	border-radius: 10px;
-	border: 1px solid;
-	border-right-color: transparent !important;
-	border-left-color: transparent !important;
-	border-bottom-color: transparent !important;
-	border-top: 4px solid;
+	border: 1px solid transparent;
+	border-top: 4px solid var(--column-color);
 }
 
-.kanban-column--drag-over {
-	border: 1px solid var(--background-modifier-border-focus) !important;
-	border-top: 4px solid var(--background-modifier-border-focus) !important;
+.kanban-column.kanban-column--drag-over {
+	border-color: var(--background-modifier-border-focus);
 }
 
 .kanban-column__header {
@@ -124,7 +115,6 @@
 	border-radius: 8px;
 	border-left: 3px solid;
 	margin: 12px;
-	margin-bottom: 12px;
 	cursor: grab;
 }
 
@@ -140,13 +130,13 @@
 	margin-bottom: 6px;
 }
 
-.kanban-card__title {
+a.kanban-card__title.internal-link {
 	font-size: 13px;
 	font-weight: bold;
 	color: var(--text-normal);
 	text-decoration: none;
 	margin: 2px auto 2px 0;
-	pointer-events: auto !important;
+	pointer-events: auto;
 }
 
 .kanban-card__title:hover {
@@ -224,10 +214,9 @@
 	padding: 20px 0;
 }
 
-.btn-complete {
+button.btn-complete {
 	border: 1px solid var(--text-success);
-	background: var(--background-primary) !important;
-	color: var(--text-muted);
+	background: var(--background-primary);
 	padding: 2px 5px;
 	border-radius: 4px;
 	font-size: 10px;
@@ -244,8 +233,8 @@
 	color: var(--text-success);
 }
 
-.btn-complete:hover {
-	background: var(--text-success) !important;
+button.btn-complete:hover {
+	background: var(--text-success);
 	color: var(--text-on-accent);
 }
 
@@ -304,7 +293,7 @@
 	gap: 10px;
 }
 
-.kanban-moonlight-icon-preview {
+.kanban-moon-icon-preview {
 	margin-right: 10px;
 	display: flex;
 	align-items: center;
@@ -328,19 +317,19 @@
 	margin-top: 8px;
 }
 
-.kanban-card-input {
+input.kanban-card-input {
 	flex: 1;
-	background: var(--background-primary) !important;
-	border: 1px solid var(--background-modifier-border) !important;
-	border-radius: 4px !important;
-	padding: 6px 10px !important;
-	font-size: 13px !important;
-	color: var(--text-normal) !important;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 6px 10px;
+	font-size: 13px;
+	color: var(--text-normal);
 }
 
-.kanban-card-input:focus {
-	border-color: var(--interactive-accent) !important;
-	outline: none !important;
+input.kanban-card-input:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
 }
 
 .kanban-card-color {
@@ -439,30 +428,30 @@
 	height: 12px;
 }
 
-.btn-delete {
+button.btn-delete {
 	flex: 1;
-	background: var(--background-primary) !important;
+	background: var(--background-primary);
 	border: 1px solid var(--text-error);
 	color: var(--text-error);
 }
 
-.btn-delete span {
+button.btn-delete span {
 	color: var(--text-error);
 }
 
-.btn-delete:hover {
-	background: var(--text-error) !important;
+button.btn-delete:hover {
+	background: var(--text-error);
 	color: var(--text-on-accent);
 }
 
-.btn-delete:hover span {
+button.btn-delete:hover span {
 	color: var(--text-on-accent);
 }
 
-.btn-delete svg {
+button.btn-delete svg {
 	color: var(--text-error);
 }
 
-.btn-delete:hover svg {
+button.btn-delete:hover svg {
 	color: var(--text-on-accent);
 }
