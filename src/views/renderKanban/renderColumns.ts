@@ -4,6 +4,7 @@ import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { createColumnElement } from './column'
 import { sortByMtime } from './utils'
+import { toSafeFm, getFmString } from '../../utils/frontmatter'
 
 export const renderKanbanColumns = (
 	view: KanbanMoonlightView,
@@ -11,7 +12,7 @@ export const renderKanbanColumns = (
 ) => {
 	const container = view.containerEl.querySelector(
 		'.kanban-board',
-	) as HTMLElement | null
+	)
 
 	if (!container) return
 	container.empty()
@@ -20,16 +21,15 @@ export const renderKanbanColumns = (
 		const columnNotes = notes
 			.filter((note) => {
 				const defaultId = view.plugin.settings.columns[0]?.id || 'backlog'
-				const state = (view.app.metadataCache.getFileCache(note)
-					?.frontmatter?.[view.plugin.settings.propertyState] ||
-					defaultId) as string
+				const fm = toSafeFm(view.app.metadataCache.getFileCache(note))
+				const state = getFmString(fm, view.plugin.settings.propertyState, defaultId)
 
 				return state.toLowerCase() === columna.id.toLowerCase() ||
 				state.toLowerCase() === columna.title.toLowerCase()
 			})
 			.sort(sortByMtime)
 
-		createColumnElement(container, view, columna, columnNotes)
+		createColumnElement(container as HTMLElement, view, columna, columnNotes)
 	})
 
 	const completedColumn = view.plugin.settings.completedColumn
@@ -55,10 +55,8 @@ export const renderKanbanColumns = (
 
 	const completedNotes = notes
 		.filter((note) => {
-			const noteCache = view.app.metadataCache.getFileCache(note)
-			const state =
-				noteCache?.frontmatter?.[view.plugin.settings.propertyState] ||
-				''
+			const fm = toSafeFm(view.app.metadataCache.getFileCache(note))
+			const state = getFmString(fm, view.plugin.settings.propertyState)
 
 			const noteDate = new Date(note.stat.mtime || note.stat.ctime)
 			return (state === completedColumn.id ||
@@ -68,5 +66,5 @@ export const renderKanbanColumns = (
 		.sort(sortByMtime)
 
 	completedColumn.title = t('COLUMN_COMPLETED')
-	createColumnElement(container, view, completedColumn, completedNotes)
+	createColumnElement(container as HTMLElement, view, completedColumn, completedNotes)
 }

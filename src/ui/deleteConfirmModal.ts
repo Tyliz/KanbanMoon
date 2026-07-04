@@ -34,7 +34,7 @@ export class DeleteConfirmModal extends Modal {
 				btn.setButtonText(t('DELETE_CONFIRM_YES'))
 				btn.onClick(async () => {
 					try {
-						await this.app.vault.delete(this.file)
+						await this.app.fileManager.trashFile(this.file)
 						new Notice(t('NOTICE_DELETED'))
 						this.close()
 					} catch (err) {
