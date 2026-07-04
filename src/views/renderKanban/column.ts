@@ -59,7 +59,7 @@ export const createColumnElement = (
 	}
 
 	const categories: ICategory[] = [
-		{ id: '-', name: '', color: columnSetting.color || '#696969' },
+		{ id: '-', name: '', color: columnSetting.color || '#696969', icon: 'tag' },
 		...view.plugin.settings.categories,
 	]
 

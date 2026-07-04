@@ -31,14 +31,10 @@ export class IconSuggestModal extends SuggestModal<string> {
 	}
 
 	renderSuggestion(icon: string, el: HTMLElement): void {
-		el.addClass('icon-suggest-item') // Puedes darle estilo en tu CSS
-		el.style.display = 'flex'
-		el.style.alignItems = 'center'
-		el.style.gap = '10px'
+		el.addClass('icon-suggest-item')
 		const iconPreview = el.createDiv({
 			cls: 'kanban-moon-icon-preview',
 		})
-		iconPreview.style.marginRight = '10px'
 
 		// Función para renderizar el icono en ese contenedor
 		const renderIcon = (iconName: string) => {
