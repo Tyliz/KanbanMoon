@@ -9,17 +9,12 @@ export const renderCompletedSettings = (
 	containerEl: HTMLElement,
 	display: () => void,
 ): void => {
-	containerEl.createEl('h3', { text: t('COMPLETED_SETTINGS_TITLE') })
+	new Setting(containerEl).setName(t('COMPLETED_SETTINGS_TITLE')).setHeading()
 
-	const columnSettingStyle = new Setting(containerEl)
-	const columnSettingTime = new Setting(containerEl)
-
-	columnSettingStyle.setClass('kanban-column-setting')
-	columnSettingTime.setClass('kanban-column-setting')
-
-	columnSettingStyle
+	new Setting(containerEl)
 		.setName(t('COMPLETE_SETTING_BASIC'))
 		.setDesc(t('COMPLETE_SETTING_BASIC_DESC'))
+		.setClass('kanban-setting-section')
 		.addButton((button) => {
 			button.setButtonText('')
 			button.setIcon(plugin.settings.completedColumn.icon)
@@ -27,8 +22,8 @@ export const renderCompletedSettings = (
 			button.onClick(() => {
 				new IconSuggestModal(plugin.app, (selectedIcon) => {
 					plugin.settings.completedColumn.icon = selectedIcon
-					plugin.saveSettings()
-					display() // Refresca la UI para mostrar el cambio
+					void plugin.saveSettings()
+					display()
 				}).open()
 			})
 		})
@@ -41,9 +36,10 @@ export const renderCompletedSettings = (
 				}),
 		)
 
-	columnSettingTime
+	new Setting(containerEl)
 		.setName(t('COMPLETE_SETTING_TIME'))
 		.setDesc(t('COMPLETE_SETTING_TIME_DESC'))
+		.setClass('kanban-setting-section')
 		.addDropdown((dropdownComponent) => {
 			dropdownComponent
 				.addOption(TimeOptions.day.toString(), t('DAY'))

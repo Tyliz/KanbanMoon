@@ -3,6 +3,7 @@ import { IColumn, ICategory } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { getContrastColor, normalizeTag } from './utils'
+import { DeleteConfirmModal } from '../../ui/deleteConfirmModal'
 
 export const createCardElement = (
 	columnEl: HTMLElement,
@@ -17,16 +18,20 @@ export const createCardElement = (
 	if (
 		noteCache &&
 		noteCache.frontmatter &&
-		noteCache.frontmatter[view.plugin.settings.propertyCategory || 'category']
-	) {
-		noteCategoryName = noteCache.frontmatter[
+		noteCache.frontmatter[
 			view.plugin.settings.propertyCategory || 'category'
-		].toLowerCase()
+		]
+	) {
+		noteCategoryName =
+			noteCache.frontmatter[
+				view.plugin.settings.propertyCategory || 'category'
+			].toLowerCase()
 	}
 
 	const noteCategory =
 		categories.find(
-			(category) => category.name.toLocaleLowerCase() === noteCategoryName,
+			(category) =>
+				category.name.toLocaleLowerCase() === noteCategoryName,
 		) ?? categories.first()
 
 	const cardBorderColor = noteCategory?.color
@@ -69,9 +74,7 @@ export const createCardElement = (
 	})
 
 	const description =
-		noteCache?.frontmatter?.[
-			view.plugin.settings.propertyDescription
-		] || ''
+		noteCache?.frontmatter?.[view.plugin.settings.propertyDescription] || ''
 
 	const descriptionShorted =
 		description.length > 55
@@ -97,12 +100,18 @@ export const createCardElement = (
 	if (noteCategory && noteCategory.name !== '') {
 		const fontColor = getContrastColor(noteCategory.color)
 
-		tagContainer.createEl('span', {
-			text: noteCategory?.name,
+		const categoryTag = tagContainer.createEl('span', {
 			cls: 'kanban-card__tag',
 			attr: {
 				style: `background: ${noteCategory.color}; color: ${fontColor}; font-weight: normal !important;`,
 			},
+		})
+
+		const iconEl = categoryTag.createEl('span', { cls: 'kanban-card__tag-icon' })
+		setIcon(iconEl, noteCategory.icon || 'tag')
+
+		categoryTag.createEl('span', {
+			text: noteCategory.name,
 		})
 	}
 
@@ -128,25 +137,73 @@ export const createCardElement = (
 	})
 	setIcon(dateIconEl, 'calendar')
 
-	if (
+	const btnFooter = cardEl.createEl('div', {
+		cls: 'kanban-card__footer',
+	})
+
+	const isCompleted =
 		noteCache &&
 		noteCache.frontmatter &&
 		noteCache.frontmatter[view.plugin.settings.propertyState] ===
 			view.plugin.settings.completedColumn.id
-	)
-		return
 
-	const btnComplete = cardEl.createEl('button', {
-		cls: 'btn-complete',
+	if (!isCompleted) {
+		const btnComplete = btnFooter.createEl('button', {
+			cls: 'btn-complete',
+		})
+
+		setIcon(
+			btnComplete,
+			view.plugin.settings.completedColumn.icon || 'check',
+		)
+
+		btnComplete.createEl('span', {
+			text: t('COMPLETE_NOTE'),
+		})
+
+		btnComplete.addEventListener('click', async () => {
+			const file = view.app.vault.getFileByPath(note.path)
+
+			if (!file) {
+				new Notice(t('NOTE_NOT_FOUND'))
+				return
+			}
+
+			await view.app.fileManager.processFrontMatter(
+				file,
+				(frontmatter) => {
+					const today = new Date().toISOString().split('T')[0]
+					const history = frontmatter['history'] || []
+
+					history.push({
+						state: t('COLUMN_COMPLETED'),
+						stateId: view.plugin.settings.completedColumn.id,
+						date: today,
+						from: columnSetting.title,
+					})
+
+					frontmatter['history'] = history
+
+					frontmatter[view.plugin.settings.propertyState ?? 'state'] =
+						view.plugin.settings.completedColumn.id
+
+					new Notice(t('NOTICE_COMPLETED'))
+				},
+			)
+		})
+	}
+
+	const btnDelete = btnFooter.createEl('button', {
+		cls: 'btn-delete',
 	})
 
-	setIcon(btnComplete, 'check')
+	setIcon(btnDelete, 'trash-2')
 
-	btnComplete.createEl('span', {
-		text: t('COMPLETE_NOTE'),
+	btnDelete.createEl('span', {
+		text: t('DELETE_BTN'),
 	})
 
-	btnComplete.addEventListener('click', async () => {
+	btnDelete.addEventListener('click', () => {
 		const file = view.app.vault.getFileByPath(note.path)
 
 		if (!file) {
@@ -154,26 +211,6 @@ export const createCardElement = (
 			return
 		}
 
-		await view.app.fileManager.processFrontMatter(
-			file,
-			(frontmatter) => {
-				const today = new Date().toISOString().split('T')[0]
-				const history = frontmatter['history'] || []
-
-				history.push({
-					state: t('COLUMN_COMPLETED'),
-					stateId: view.plugin.settings.completedColumn.id,
-					date: today,
-					from: columnSetting.title,
-				})
-
-				frontmatter['history'] = history
-
-				frontmatter[view.plugin.settings.propertyState ?? 'state'] =
-					view.plugin.settings.completedColumn.id
-
-				new Notice(t('NOTICE_COMPLETED'))
-			},
-		)
+		new DeleteConfirmModal(view.app, view.plugin, file).open()
 	})
 }

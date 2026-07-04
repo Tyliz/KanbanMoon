@@ -16,26 +16,9 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this
 		containerEl.empty()
+		containerEl.addClass('kanban-settings-container')
 
-		containerEl.createEl('h2', { text: t('VIEW_TITLE') })
-
-		containerEl.createEl('h3', { text: t('PROPERTIES_TITLE') })
-		const propsEl = containerEl.createEl('div', {
-			cls: 'kanban-setting-section',
-		})
-		propsEl.createEl('p', {
-			text: `${t('PROPERTY_STATE')}: ${this.plugin.settings.propertyState}`,
-		})
-		propsEl.createEl('p', {
-			text: `${t('PROPERTY_DESCRIPTION')}: ${this.plugin.settings.propertyDescription}`,
-		})
-		propsEl.createEl('p', {
-			text: `${t('PROPERTY_CATEGORY')}: ${this.plugin.settings.propertyCategory}`,
-		})
-		propsEl.createEl('p', {
-			text: t('PROPERTIES_NOTE'),
-			attr: { style: 'opacity: 0.7; font-size: 0.85em;' },
-		})
+		new Setting(containerEl).setName(t('VIEW_TITLE')).setHeading()
 
 		new Setting(containerEl)
 			.setName(t('TAG_LABEL'))
@@ -56,13 +39,35 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			.addText((text) =>
 				text
 					.setValue(this.plugin.settings.folderNotes)
-					.setPlaceholder('Projects/MyProject')
+					.setPlaceholder('projects/my-project')
 					.onChange(async (value) => {
 						this.plugin.settings.folderNotes = value
 						await this.plugin.saveSettings()
 					}),
 			)
 			.setClass('kanban-setting-section')
+
+		new Setting(containerEl).setName(t('PROPERTIES_TITLE')).setHeading()
+
+		new Setting(containerEl)
+			.setName(t('PROPERTY_STATE'))
+			.setDesc(this.plugin.settings.propertyState)
+			.setClass('kanban-setting-section')
+
+		new Setting(containerEl)
+			.setName(t('PROPERTY_DESCRIPTION'))
+			.setDesc(this.plugin.settings.propertyDescription)
+			.setClass('kanban-setting-section')
+
+		new Setting(containerEl)
+			.setName(t('PROPERTY_CATEGORY'))
+			.setDesc(this.plugin.settings.propertyCategory)
+			.setClass('kanban-setting-section')
+
+		containerEl.createEl('p', {
+			text: t('PROPERTIES_NOTE'),
+			cls: 'kanban-setting-note',
+		})
 
 		renderColumnSettings(this.plugin, containerEl, this.display.bind(this))
 

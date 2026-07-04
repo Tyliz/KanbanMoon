@@ -19,7 +19,7 @@ export const renderKanbanColumns = (
 	view.plugin.settings.columns.forEach((columna) => {
 		const columnNotes = notes
 			.filter((note) => {
-				const defaultId = view.plugin.settings.columns[0]?.id || 'pending'
+				const defaultId = view.plugin.settings.columns[0]?.id || 'backlog'
 				const state = (view.app.metadataCache.getFileCache(note)
 					?.frontmatter?.[view.plugin.settings.propertyState] ||
 					defaultId) as string

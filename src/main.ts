@@ -1,8 +1,9 @@
-import { Plugin } from 'obsidian'
+import { Plugin, Notice } from 'obsidian'
 import { IKanbanSettings, DEFAULT_SETTINGS } from './settings/kanbanSettings'
 import { KanbanMoonlightSettingTab } from './settings/settingsTab'
 import { KanbanMoonlightView, VIEW_TYPE_KANBAN } from './views/kanbanView'
 import { CreateTaskModal } from './ui/createTaskModal'
+import { DeleteConfirmModal } from './ui/deleteConfirmModal'
 import { normalizeTag } from './views/renderKanban/utils'
 import { t } from './lang/helpers' // Importamos la función de traducción
 
@@ -33,6 +34,40 @@ export default class KanbanMoonlightPlugin extends Plugin {
 			name: t('CREATE_TASK_TITLE'),
 			callback: () => {
 				new CreateTaskModal(this.app, this).open()
+			},
+		})
+
+		this.addCommand({
+			id: 'delete-kanban-task',
+			name: t('DELETE_BTN') + ' ' + t('VIEW_TITLE'),
+			callback: async () => {
+				const activeFile = this.app.workspace.getActiveFile()
+				if (!activeFile) {
+					new Notice(t('NOTE_NOT_FOUND'))
+					return
+				}
+
+				const cache = this.app.metadataCache.getFileCache(activeFile)
+				const hasTag =
+					cache?.frontmatter?.tags?.some((tag: string) =>
+						normalizeTag(tag).startsWith(
+							normalizeTag(this.settings.tagNotes),
+						),
+					) ?? false
+
+				const folder = this.settings.folderNotes
+				const inFolder =
+					folder &&
+					activeFile.path.startsWith(
+						folder.replace(/^\/+/, '').replace(/\/?$/, '/'),
+					)
+
+				if (!hasTag && !inFolder) {
+					new Notice(t('NOTICE_NOT_KANBAN'))
+					return
+				}
+
+				new DeleteConfirmModal(this.app, this, activeFile).open()
 			},
 		})
 

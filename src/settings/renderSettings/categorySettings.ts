@@ -1,62 +1,88 @@
-import { Setting } from 'obsidian'
+import { Setting, setIcon } from 'obsidian'
 import type KanbanMoonlight from '../../main'
 import { t } from '../../lang/helpers'
-import { ICategory } from '../kanbanSettings'
+import { IconSuggestModal } from './iconSuggestModal'
 
 export const renderCategorySettings = (
 	plugin: KanbanMoonlight,
 	containerEl: HTMLElement,
 	display: () => void,
 ): void => {
-	containerEl.createEl('h2', { text: t('CATEGORIES_TITLE') })
+	new Setting(containerEl).setName(t('CATEGORIES_TITLE')).setHeading()
 
 	plugin.settings.categories.forEach((category, index) => {
-		const categorySetting = new Setting(containerEl)
-		categorySetting.setClass('kanban-setting-section')
+		const section = containerEl.createEl('div', {
+			cls: 'kanban-setting-card',
+		})
 
-		categorySetting.addText((text) =>
-			text.setValue(category.name).onChange(async (value: string) => {
-				plugin.settings.categories[index]!.name = value
-				await plugin.saveSettings()
-			}),
-		)
+		const nameRow = section.createEl('div', { cls: 'kanban-card-row' })
+		const nameInput = nameRow.createEl('input', {
+			cls: 'kanban-card-input',
+			attr: {
+				type: 'text',
+				value: category.name,
+				placeholder: t('NEW_CATEGORY_PLACEHOLDER'),
+			},
+		})
+		nameInput.addEventListener('change', () => {
+			plugin.settings.categories[index]!.name = nameInput.value
+			void plugin.saveSettings()
+		})
 
-		categorySetting
-			.addColorPicker((colorPicker) =>
-				colorPicker.setValue(category.color).onChange(async (value) => {
-					plugin.settings.categories[index]!.color = value
-					await plugin.saveSettings()
-				}),
-			)
-			.addButton((btn) =>
-				btn
-					.setButtonText('')
-					.setIcon('trash')
-					.setTooltip(t('DELETE_BTN'))
-					.setWarning()
-					.onClick(async () => {
-						plugin.settings.categories.splice(index, 1)
-						await plugin.saveSettings()
-						display()
-					}),
-			)
+		const actionsRow = section.createEl('div', { cls: 'kanban-card-row' })
+
+		const iconBtn = actionsRow.createEl('button', {
+			cls: 'kanban-card-icon-btn',
+			attr: { title: t('SELECT_ICON') },
+		})
+		setIcon(iconBtn, category.icon || 'tag')
+		iconBtn.addEventListener('click', () => {
+			new IconSuggestModal(plugin.app, (selectedIcon) => {
+				plugin.settings.categories[index]!.icon = selectedIcon
+				plugin.saveSettings()
+				display()
+			}).open()
+		})
+
+		const colorPicker = actionsRow.createEl('input', {
+			cls: 'kanban-card-color',
+			attr: { type: 'color', value: category.color },
+		})
+		colorPicker.addEventListener('input', async () => {
+			plugin.settings.categories[index]!.color = colorPicker.value
+			await plugin.saveSettings()
+		})
+
+		actionsRow.createEl('span', { cls: 'kanban-card-spacer' })
+
+		const deleteBtn = actionsRow.createEl('button', {
+			cls: 'kanban-card-action-btn kanban-card-action-btn--danger',
+			attr: { title: t('DELETE_BTN') },
+		})
+		setIcon(deleteBtn, 'trash')
+		deleteBtn.addEventListener('click', () => {
+			plugin.settings.categories.splice(index, 1)
+			void plugin.saveSettings()
+			display()
+		})
 	})
 
 	new Setting(containerEl)
+		.setClass('kanban-setting-section')
 		.addButton((btn) =>
 			btn
 				.setButtonText(t('ADD_CATEGORY_BTN'))
 				.setCta()
-				.onClick(async () => {
+				.onClick(() => {
 					const nuevoId = `cat-${Date.now()}`
 					plugin.settings.categories.push({
 						id: nuevoId,
 						name: t('NEW_CATEGORY_PLACEHOLDER'),
 						color: '#ffffff',
+						icon: 'tag',
 					})
-					await plugin.saveSettings()
+					void plugin.saveSettings()
 					display()
 				}),
 		)
-		.setClass('kanban-setting-section')
 }
