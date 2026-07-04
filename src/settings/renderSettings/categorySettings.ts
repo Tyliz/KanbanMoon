@@ -39,7 +39,7 @@ export const renderCategorySettings = (
 		iconBtn.addEventListener('click', () => {
 			new IconSuggestModal(plugin.app, (selectedIcon) => {
 				plugin.settings.categories[index]!.icon = selectedIcon
-				plugin.saveSettings()
+				void plugin.saveSettings()
 				display()
 			}).open()
 		})
@@ -48,9 +48,9 @@ export const renderCategorySettings = (
 			cls: 'kanban-card-color',
 			attr: { type: 'color', value: category.color },
 		})
-		colorPicker.addEventListener('input', async () => {
+		colorPicker.addEventListener('input', () => {
 			plugin.settings.categories[index]!.color = colorPicker.value
-			await plugin.saveSettings()
+			void plugin.saveSettings()
 		})
 
 		actionsRow.createEl('span', { cls: 'kanban-card-spacer' })

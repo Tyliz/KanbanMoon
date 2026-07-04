@@ -1,4 +1,4 @@
-import { App, Modal, Setting, Notice, TFile } from 'obsidian'
+import { App, Modal, Setting, Notice } from 'obsidian'
 import { t } from '../lang/helpers'
 import type KanbanMoonlightPlugin from '../main'
 
@@ -42,13 +42,16 @@ export class CreateTaskModal extends Modal {
 			.setName(t('CREATE_TASK_DESC_LABEL'))
 			.setDesc(t('CREATE_TASK_DESC_DESC'))
 
-		const descriptionTextarea = descriptionSetting.descEl.createEl('textarea', {
-			cls: 'kanban-create-task-textarea',
-			attr: {
-				rows: 3,
-				placeholder: t('CREATE_TASK_DESC_PLACEHOLDER'),
+		const descriptionTextarea = descriptionSetting.descEl.createEl(
+			'textarea',
+			{
+				cls: 'kanban-create-task-textarea',
+				attr: {
+					rows: 3,
+					placeholder: t('CREATE_TASK_DESC_PLACEHOLDER'),
+				},
 			},
-		})
+		)
 		descriptionTextarea.addEventListener('input', () => {
 			description = descriptionTextarea.value
 		})
@@ -82,59 +85,74 @@ export class CreateTaskModal extends Modal {
 		contentEl.createEl('hr')
 
 		const createTask = async () => {
-				if (!title.trim()) {
-					new Notice(t('CREATE_TASK_ERROR_TITLE'))
-					return
-				}
+			if (!title.trim()) {
+				new Notice(t('CREATE_TASK_ERROR_TITLE'))
+				return
+			}
 
-				const folder = this.plugin.settings.folderNotes
-				const sanitizedTitle = title.replace(/[\\/:*?"<>|]/g, '-')
-				let filePath = sanitizedTitle.endsWith('.md')
-					? sanitizedTitle
-					: `${sanitizedTitle}.md`
+			const folder = this.plugin.settings.folderNotes
+			const sanitizedTitle = title.replace(/[\\/:*?"<>|]/g, '-')
+			let filePath = sanitizedTitle.endsWith('.md')
+				? sanitizedTitle
+				: `${sanitizedTitle}.md`
 
-				if (folder) {
-					const normalizedFolder = folder.replace(/^\/+/, '').replace(/\/?$/, '/')
-					filePath = `${normalizedFolder}${filePath}`
-				}
+			if (folder) {
+				const normalizedFolder = folder
+					.replace(/^\/+/, '')
+					.replace(/\/?$/, '/')
+				filePath = `${normalizedFolder}${filePath}`
+			}
 
-				const existing = this.app.vault.getFileByPath(filePath)
-				if (existing) {
-					new Notice(t('CREATE_TASK_ERROR_EXISTS'))
-					return
-				}
+			const existing = this.app.vault.getFileByPath(filePath)
+			if (existing) {
+				new Notice(t('CREATE_TASK_ERROR_EXISTS'))
+				return
+			}
 
-				const folderPath = filePath.includes('/')
-					? filePath.substring(0, filePath.lastIndexOf('/'))
-					: ''
-				if (folderPath && !this.app.vault.getFolderByPath(folderPath)) {
-					try {
-						await this.app.vault.createFolder(folderPath)
-					} catch (err) {
-						new Notice(t('CREATE_TASK_ERROR_CREATE'))
-						console.error('Error creating folder:', err)
-						return
-					}
-				}
-
+			const folderPath = filePath.includes('/')
+				? filePath.substring(0, filePath.lastIndexOf('/'))
+				: ''
+			if (folderPath && !this.app.vault.getFolderByPath(folderPath)) {
 				try {
-					const file = await this.app.vault.create(filePath, '')
-					await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-						const tagValue = this.plugin.settings.tagNotes.replace('#', '')
-						frontmatter['tags'] = [tagValue]
-						const stateKey = this.plugin.settings.propertyState || 'state'
-						frontmatter[stateKey] = state
+					await this.app.vault.createFolder(folderPath)
+				} catch (err) {
+					new Notice(t('CREATE_TASK_ERROR_CREATE'))
+					console.error('Error creating folder:', err)
+					return
+				}
+			}
+
+			try {
+				const file = await this.app.vault.create(filePath, '')
+				await this.app.fileManager.processFrontMatter(
+					file,
+					(frontmatter) => {
+						const fm = frontmatter as Record<string, unknown>
+						const tagValue = this.plugin.settings.tagNotes.replace(
+							'#',
+							'',
+						)
+						fm['tags'] = [tagValue]
+						const stateKey =
+							this.plugin.settings.propertyState || 'state'
+						fm[stateKey] = state
 						if (description.trim()) {
-							frontmatter[this.plugin.settings.propertyDescription || 'description'] =
-								description.trim()
+							fm[
+								this.plugin.settings.propertyDescription ||
+									'description'
+							] = description.trim()
 						}
 						if (category.trim()) {
-							frontmatter[this.plugin.settings.propertyCategory || 'category'] =
-								category.trim()
+							fm[
+								this.plugin.settings.propertyCategory ||
+									'category'
+							] = category.trim()
 						}
-						const column = this.plugin.settings.columns.find((c) => c.id === state)
+						const column = this.plugin.settings.columns.find(
+							(c) => c.id === state,
+						)
 						const today = new Date().toISOString().split('T')[0]
-						frontmatter['history'] = [
+						fm['history'] = [
 							{
 								state: column?.title || state,
 								stateId: state,
@@ -142,14 +160,15 @@ export class CreateTaskModal extends Modal {
 								from: '',
 							},
 						]
-					})
-					new Notice(t('CREATE_TASK_SUCCESS'))
-					this.close()
-				} catch (err) {
-					new Notice(t('CREATE_TASK_ERROR_CREATE'))
-					console.error('Error creating task:', err)
-				}
+					},
+				)
+				new Notice(t('CREATE_TASK_SUCCESS'))
+				this.close()
+			} catch (err) {
+				new Notice(t('CREATE_TASK_ERROR_CREATE'))
+				console.error('Error creating task:', err)
 			}
+		}
 
 		new Setting(contentEl)
 			.addButton((btn) => {

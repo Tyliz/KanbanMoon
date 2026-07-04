@@ -5,7 +5,8 @@ import { KanbanMoonlightView, VIEW_TYPE_KANBAN } from './views/kanbanView'
 import { CreateTaskModal } from './ui/createTaskModal'
 import { DeleteConfirmModal } from './ui/deleteConfirmModal'
 import { normalizeTag } from './views/renderKanban/utils'
-import { t } from './lang/helpers' // Importamos la función de traducción
+import { t } from './lang/helpers'
+import { toSafeFm, getFmStringArray } from './utils/frontmatter'
 
 export default class KanbanMoonlightPlugin extends Plugin {
 	settings: IKanbanSettings = DEFAULT_SETTINGS
@@ -25,7 +26,7 @@ export default class KanbanMoonlightPlugin extends Plugin {
 			'lucide-kanban',
 			t('VIEW_TITLE'),
 			(_evt: MouseEvent) => {
-				this.activeView()
+				void this.activeView()
 			},
 		)
 
@@ -48,14 +49,14 @@ export default class KanbanMoonlightPlugin extends Plugin {
 				}
 
 				const cache = this.app.metadataCache.getFileCache(activeFile)
-				const hasTag =
-					cache?.frontmatter?.tags?.some((tag: string) =>
-						normalizeTag(tag).startsWith(
-							normalizeTag(this.settings.tagNotes),
-						),
-					) ?? false
-
-				const folder = this.settings.folderNotes
+			const fm = toSafeFm(cache)
+			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
+					normalizeTag(tag).startsWith(
+						normalizeTag(this.settings.tagNotes),
+					),
+				)
+	
+			const folder = this.settings.folderNotes
 				const inFolder =
 					folder &&
 					activeFile.path.startsWith(
@@ -73,13 +74,13 @@ export default class KanbanMoonlightPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.metadataCache.on('changed', (file) => {
-				const cache = this.app.metadataCache.getFileCache(file)
-				const hasTag =
-					cache?.frontmatter?.tags?.some((tag: string) =>
-						normalizeTag(tag).startsWith(
-							normalizeTag(this.settings.tagNotes),
-						),
-					) ?? false
+			const cache = this.app.metadataCache.getFileCache(file)
+			const fm = toSafeFm(cache)
+			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
+					normalizeTag(tag).startsWith(
+						normalizeTag(this.settings.tagNotes),
+					),
+				)
 				const folder = this.settings.folderNotes
 				const inFolder =
 					folder &&
@@ -120,25 +121,32 @@ export default class KanbanMoonlightPlugin extends Plugin {
 				active: true,
 			})
 		}
-		workspace.revealLeaf(leaf)
+		void workspace.revealLeaf(leaf)
 	}
 
 	refreshView = () => {
-		if (this.refreshTimer) clearTimeout(this.refreshTimer)
+		if (this.refreshTimer) window.clearTimeout(this.refreshTimer)
 		this.refreshTimer = window.setTimeout(() => {
-			this.app.workspace.getLeavesOfType(VIEW_TYPE_KANBAN).forEach((leaf) => {
-				if (leaf.view instanceof KanbanMoonlightView) {
-					leaf.view.drawKanbanBoard()
-				}
-			})
+			this.app.workspace
+				.getLeavesOfType(VIEW_TYPE_KANBAN)
+				.forEach((leaf) => {
+					if (leaf.view instanceof KanbanMoonlightView) {
+						leaf.view.drawKanbanBoard()
+					}
+				})
 		}, 100)
 	}
 
 	async loadSettings() {
+		const raw = await this.loadData() as Record<string, unknown> | null
+		const savedData: Partial<IKanbanSettings> =
+			typeof raw === 'object' && raw !== null
+				? raw
+				: {}
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			await this.loadData(),
+			savedData,
 		)
 	}
 

@@ -1,9 +1,10 @@
 import { ItemView, WorkspaceLeaf, TFile, setIcon } from 'obsidian'
-import { t } from '../lang/helpers' // Importamos la función de traducción
+import { t } from '../lang/helpers'
 import type KanbanMoonlight from '../main'
 import { renderKanbanColumns } from './renderKanban/renderColumns'
 import { normalizeTag } from './renderKanban/utils'
 import { CreateTaskModal } from '../ui/createTaskModal'
+import { toSafeFm, getFmStringArray, getFmString } from '../utils/frontmatter'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
 
@@ -78,7 +79,8 @@ export class KanbanMoonlightView extends ItemView {
 
 		const notesWithTag = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
-			const hasTag = cache?.frontmatter?.tags?.some((tag: string) =>
+			const fm = toSafeFm(cache)
+			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
 				normalizeTag(tag).startsWith(normalizeTag(tagNotes)),
 			)
 			const normalizedFolder = folderNotes
@@ -95,11 +97,11 @@ export class KanbanMoonlightView extends ItemView {
 			).value.toLowerCase()
 
 			if (this.debounceTimer) {
-				clearTimeout(this.debounceTimer)
+				window.clearTimeout(this.debounceTimer)
 			}
 
 			this.debounceTimer = window.setTimeout(() => {
-				this.filterKanbanBoard(notesWithTag, searchTerm)
+				void this.filterKanbanBoard(notesWithTag, searchTerm)
 			}, 300)
 		})
 
@@ -119,9 +121,10 @@ export class KanbanMoonlightView extends ItemView {
 
 		const filteredNotes = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
+			const fm = toSafeFm(cache)
 
 			const normalizedSearch = normalizeTag(tagNotes).toLowerCase()
-			const hasTag = cache?.frontmatter?.tags?.some((tag: string) =>
+			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
 				normalizeTag(tag).toLowerCase().includes(normalizedSearch),
 			)
 			const inFolder =
@@ -131,17 +134,18 @@ export class KanbanMoonlightView extends ItemView {
 			if (!searchTerm) return true
 
 			const title = note.basename.toLowerCase()
-			const description = (cache?.frontmatter?.[
-				this.plugin.settings.propertyDescription || 'description'
-			] || '') as string
-			const category = (cache?.frontmatter?.[
-				this.plugin.settings.propertyCategory || 'category'
-			] || '') as string
+			const description = getFmString(
+				fm,
+				this.plugin.settings.propertyDescription || 'description',
+			)
+			const category = getFmString(
+				fm,
+				this.plugin.settings.propertyCategory || 'category',
+			)
 
-			const tags =
-				(cache?.frontmatter?.tags as string[] | undefined)?.map(
-					(t: string) => t.toLowerCase(),
-				) ?? []
+			const tags = getFmStringArray(fm, 'tags').map((t) =>
+				t.toLowerCase(),
+			)
 
 			return (
 				title.includes(searchTerm) ||
