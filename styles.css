@@ -211,13 +211,12 @@
 }
 
 .btn-complete {
-	width: 100%;
+	border: 1px solid var(--text-success);
 	background: var(--background-primary) !important;
 	color: var(--text-muted);
 	padding: 2px 5px;
 	border-radius: 4px;
 	font-size: 10px;
-	margin-top: 4px;
 	cursor: pointer;
 	color: var(--text-success);
 	font-weight: bold;
@@ -229,6 +228,19 @@
 
 .btn-complete svg {
 	color: var(--text-success);
+}
+
+.btn-complete:hover {
+	background: var(--text-success) !important;
+	color: var(--text-on-accent);
+}
+
+.btn-complete:hover > span {
+	color: var(--text-on-accent);
+}
+
+.btn-complete:hover svg {
+	color: var(--text-on-accent);
 }
 
 .kanban-new-task-btn {
@@ -270,4 +282,58 @@
 .kanban-create-task-modal textarea:focus {
 	border-color: var(--interactive-accent);
 	outline: none;
+}
+
+.kanban-card__footer {
+	display: flex;
+	gap: 6px;
+	margin-top: 8px;
+}
+
+.kanban-card__footer .btn-complete,
+.kanban-card__footer .btn-delete {
+	flex: 1;
+	padding: 2px 5px;
+	border-radius: 4px;
+	font-size: 10px;
+	cursor: pointer;
+	font-weight: bold;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+}
+
+.kanban-card__footer .btn-complete svg,
+.kanban-card__footer .btn-delete svg {
+	width: 12px;
+	height: 12px;
+}
+
+.btn-delete {
+	flex: 1;
+	background: var(--background-primary) !important;
+	border: 1px solid var(--text-error);
+	color: var(--text-error);
+}
+
+.btn-delete span {
+	color: var(--text-error);
+}
+
+.btn-delete:hover {
+	background: var(--text-error) !important;
+	color: var(--text-on-accent);
+}
+
+.btn-delete:hover span {
+	color: var(--text-on-accent);
+}
+
+.btn-delete svg {
+	color: var(--text-error);
+}
+
+.btn-delete:hover svg {
+	color: var(--text-on-accent);
 }
