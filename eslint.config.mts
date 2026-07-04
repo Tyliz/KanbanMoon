@@ -1,7 +1,7 @@
-import tseslint from 'typescript-eslint';
-import obsidianmd from 'eslint-plugin-obsidianmd';
-import globals from 'globals';
-import { globalIgnores } from 'eslint/config';
+import tseslint from 'typescript-eslint'
+import obsidianmd from 'eslint-plugin-obsidianmd'
+import globals from 'globals'
+import { globalIgnores } from 'eslint/config'
 
 export default tseslint.config(
 	globalIgnores([
@@ -28,6 +28,15 @@ export default tseslint.config(
 				extraFileExtensions: ['.json'],
 			},
 		},
+		rules: {
+			// 🚫 ¡Aquí obligamos a NO usar puntos y comas!
+			semi: ['error', 'never'],
+
+			// Ejemplo: Permitir console.log en desarrollo pero avisar
+			'no-console': 'warn',
+
+			// Puedes añadir más reglas específicas aquí si lo deseas
+		},
 	},
 	...obsidianmd.configs.recommended,
-);
+)

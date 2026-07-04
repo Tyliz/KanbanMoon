@@ -1,6 +1,6 @@
 {
-	"name": "kanban-moon-plugin",
-	"version": "0.0.1",
+	"name": "kanban-moonlight-plugin",
+	"version": "1.0.0",
 	"description": "This is a simple aweasome Kanban plugin for Obsidian.",
 	"main": "main.js",
 	"type": "module",
@@ -23,5 +23,8 @@
 		"obsidian": "latest",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.59.1"
+	},
+	"dependencies": {
+		"lucide": "^1.22.0"
 	}
 }

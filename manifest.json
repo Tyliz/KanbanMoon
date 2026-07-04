@@ -1,11 +1,13 @@
 {
-	"id": "kanban-Moon-plugin",
-	"name": "Kanban Moon",
+	"id": "kanban-moonlight-plugin",
+	"name": "Kanban Moonlight",
+	"icon": "lucide-kanban",
 	"version": "1.0.0",
-	"minAppVersion": "1.0.0",
-	"description": "A simple aweasome Kanban plugin for Obsidian.",
+	"minAppVersion": "1.7.2",
+	"description": "A native Kanban board plugin for Obsidian. Transform your markdown notes into an interactive, visual Kanban board with drag & drop, customizable columns, categories system, and completion tracking.",
 	"author": "Tyliz",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://github.com/Tyliz",
+	"authorEmail": "tyliz@proton.me",
+	"fundingUrl": "https://buymeacoffee.com/tyliz",
 	"isDesktopOnly": false
 }

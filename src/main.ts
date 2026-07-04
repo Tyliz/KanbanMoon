@@ -1,114 +1,149 @@
-import {
-	Editor,
-	MarkdownView,
-	MarkdownFileInfo,
-	Modal,
-	Notice,
-	Plugin,
-} from 'obsidian';
-import {
-	DEFAULT_SETTINGS,
-	KanbanMoonlightSettings,
-	SampleSettingTab,
-} from './settings';
+import { Plugin, Notice } from 'obsidian'
+import { IKanbanSettings, DEFAULT_SETTINGS } from './settings/kanbanSettings'
+import { KanbanMoonlightSettingTab } from './settings/settingsTab'
+import { KanbanMoonlightView, VIEW_TYPE_KANBAN } from './views/kanbanView'
+import { CreateTaskModal } from './ui/createTaskModal'
+import { DeleteConfirmModal } from './ui/deleteConfirmModal'
+import { normalizeTag } from './views/renderKanban/utils'
+import { t } from './lang/helpers' // Importamos la función de traducción
 
-// Remember to rename these classes and interfaces!
-
-export default class KanbanMoonlight extends Plugin {
-	settings!: KanbanMoonlightSettings;
+export default class KanbanMoonlightPlugin extends Plugin {
+	settings: IKanbanSettings = DEFAULT_SETTINGS
+	private refreshTimer: number | null = null
 
 	async onload() {
-		await this.loadSettings();
+		await this.loadSettings()
 
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('dice', 'Sample', (_evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
+		// Registrar la Vista pasando "this" (el plugin) como argumento
+		this.registerView(
+			VIEW_TYPE_KANBAN,
+			(leaf) => new KanbanMoonlightView(leaf, this),
+		)
+		// 2. AÑADIR EL ICONO A LA BARRA LATERAL (RIBBON)
+		// Usamos el icono 'lucide-kanban' (Obsidian incluye la librería Lucide Icons)
+		this.addRibbonIcon(
+			'lucide-kanban',
+			t('VIEW_TITLE'),
+			(_evt: MouseEvent) => {
+				this.activeView()
+			},
+		)
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text');
-
-		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
+			id: 'create-new-kanban-task',
+			name: t('CREATE_TASK_TITLE'),
 			callback: () => {
-				new SampleModal(this.app).open();
+				new CreateTaskModal(this.app, this).open()
 			},
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (
-				editor: Editor,
-				_ctx: MarkdownView | MarkdownFileInfo,
-			) => {
-				editor.replaceSelection('Sample editor command');
-			},
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView =
-					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
+		})
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
+		this.addCommand({
+			id: 'delete-kanban-task',
+			name: t('DELETE_BTN') + ' ' + t('VIEW_TITLE'),
+			callback: async () => {
+				const activeFile = this.app.workspace.getActiveFile()
+				if (!activeFile) {
+					new Notice(t('NOTE_NOT_FOUND'))
+					return
 				}
-				return false;
+
+				const cache = this.app.metadataCache.getFileCache(activeFile)
+				const hasTag =
+					cache?.frontmatter?.tags?.some((tag: string) =>
+						normalizeTag(tag).startsWith(
+							normalizeTag(this.settings.tagNotes),
+						),
+					) ?? false
+
+				const folder = this.settings.folderNotes
+				const inFolder =
+					folder &&
+					activeFile.path.startsWith(
+						folder.replace(/^\/+/, '').replace(/\/?$/, '/'),
+					)
+
+				if (!hasTag && !inFolder) {
+					new Notice(t('NOTICE_NOT_KANBAN'))
+					return
+				}
+
+				new DeleteConfirmModal(this.app, this, activeFile).open()
 			},
-		});
+		})
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.registerEvent(
+			this.app.metadataCache.on('changed', (file) => {
+				const cache = this.app.metadataCache.getFileCache(file)
+				const hasTag =
+					cache?.frontmatter?.tags?.some((tag: string) =>
+						normalizeTag(tag).startsWith(
+							normalizeTag(this.settings.tagNotes),
+						),
+					) ?? false
+				const folder = this.settings.folderNotes
+				const inFolder =
+					folder &&
+					file.path.startsWith(
+						folder.replace(/^\/+/, '').replace(/\/?$/, '/'),
+					)
+				if (hasTag || inFolder) {
+					this.refreshView()
+				}
+			}),
+		)
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(activeDocument, 'click', (_evt: MouseEvent) => {
-			new Notice('Click');
-		});
+		this.registerEvent(
+			this.app.metadataCache.on('resolve', (file) => {
+				this.refreshView()
+			}),
+		)
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(
-			window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000),
-		);
+		this.registerEvent(
+			this.app.vault.on('delete', (file) => {
+				this.refreshView()
+			}),
+		)
+
+		// Registrar la pestaña de ajustes
+		this.addSettingTab(new KanbanMoonlightSettingTab(this.app, this))
 	}
 
-	onunload() {}
+	// Función para abrir o enfocar la pestaña del Kanban
+	async activeView() {
+		const { workspace } = this.app
+		let leaf = workspace.getLeavesOfType(VIEW_TYPE_KANBAN)[0]
+
+		if (!leaf) {
+			leaf = workspace.getLeaf('tab')
+			await leaf.setViewState({
+				type: VIEW_TYPE_KANBAN,
+				active: true,
+			})
+		}
+		workspace.revealLeaf(leaf)
+	}
+
+	refreshView = () => {
+		if (this.refreshTimer) clearTimeout(this.refreshTimer)
+		this.refreshTimer = window.setTimeout(() => {
+			this.app.workspace.getLeavesOfType(VIEW_TYPE_KANBAN).forEach((leaf) => {
+				if (leaf.view instanceof KanbanMoonlightView) {
+					leaf.view.drawKanbanBoard()
+				}
+			})
+		}, 100)
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<KanbanMoonlightSettings>,
-		);
+			await this.loadData(),
+		)
 	}
 
 	async saveSettings() {
-		await this.saveData(this.settings);
-	}
-}
-
-class SampleModal extends Modal {
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
+		await this.saveData(this.settings)
+		this.refreshView()
 	}
 }
