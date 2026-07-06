@@ -32,20 +32,27 @@ export class KanbanMoonlightView extends ItemView {
 		const container = this.contentEl
 		container.empty()
 
-		const board = this.plugin.getActiveBoard()
-		const tag = board.tagNotes
-		const folder = board.folderNotes
-		const filters = [tag, folder].filter(Boolean).join(', ')
-		container.createEl('h3', {
-			text: t('FILTER_NOTICE') + ` ${filters}`,
-		})
-
 		this.drawKanbanBoard()
 	}
 
 	drawKanbanBoard = () => {
 		const container = this.contentEl
 		container.empty()
+
+		this.createTabBar(container)
+
+		const board = this.plugin.getActiveBoard()
+
+		const filterNotice = container.createEl('div', {
+			cls: 'kanban-filter-notice',
+		})
+		const tag = board.tagNotes
+		const folder = board.folderNotes
+		const filters = [tag, folder].filter(Boolean).join(', ')
+		filterNotice.createEl('span', {
+			text: t('FILTER_NOTICE') + ` ${filters}`,
+			cls: 'kanban-filter-notice-text',
+		})
 
 		const mainContainer = container.createEl('div', {
 			cls: 'main-kanban-container',
@@ -74,7 +81,6 @@ export class KanbanMoonlightView extends ItemView {
 			new CreateTaskModal(this.app, this.plugin).open()
 		})
 
-		const board = this.plugin.getActiveBoard()
 		const tagNotes = board.tagNotes
 		const folderNotes = board.folderNotes
 		const allNotes = this.app.vault.getMarkdownFiles()
@@ -112,6 +118,81 @@ export class KanbanMoonlightView extends ItemView {
 		})
 
 		renderKanbanColumns(this, notesWithTag)
+	}
+
+	private createTabBar(container: HTMLElement) {
+		const tabBar = container.createEl('div', {
+			cls: 'kanban-tab-bar',
+		})
+
+		const boards = this.plugin.settings.boards
+		const activeBoardId = this.plugin.settings.activeBoardId
+
+		boards.forEach((board) => {
+			const tab = tabBar.createEl('div', {
+				cls: `kanban-tab${board.id === activeBoardId ? ' kanban-tab--active' : ''}`,
+				text: board.name,
+			})
+
+			tab.addEventListener('click', () => {
+				if (board.id === activeBoardId) return
+				this.plugin.settings.activeBoardId = board.id
+				void this.plugin.saveSettings()
+				this.drawKanbanBoard()
+			})
+		})
+
+		const addTabBtn = tabBar.createEl('div', {
+			cls: 'kanban-tab kanban-tab-add',
+			attr: { title: t('ADD_BOARD') },
+		})
+		setIcon(addTabBtn, 'plus')
+		addTabBtn.addEventListener('click', () => {
+			this.createNewBoard()
+		})
+	}
+
+	private createNewBoard() {
+		const boards = this.plugin.settings.boards
+		const newId = `board-${Date.now()}`
+
+		const maxTagNum = boards.reduce((max, b) => {
+			const match = b.tagNotes.match(/^#tag\/(\d+)$/)
+			if (match && match[1]) {
+				const num = parseInt(match[1])
+				return num > max ? num : max
+			}
+			return max
+		}, 1)
+
+		const newBoard = {
+			id: newId,
+			name: `Board ${boards.length + 1}`,
+			tagNotes: `#tag/${maxTagNum + 1}`,
+			folderNotes: '',
+			propertyState: 'state',
+			propertyDescription: 'description',
+			propertyCategory: 'category',
+			columns: [
+				{ id: 'backlog', icon: 'inbox', title: 'Backlog', color: '#ac46ff' },
+				{ id: 'todo', icon: 'clipboard-list', title: 'To Do', color: '#3498db' },
+				{ id: 'workingOn', icon: 'cog', title: 'Working On', color: '#00a8ff' },
+				{ id: 'review', icon: 'eye', title: 'Review', color: '#f39c12' },
+			],
+			categories: [],
+			completedColumn: {
+				id: 'completed',
+				icon: 'check-check',
+				title: 'Completed',
+				color: '#27ae60',
+				limitDate: 1,
+			},
+		}
+
+		boards.push(newBoard)
+		this.plugin.settings.activeBoardId = newId
+		void this.plugin.saveSettings()
+		this.drawKanbanBoard()
 	}
 
 	filterKanbanBoard = async (allNotes: TFile[], searchTerm: string) => {

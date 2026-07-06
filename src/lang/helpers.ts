@@ -71,6 +71,7 @@ const AUTHORS_LANGS = {
 		DELETE_CONFIRM_YES: 'Delete',
 		NOTICE_DELETED: 'Task deleted',
 		NOTICE_NOT_KANBAN: 'Not a kanban task',
+		ADD_BOARD: 'Add Board',
 	},
 	es: {
 		TAG_LABEL: 'Etiqueta de Proyectos',
@@ -144,6 +145,7 @@ const AUTHORS_LANGS = {
 		NOTICE_COMPLETED: 'La nota fue completada',
 		WEEK: 'Semana',
 		YEAR: 'Año',
+		ADD_BOARD: 'Agregar Tablero',
 	},
 }
 
