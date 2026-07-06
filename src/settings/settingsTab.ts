@@ -23,11 +23,13 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName(t('VIEW_TITLE')).setHeading()
 
 		new Setting(containerEl)
+
 			.setName(t('TAG_LABEL'))
 			.setDesc(t('TAG_DESC'))
 			.addText((text) =>
 				text
 					.setValue(board.tagNotes)
+					.setPlaceholder(t('BOARD_TAG_PLACEHOLDER'))
 					.onChange(async (value) => {
 						board.tagNotes = value
 						await this.plugin.saveSettings()

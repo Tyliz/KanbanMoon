@@ -2,7 +2,7 @@
 	padding: 0 20px;
 }
 
-.kanban-setting-section {
+.kanban-settings-container .kanban-setting-section {
 	padding: 15px;
 }
 
@@ -21,6 +21,7 @@
 	width: 100%;
 	max-width: none;
 	max-height: 75vh;
+	position: relative;
 }
 
 .kanban-board {
@@ -519,4 +520,56 @@ button.btn-delete:hover svg {
 
 .kanban-filter-notice-text {
 	opacity: 0.8;
+}
+
+.kanban-board-modal-footer {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	align-items: center;
+	margin-top: 16px;
+}
+
+.kanban-board-modal-footer .btn-delete {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.kanban-board-modal-footer .btn-delete svg {
+	width: 14px;
+	height: 14px;
+}
+
+.kanban-board-modal-spacer {
+	flex: 1;
+}
+
+.kanban-settings-btn {
+	position: absolute;
+	bottom: 40px;
+	right: 16px;
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 50%;
+	cursor: pointer;
+	color: var(--text-muted);
+	transition: all 0.15s ease;
+	z-index: 10;
+}
+
+.kanban-settings-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+	border-color: var(--interactive-accent);
+}
+
+.kanban-settings-btn svg {
+	width: 18px;
+	height: 18px;
 }

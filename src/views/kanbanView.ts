@@ -4,6 +4,7 @@ import type KanbanMoonlight from '../main'
 import { renderKanbanColumns } from './renderKanban/renderColumns'
 import { normalizeTag } from './renderKanban/utils'
 import { CreateTaskModal } from '../ui/createTaskModal'
+import { BoardModal } from '../ui/boardModal'
 import { toSafeFm, getFmStringArray, getFmString } from '../utils/frontmatter'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
@@ -88,14 +89,19 @@ export class KanbanMoonlightView extends ItemView {
 		const notesWithTag = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
 			const fm = toSafeFm(cache)
-			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
-				normalizeTag(tag).startsWith(normalizeTag(tagNotes)),
-			)
+
 			const normalizedFolder = folderNotes
 				? folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
 				: ''
 			const inFolder =
 				normalizedFolder && note.path.startsWith(normalizedFolder)
+
+			const hasTag = tagNotes.trim()
+				? getFmStringArray(fm, 'tags').some((tag) =>
+					normalizeTag(tag).startsWith(normalizeTag(tagNotes)),
+				)
+				: false
+
 			return hasTag || inFolder
 		})
 
@@ -118,6 +124,15 @@ export class KanbanMoonlightView extends ItemView {
 		})
 
 		renderKanbanColumns(this, notesWithTag)
+
+		const settingsBtn = container.createEl('div', {
+			cls: 'kanban-settings-btn',
+			attr: { title: t('OPEN_SETTINGS') },
+		})
+		setIcon(settingsBtn, 'settings')
+		settingsBtn.addEventListener('click', () => {
+			this.openPluginSettings()
+		})
 	}
 
 	private createTabBar(container: HTMLElement) {
@@ -140,6 +155,11 @@ export class KanbanMoonlightView extends ItemView {
 				void this.plugin.saveSettings()
 				this.drawKanbanBoard()
 			})
+
+			tab.addEventListener('dblclick', (e) => {
+				e.stopPropagation()
+				new BoardModal(this.app, this.plugin, board).open()
+			})
 		})
 
 		const addTabBtn = tabBar.createEl('div', {
@@ -148,51 +168,8 @@ export class KanbanMoonlightView extends ItemView {
 		})
 		setIcon(addTabBtn, 'plus')
 		addTabBtn.addEventListener('click', () => {
-			this.createNewBoard()
+			new BoardModal(this.app, this.plugin).open()
 		})
-	}
-
-	private createNewBoard() {
-		const boards = this.plugin.settings.boards
-		const newId = `board-${Date.now()}`
-
-		const maxTagNum = boards.reduce((max, b) => {
-			const match = b.tagNotes.match(/^#tag\/(\d+)$/)
-			if (match && match[1]) {
-				const num = parseInt(match[1])
-				return num > max ? num : max
-			}
-			return max
-		}, 1)
-
-		const newBoard = {
-			id: newId,
-			name: `Board ${boards.length + 1}`,
-			tagNotes: `#tag/${maxTagNum + 1}`,
-			folderNotes: '',
-			propertyState: 'state',
-			propertyDescription: 'description',
-			propertyCategory: 'category',
-			columns: [
-				{ id: 'backlog', icon: 'inbox', title: 'Backlog', color: '#ac46ff' },
-				{ id: 'todo', icon: 'clipboard-list', title: 'To Do', color: '#3498db' },
-				{ id: 'workingOn', icon: 'cog', title: 'Working On', color: '#00a8ff' },
-				{ id: 'review', icon: 'eye', title: 'Review', color: '#f39c12' },
-			],
-			categories: [],
-			completedColumn: {
-				id: 'completed',
-				icon: 'check-check',
-				title: 'Completed',
-				color: '#27ae60',
-				limitDate: 1,
-			},
-		}
-
-		boards.push(newBoard)
-		this.plugin.settings.activeBoardId = newId
-		void this.plugin.saveSettings()
-		this.drawKanbanBoard()
 	}
 
 	filterKanbanBoard = async (allNotes: TFile[], searchTerm: string) => {
@@ -207,12 +184,16 @@ export class KanbanMoonlightView extends ItemView {
 			const cache = this.app.metadataCache.getFileCache(note)
 			const fm = toSafeFm(cache)
 
-			const normalizedSearch = normalizeTag(tagNotes).toLowerCase()
-			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
-				normalizeTag(tag).toLowerCase().includes(normalizedSearch),
-			)
 			const inFolder =
 				normalizedFolder && note.path.startsWith(normalizedFolder)
+
+			const hasTag = tagNotes.trim()
+				? getFmStringArray(fm, 'tags').some((tag) => {
+					const normalizedSearch = normalizeTag(tagNotes).toLowerCase()
+					return normalizeTag(tag).toLowerCase().includes(normalizedSearch)
+				})
+				: false
+
 			const isProjectNote = hasTag || inFolder
 			if (!isProjectNote) return false
 			if (!searchTerm) return true
@@ -245,4 +226,13 @@ export class KanbanMoonlightView extends ItemView {
 	}
 
 	debounceTimer: number | null = null
+
+	private openPluginSettings() {
+		// Access Obsidian's internal settings API
+		const app = this.app as unknown as { setting?: { open: () => void; openTabById: (id: string) => void } }
+		if (app.setting) {
+			app.setting.open()
+			app.setting.openTabById(this.plugin.manifest.id)
+		}
+	}
 }
