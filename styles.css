@@ -6,6 +6,67 @@
 	padding: 15px;
 }
 
+.kanban-settings-board-name {
+	font-size: 12px;
+	color: var(--text-muted);
+	padding: 4px 15px 8px;
+	font-style: italic;
+}
+
+.kanban-properties-collapsible {
+	margin: 8px 0;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.kanban-properties-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 12px;
+	cursor: pointer;
+	background: var(--background-secondary);
+	transition: background 0.15s ease;
+	user-select: none;
+}
+
+.kanban-properties-header:hover {
+	background: var(--background-modifier-hover);
+}
+
+.kanban-properties-toggle {
+	display: flex;
+	align-items: center;
+	color: var(--text-muted);
+	transition: transform 0.15s ease;
+}
+
+.kanban-properties-toggle svg {
+	width: 14px;
+	height: 14px;
+}
+
+.kanban-properties-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.kanban-properties-content {
+	display: none;
+	padding: 8px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.kanban-properties-expanded .kanban-properties-content {
+	display: block;
+}
+
+.kanban-properties-expanded .kanban-properties-toggle {
+	transform: rotate(90deg);
+}
+
 .kanban-setting-note {
 	opacity: 0.7;
 	font-size: 0.85em;

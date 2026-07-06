@@ -89,6 +89,12 @@ const AUTHORS_LANGS = {
 		BOARD_MODAL_SAVED: 'Board saved.',
 		BOARD_MODAL_DELETED: 'Board deleted.',
 		OPEN_SETTINGS: 'Open Settings',
+		SETTINGS_BOARD_SELECT: 'Active Board',
+		SETTINGS_BOARD_SELECT_DESC: 'Select which board to configure.',
+		SETTINGS_BOARD_CURRENT: 'Configuring',
+		SETTINGS_DELETE_BOARD: 'Delete Board',
+		SETTINGS_DELETE_BOARD_DESC: 'Permanently remove this board.',
+		SETTINGS_DELETE_BOARD_CONFIRM: 'Are you sure you want to delete "{name}"? This cannot be undone.',
 	},
 	es: {
 		TAG_LABEL: 'Etiqueta de Proyectos',
@@ -180,6 +186,12 @@ const AUTHORS_LANGS = {
 		BOARD_MODAL_SAVED: 'Tablero guardado.',
 		BOARD_MODAL_DELETED: 'Tablero eliminado.',
 		OPEN_SETTINGS: 'Abrir Configuración',
+		SETTINGS_BOARD_SELECT: 'Tablero Activo',
+		SETTINGS_BOARD_SELECT_DESC: 'Selecciona qué tablero configurar.',
+		SETTINGS_BOARD_CURRENT: 'Configurando',
+		SETTINGS_DELETE_BOARD: 'Eliminar Tablero',
+		SETTINGS_DELETE_BOARD_DESC: 'Eliminar este tablero permanentemente.',
+		SETTINGS_DELETE_BOARD_CONFIRM: '¿Estás seguro de que quieres eliminar "{name}"? Esta acción no se puede deshacer.',
 	},
 }
 
