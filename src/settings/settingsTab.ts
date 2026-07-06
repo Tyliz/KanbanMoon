@@ -18,6 +18,8 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 		containerEl.empty()
 		containerEl.addClass('kanban-settings-container')
 
+		const board = this.plugin.getActiveBoard()
+
 		new Setting(containerEl).setName(t('VIEW_TITLE')).setHeading()
 
 		new Setting(containerEl)
@@ -25,9 +27,9 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			.setDesc(t('TAG_DESC'))
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.tagNotes)
+					.setValue(board.tagNotes)
 					.onChange(async (value) => {
-						this.plugin.settings.tagNotes = value
+						board.tagNotes = value
 						await this.plugin.saveSettings()
 					}),
 			)
@@ -38,10 +40,10 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			.setDesc(t('FOLDER_DESC'))
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.folderNotes)
+					.setValue(board.folderNotes)
 					.setPlaceholder('Projects/my-project')
 					.onChange(async (value) => {
-						this.plugin.settings.folderNotes = value
+						board.folderNotes = value
 						await this.plugin.saveSettings()
 					}),
 			)
@@ -51,17 +53,17 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName(t('PROPERTY_STATE'))
-			.setDesc(this.plugin.settings.propertyState)
+			.setDesc(board.propertyState)
 			.setClass('kanban-setting-section')
 
 		new Setting(containerEl)
 			.setName(t('PROPERTY_DESCRIPTION'))
-			.setDesc(this.plugin.settings.propertyDescription)
+			.setDesc(board.propertyDescription)
 			.setClass('kanban-setting-section')
 
 		new Setting(containerEl)
 			.setName(t('PROPERTY_CATEGORY'))
-			.setDesc(this.plugin.settings.propertyCategory)
+			.setDesc(board.propertyCategory)
 			.setClass('kanban-setting-section')
 
 		containerEl.createEl('p', {

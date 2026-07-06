@@ -23,7 +23,9 @@ export const renderColumnSettings = (
 ): void => {
 	new Setting(containerEl).setName(t('COLUMNS_TITLE')).setHeading()
 
-	plugin.settings.columns.forEach((column, index) => {
+	const board = plugin.getActiveBoard()
+
+	board.columns.forEach((column, index) => {
 		const section = containerEl.createEl('div', {
 			cls: 'kanban-setting-card',
 		})
@@ -38,7 +40,7 @@ export const renderColumnSettings = (
 			},
 		})
 		nameInput.addEventListener('change', () => {
-			plugin.settings.columns[index]!.title = nameInput.value
+			board.columns[index]!.title = nameInput.value
 			void plugin.saveSettings()
 		})
 
@@ -48,10 +50,10 @@ export const renderColumnSettings = (
 			cls: 'kanban-card-icon-btn',
 			attr: { title: t('SELECT_ICON') },
 		})
-		setIcon(iconBtn, plugin.settings.columns[index]!.icon)
+		setIcon(iconBtn, board.columns[index]!.icon)
 		iconBtn.addEventListener('click', () => {
 			new IconSuggestModal(plugin.app, (selectedIcon) => {
-				plugin.settings.columns[index]!.icon = selectedIcon
+				board.columns[index]!.icon = selectedIcon
 				void plugin.saveSettings()
 				display()
 			}).open()
@@ -62,7 +64,7 @@ export const renderColumnSettings = (
 			attr: { type: 'color', value: column.color },
 		})
 		colorPicker.addEventListener('input', () => {
-			plugin.settings.columns[index]!.color = colorPicker.value
+			board.columns[index]!.color = colorPicker.value
 			void plugin.saveSettings()
 		})
 
@@ -75,20 +77,20 @@ export const renderColumnSettings = (
 			})
 			setIcon(upBtn, 'up-chevron-glyph')
 			upBtn.addEventListener('click', () => {
-				moveArrayElement(plugin.settings.columns, index, index - 1)
+				moveArrayElement(board.columns, index, index - 1)
 				void plugin.saveSettings()
 				display()
 			})
 		}
 
-		if (index !== plugin.settings.columns.length - 1) {
+		if (index !== board.columns.length - 1) {
 			const downBtn = actionsRow.createEl('button', {
 				cls: 'kanban-card-action-btn',
 				attr: { title: 'Move down' },
 			})
 			setIcon(downBtn, 'down-chevron-glyph')
 			downBtn.addEventListener('click', () => {
-				moveArrayElement(plugin.settings.columns, index, index + 1)
+				moveArrayElement(board.columns, index, index + 1)
 				void plugin.saveSettings()
 				display()
 			})
@@ -100,7 +102,7 @@ export const renderColumnSettings = (
 		})
 		setIcon(deleteBtn, 'trash')
 		deleteBtn.addEventListener('click', () => {
-			plugin.settings.columns.splice(index, 1)
+			board.columns.splice(index, 1)
 			void plugin.saveSettings()
 			display()
 		})
@@ -113,7 +115,7 @@ export const renderColumnSettings = (
 				.setCta()
 				.onClick(() => {
 					const nuevoId = `col-${Date.now()}`
-					plugin.settings.columns.push({
+					board.columns.push({
 						id: nuevoId,
 						icon: 'plus',
 						title: t('NEW_COLUMN_PLACEHOLDER'),

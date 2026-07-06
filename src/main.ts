@@ -1,5 +1,6 @@
 import { Plugin, Notice } from 'obsidian'
-import { IKanbanSettings, DEFAULT_SETTINGS } from './settings/kanbanSettings'
+import { IKanbanSettings, DEFAULT_SETTINGS, getActiveBoard } from './settings/kanbanSettings'
+import { migrateSettings } from './settings/migration'
 import { KanbanMoonlightSettingTab } from './settings/settingsTab'
 import { KanbanMoonlightView, VIEW_TYPE_KANBAN } from './views/kanbanView'
 import { CreateTaskModal } from './ui/createTaskModal'
@@ -11,6 +12,10 @@ import { toSafeFm, getFmStringArray } from './utils/frontmatter'
 export default class KanbanMoonlightPlugin extends Plugin {
 	settings: IKanbanSettings = DEFAULT_SETTINGS
 	private refreshTimer: number | null = null
+
+	getActiveBoard() {
+		return getActiveBoard(this.settings)
+	}
 
 	async onload() {
 		await this.loadSettings()
@@ -50,13 +55,14 @@ export default class KanbanMoonlightPlugin extends Plugin {
 
 				const cache = this.app.metadataCache.getFileCache(activeFile)
 			const fm = toSafeFm(cache)
+			const board = this.getActiveBoard()
 			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
 					normalizeTag(tag).startsWith(
-						normalizeTag(this.settings.tagNotes),
+						normalizeTag(board.tagNotes),
 					),
 				)
 	
-			const folder = this.settings.folderNotes
+			const folder = board.folderNotes
 				const inFolder =
 					folder &&
 					activeFile.path.startsWith(
@@ -76,12 +82,13 @@ export default class KanbanMoonlightPlugin extends Plugin {
 			this.app.metadataCache.on('changed', (file) => {
 			const cache = this.app.metadataCache.getFileCache(file)
 			const fm = toSafeFm(cache)
+			const board = this.getActiveBoard()
 			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
 					normalizeTag(tag).startsWith(
-						normalizeTag(this.settings.tagNotes),
+						normalizeTag(board.tagNotes),
 					),
 				)
-				const folder = this.settings.folderNotes
+				const folder = board.folderNotes
 				const inFolder =
 					folder &&
 					file.path.startsWith(
@@ -139,15 +146,7 @@ export default class KanbanMoonlightPlugin extends Plugin {
 
 	async loadSettings() {
 		const raw = await this.loadData() as Record<string, unknown> | null
-		const savedData: Partial<IKanbanSettings> =
-			typeof raw === 'object' && raw !== null
-				? raw
-				: {}
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			savedData,
-		)
+		this.settings = migrateSettings(raw)
 	}
 
 	async saveSettings() {

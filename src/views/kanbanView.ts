@@ -32,8 +32,9 @@ export class KanbanMoonlightView extends ItemView {
 		const container = this.contentEl
 		container.empty()
 
-		const tag = this.plugin.settings.tagNotes
-		const folder = this.plugin.settings.folderNotes
+		const board = this.plugin.getActiveBoard()
+		const tag = board.tagNotes
+		const folder = board.folderNotes
 		const filters = [tag, folder].filter(Boolean).join(', ')
 		container.createEl('h3', {
 			text: t('FILTER_NOTICE') + ` ${filters}`,
@@ -73,8 +74,9 @@ export class KanbanMoonlightView extends ItemView {
 			new CreateTaskModal(this.app, this.plugin).open()
 		})
 
-		const tagNotes = this.plugin.settings.tagNotes
-		const folderNotes = this.plugin.settings.folderNotes
+		const board = this.plugin.getActiveBoard()
+		const tagNotes = board.tagNotes
+		const folderNotes = board.folderNotes
 		const allNotes = this.app.vault.getMarkdownFiles()
 
 		const notesWithTag = allNotes.filter((note) => {
@@ -113,8 +115,9 @@ export class KanbanMoonlightView extends ItemView {
 	}
 
 	filterKanbanBoard = async (allNotes: TFile[], searchTerm: string) => {
-		const tagNotes = this.plugin.settings.tagNotes
-		const folderNotes = this.plugin.settings.folderNotes
+		const board = this.plugin.getActiveBoard()
+		const tagNotes = board.tagNotes
+		const folderNotes = board.folderNotes
 		const normalizedFolder = folderNotes
 			? folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
 			: ''
@@ -136,11 +139,11 @@ export class KanbanMoonlightView extends ItemView {
 			const title = note.basename.toLowerCase()
 			const description = getFmString(
 				fm,
-				this.plugin.settings.propertyDescription || 'description',
+				board.propertyDescription || 'description',
 			)
 			const category = getFmString(
 				fm,
-				this.plugin.settings.propertyCategory || 'category',
+				board.propertyCategory || 'category',
 			)
 
 			const tags = getFmStringArray(fm, 'tags').map((t) =>

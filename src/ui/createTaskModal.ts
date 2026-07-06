@@ -16,10 +16,11 @@ export class CreateTaskModal extends Modal {
 		contentEl.addClass('kanban-create-task-modal')
 		this.titleEl.setText(t('CREATE_TASK_TITLE'))
 
+		const board = this.plugin.getActiveBoard()
 		let title = ''
 		let description = ''
 		let category = ''
-		let state = this.plugin.settings.columns[0]?.id || 'backlog'
+		let state = board.columns[0]?.id || 'backlog'
 
 		new Setting(contentEl)
 			.setName(t('CREATE_TASK_TITLE_LABEL'))
@@ -62,7 +63,7 @@ export class CreateTaskModal extends Modal {
 			.setName(t('CREATE_TASK_CATEGORY_LABEL'))
 			.addDropdown((dropdown) => {
 				dropdown.addOption('', t('CREATE_TASK_CATEGORY_NONE'))
-				this.plugin.settings.categories.forEach((cat) => {
+				board.categories.forEach((cat) => {
 					dropdown.addOption(cat.name, cat.name)
 				})
 				dropdown.onChange((value) => {
@@ -73,7 +74,7 @@ export class CreateTaskModal extends Modal {
 		new Setting(contentEl)
 			.setName(t('CREATE_TASK_STATE_LABEL'))
 			.addDropdown((dropdown) => {
-				this.plugin.settings.columns.forEach((col) => {
+				board.columns.forEach((col) => {
 					dropdown.addOption(col.id, col.title)
 				})
 				dropdown.setValue(state)
@@ -90,7 +91,7 @@ export class CreateTaskModal extends Modal {
 				return
 			}
 
-			const folder = this.plugin.settings.folderNotes
+			const folder = board.folderNotes
 			const sanitizedTitle = title.replace(/[\\/:*?"<>|]/g, '-')
 			let filePath = sanitizedTitle.endsWith('.md')
 				? sanitizedTitle
@@ -128,27 +129,27 @@ export class CreateTaskModal extends Modal {
 					file,
 					(frontmatter) => {
 						const fm = frontmatter as Record<string, unknown>
-						const tagValue = this.plugin.settings.tagNotes.replace(
+						const tagValue = board.tagNotes.replace(
 							'#',
 							'',
 						)
 						fm['tags'] = [tagValue]
 						const stateKey =
-							this.plugin.settings.propertyState || 'state'
+							board.propertyState || 'state'
 						fm[stateKey] = state
 						if (description.trim()) {
 							fm[
-								this.plugin.settings.propertyDescription ||
+								board.propertyDescription ||
 									'description'
 							] = description.trim()
 						}
 						if (category.trim()) {
 							fm[
-								this.plugin.settings.propertyCategory ||
+								board.propertyCategory ||
 									'category'
 							] = category.trim()
 						}
-						const column = this.plugin.settings.columns.find(
+						const column = board.columns.find(
 							(c) => c.id === state,
 						)
 						const today = new Date().toISOString().split('T')[0]
