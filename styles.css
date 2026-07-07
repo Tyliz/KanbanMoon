@@ -2,8 +2,69 @@
 	padding: 0 20px;
 }
 
-.kanban-setting-section {
+.kanban-settings-container .kanban-setting-section {
 	padding: 15px;
+}
+
+.kanban-settings-board-name {
+	font-size: 12px;
+	color: var(--text-muted);
+	padding: 4px 15px 8px;
+	font-style: italic;
+}
+
+.kanban-properties-collapsible {
+	margin: 8px 0;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.kanban-properties-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 12px;
+	cursor: pointer;
+	background: var(--background-secondary);
+	transition: background 0.15s ease;
+	user-select: none;
+}
+
+.kanban-properties-header:hover {
+	background: var(--background-modifier-hover);
+}
+
+.kanban-properties-toggle {
+	display: flex;
+	align-items: center;
+	color: var(--text-muted);
+	transition: transform 0.15s ease;
+}
+
+.kanban-properties-toggle svg {
+	width: 14px;
+	height: 14px;
+}
+
+.kanban-properties-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.kanban-properties-content {
+	display: none;
+	padding: 8px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.kanban-properties-expanded .kanban-properties-content {
+	display: block;
+}
+
+.kanban-properties-expanded .kanban-properties-toggle {
+	transform: rotate(90deg);
 }
 
 .kanban-setting-note {
@@ -21,6 +82,7 @@
 	width: 100%;
 	max-width: none;
 	max-height: 75vh;
+	position: relative;
 }
 
 .kanban-board {
@@ -454,4 +516,121 @@ button.btn-delete svg {
 
 button.btn-delete:hover svg {
 	color: var(--text-on-accent);
+}
+
+.kanban-tab-bar {
+	display: flex;
+	gap: 2px;
+	padding: 8px 12px 0;
+	background-color: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	overflow-x: auto;
+}
+
+.kanban-tab {
+	padding: 8px 16px;
+	border-radius: 6px 6px 0 0;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--text-muted);
+	background: transparent;
+	border: 1px solid transparent;
+	border-bottom: none;
+	transition: all 0.15s ease;
+	white-space: nowrap;
+	user-select: none;
+}
+
+.kanban-tab:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.kanban-tab--active {
+	color: var(--text-normal);
+	background: var(--background-primary);
+	border-color: var(--background-modifier-border);
+	font-weight: 600;
+}
+
+.kanban-tab-add {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 12px;
+	color: var(--text-muted);
+}
+
+.kanban-tab-add:hover {
+	color: var(--interactive-accent);
+}
+
+.kanban-tab-add svg {
+	width: 14px;
+	height: 14px;
+}
+
+.kanban-filter-notice {
+	padding: 6px 16px;
+	font-size: 12px;
+	color: var(--text-muted);
+	background: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.kanban-filter-notice-text {
+	opacity: 0.8;
+}
+
+.kanban-board-modal-footer {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+	align-items: center;
+	margin-top: 16px;
+}
+
+.kanban-board-modal-footer .btn-delete {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.kanban-board-modal-footer .btn-delete svg {
+	width: 14px;
+	height: 14px;
+}
+
+.kanban-board-modal-spacer {
+	flex: 1;
+}
+
+.kanban-settings-btn {
+	position: absolute;
+	bottom: 40px;
+	right: 16px;
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 50%;
+	cursor: pointer;
+	color: var(--text-muted);
+	transition: all 0.15s ease;
+	z-index: 10;
+}
+
+.kanban-settings-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+	border-color: var(--interactive-accent);
+}
+
+.kanban-settings-btn svg {
+	width: 18px;
+	height: 18px;
 }

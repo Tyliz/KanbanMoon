@@ -6,33 +6,35 @@ A native Kanban board plugin for [Obsidian](https://obsidian.md). Transform your
 
 ## Features
 
-- **Kanban Board View**: Renders notes tagged with a configurable tag (default `#task`) or inside a specific folder as cards in customizable columns.
+- **Multi-board Support**: Create and manage multiple independent Kanban boards, each with its own columns, categories, tag, and folder configuration.
+- **Board Tabs**: Switch between boards via a tab bar at the top of the Kanban view.
 - **Drag & Drop**: Move notes between columns by dragging cards — frontmatter `state` is updated automatically with a full history log.
 - **Create Task**: Create new tasks directly from the Kanban board or via the command palette. A modal lets you set title, description, category, and initial column.
 - **Delete Task**: Remove tasks with a single click. A confirmation dialog prevents accidental deletion. Also available as a command.
 - **Search / Filter**: Real-time search across note titles, descriptions, categories, and tags with debounced input.
-- **Customizable Columns**: Add, remove, reorder and rename columns. Configure each column's icon and color.
+- **Customizable Columns**: Add, remove, reorder and rename columns. Configure each column's icon and color. Each board has its own column configuration.
 - **Categories System**: Define categories with icons and custom colors to classify notes (displayed as colored borders and tags with automatic contrast text).
 - **Completion Tracking**: Mark tasks as complete with a single click. Completed notes appear in a dedicated column with a configurable time window (day/week/month/year).
 - **History Log**: Every state change, creation, and completion is recorded in the note's frontmatter `history` array with timestamp and origin.
 - **Auto-refresh**: The board refreshes automatically when notes are modified, created, or deleted.
 - **Icon Selector**: Choose from hundreds of Lucide icons for columns and categories via a searchable suggest modal.
 - **Sorting**: Notes are sorted by modification time (most recent first) within each column.
+- **Quick Settings**: Access Settings directly from the Kanban view via the gear icon.
 - **i18n**: English and Spanish built-in, auto-detected from Obsidian's locale.
 
 ## How it works
 
-Notes are displayed as Kanban cards based on their frontmatter:
+Each board filters notes by a combination of tag and/or folder. Notes are displayed as Kanban cards based on their frontmatter:
 
 | Frontmatter property | Default   | Description                                                                             |
 | -------------------- | --------- | --------------------------------------------------------------------------------------- |
-| `tags`               | `#task`   | Tag that determines which notes appear on the board                                     |
+| `tags`               | `#task`   | Tag that determines which notes appear on the board (configurable per board)            |
 | `state`              | `backlog` | Current column ID (`backlog`, `todo`, `workingOn`, `review`, or custom column IDs)      |
 | `description`        | —         | Short description shown on the card                                                     |
 | `category`           | —         | Category for color-coded borders and tags                                               |
 | `history`            | —         | Auto-generated log of state changes (array of `{ state, stateId, date, from }` objects) |
 
-> All frontmatter property names are configurable in settings.
+> All frontmatter property names are configurable in Settings. Each board has its own columns, categories, and completed column configuration.
 
 ## Installation
 
@@ -52,22 +54,25 @@ Notes are displayed as Kanban cards based on their frontmatter:
 ## Usage
 
 1. Click the Kanban icon in the left ribbon or open the board via command palette.
-2. Click **+ New Task** or run the **Create New Task** command to add a task.
-3. Fill in the title (required), description, category, and initial column.
-4. Drag cards between columns to update their state.
-5. Click **Complete** to mark a task as done, or **Delete** to remove it.
-6. Use the search bar to filter cards in real time.
+2. Use the **tab bar** to switch between boards, or click **+** to create a new board.
+3. Click **+ New Task** or run the **Create New Task** command to add a task.
+4. Fill in the title (required), description, category, and initial column.
+5. Drag cards between columns to update their state.
+6. Click **Complete** to mark a task as done, or **Delete** to remove it.
+7. Use the search bar to filter cards in real time.
+8. Click the **gear icon** (bottom-right) to open Settings.
 
 ## Settings
 
-| Setting                    | Description                                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Project Tag**            | The tag notes must have to appear on the board (default: `#task`). Works with or without `#` prefix.         |
-| **Project Folder**         | Optional folder path. Notes inside will appear on the board. Created automatically if it doesn't exist.      |
-| **Frontmatter Properties** | Read-only display of the configured property names for state, description, and category.                     |
-| **Columns**                | Add, remove, reorder, rename columns. Change each column's icon and color.                                   |
-| **Completed Column**       | Customize the completed column's icon, color, and time window (day/week/month/year).                         |
-| **Categories**             | Define note categories with icons and custom colors. Categories appear as colored borders and tags on cards. |
+| Setting                    | Description                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Board Selector**         | Switch between boards. Create new boards or edit existing ones.                                 |
+| **Frontmatter Properties** | Collapsible section showing the configured property names for state, description, and category. |
+| **Columns**                | Add, remove, reorder, rename columns per board. Change each column's icon and color.            |
+| **Completed Column**       | Customize the completed column's icon, color, and time window (day/week/month/year) per board.  |
+| **Categories**             | Define note categories with icons and custom colors per board.                                  |
+
+Each board has its own independent configuration for columns, categories, and completed column. Board settings (name, tag, folder) are managed via the Board Modal.
 
 ## Commands
 
@@ -89,6 +94,10 @@ Notes are displayed as Kanban cards based on their frontmatter:
 ### Demo 3 — Customizing the board
 
 ![Demo 3](docs/demo3.gif)
+
+### Demo 4 — Multiple boards
+
+![Demo 4](docs/demo4.gif)
 
 ## Translation
 

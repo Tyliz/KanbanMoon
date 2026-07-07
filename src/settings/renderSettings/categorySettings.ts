@@ -10,7 +10,9 @@ export const renderCategorySettings = (
 ): void => {
 	new Setting(containerEl).setName(t('CATEGORIES_TITLE')).setHeading()
 
-	plugin.settings.categories.forEach((category, index) => {
+	const board = plugin.getActiveBoard()
+
+	board.categories.forEach((category, index) => {
 		const section = containerEl.createEl('div', {
 			cls: 'kanban-setting-card',
 		})
@@ -25,7 +27,7 @@ export const renderCategorySettings = (
 			},
 		})
 		nameInput.addEventListener('change', () => {
-			plugin.settings.categories[index]!.name = nameInput.value
+			board.categories[index]!.name = nameInput.value
 			void plugin.saveSettings()
 		})
 
@@ -38,7 +40,7 @@ export const renderCategorySettings = (
 		setIcon(iconBtn, category.icon || 'tag')
 		iconBtn.addEventListener('click', () => {
 			new IconSuggestModal(plugin.app, (selectedIcon) => {
-				plugin.settings.categories[index]!.icon = selectedIcon
+				board.categories[index]!.icon = selectedIcon
 				void plugin.saveSettings()
 				display()
 			}).open()
@@ -49,7 +51,7 @@ export const renderCategorySettings = (
 			attr: { type: 'color', value: category.color },
 		})
 		colorPicker.addEventListener('input', () => {
-			plugin.settings.categories[index]!.color = colorPicker.value
+			board.categories[index]!.color = colorPicker.value
 			void plugin.saveSettings()
 		})
 
@@ -61,7 +63,7 @@ export const renderCategorySettings = (
 		})
 		setIcon(deleteBtn, 'trash')
 		deleteBtn.addEventListener('click', () => {
-			plugin.settings.categories.splice(index, 1)
+			board.categories.splice(index, 1)
 			void plugin.saveSettings()
 			display()
 		})
@@ -75,7 +77,7 @@ export const renderCategorySettings = (
 				.setCta()
 				.onClick(() => {
 					const nuevoId = `cat-${Date.now()}`
-					plugin.settings.categories.push({
+					board.categories.push({
 						id: nuevoId,
 						name: t('NEW_CATEGORY_PLACEHOLDER'),
 						color: '#ffffff',
