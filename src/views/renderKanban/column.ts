@@ -60,7 +60,7 @@ export const createColumnElement = (
 
 	const categories: ICategory[] = [
 		{ id: '-', name: '', color: columnSetting.color || '#696969', icon: 'tag' },
-		...view.plugin.settings.categories,
+		...view.plugin.getActiveBoard().categories,
 	]
 
 	notes.forEach((note) => {
