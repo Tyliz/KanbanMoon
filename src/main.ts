@@ -16,17 +16,9 @@ import { toSafeFm, getFmStringArray } from './utils/frontmatter'
 export default class KanbanMoonlightPlugin extends Plugin {
 	settings: IKanbanSettings = DEFAULT_SETTINGS
 	private refreshTimer: number | null = null
-	private selfModifiedFiles = new Set<string>()
 
 	getActiveBoard() {
 		return getActiveBoard(this.settings)
-	}
-
-	markSelfModified(path: string) {
-		this.selfModifiedFiles.add(path)
-		window.setTimeout(() => {
-			this.selfModifiedFiles.delete(path)
-		}, 500)
 	}
 
 	async onload() {
@@ -90,9 +82,6 @@ export default class KanbanMoonlightPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.metadataCache.on('changed', (file) => {
-				if (this.selfModifiedFiles.has(file.path)) {
-					return
-				}
 				const cache = this.app.metadataCache.getFileCache(file)
 				const fm = toSafeFm(cache)
 				const board = this.getActiveBoard()

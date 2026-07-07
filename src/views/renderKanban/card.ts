@@ -173,7 +173,6 @@ export const createCardElement = (
 					return
 				}
 
-				view.plugin.markSelfModified(file.path)
 				await view.app.fileManager.processFrontMatter(
 				file,
 				(frontmatter) => {

@@ -14,7 +14,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - **Delete board**: Remove boards from Settings or Board Modal with a confirmation dialog.
 - **Collapsible settings sections**: Frontmatter properties section in Settings is now collapsible.
 - **Settings button**: Quick access to Settings from the Kanban view (gear icon, bottom-right).
-- **Refresh optimization**: Board no longer flickers when modifying cards via drag-drop, completion, or task creation.
 
 ### Changed
 

@@ -16,7 +16,7 @@ A native Kanban board plugin for [Obsidian](https://obsidian.md). Transform your
 - **Categories System**: Define categories with icons and custom colors to classify notes (displayed as colored borders and tags with automatic contrast text).
 - **Completion Tracking**: Mark tasks as complete with a single click. Completed notes appear in a dedicated column with a configurable time window (day/week/month/year).
 - **History Log**: Every state change, creation, and completion is recorded in the note's frontmatter `history` array with timestamp and origin.
-- **Auto-refresh**: The board refreshes automatically when notes are modified externally, with flicker-free updates when modifying cards from the board.
+- **Auto-refresh**: The board refreshes automatically when notes are modified, created, or deleted.
 - **Icon Selector**: Choose from hundreds of Lucide icons for columns and categories via a searchable suggest modal.
 - **Sorting**: Notes are sorted by modification time (most recent first) within each column.
 - **Quick Settings**: Access Settings directly from the Kanban view via the gear icon.
@@ -64,13 +64,13 @@ Each board filters notes by a combination of tag and/or folder. Notes are displa
 
 ## Settings
 
-| Setting                    | Description                                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Board Selector**         | Switch between boards. Create new boards or edit existing ones.                                              |
-| **Frontmatter Properties** | Collapsible section showing the configured property names for state, description, and category.              |
-| **Columns**                | Add, remove, reorder, rename columns per board. Change each column's icon and color.                         |
-| **Completed Column**       | Customize the completed column's icon, color, and time window (day/week/month/year) per board.              |
-| **Categories**             | Define note categories with icons and custom colors per board.                                               |
+| Setting                    | Description                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Board Selector**         | Switch between boards. Create new boards or edit existing ones.                                 |
+| **Frontmatter Properties** | Collapsible section showing the configured property names for state, description, and category. |
+| **Columns**                | Add, remove, reorder, rename columns per board. Change each column's icon and color.            |
+| **Completed Column**       | Customize the completed column's icon, color, and time window (day/week/month/year) per board.  |
+| **Categories**             | Define note categories with icons and custom colors per board.                                  |
 
 Each board has its own independent configuration for columns, categories, and completed column. Board settings (name, tag, folder) are managed via the Board Modal.
 
@@ -94,6 +94,10 @@ Each board has its own independent configuration for columns, categories, and co
 ### Demo 3 — Customizing the board
 
 ![Demo 3](docs/demo3.gif)
+
+### Demo 4 — Multiple boards
+
+![Demo 4](docs/demo4.gif)
 
 ## Translation
 

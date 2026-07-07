@@ -125,7 +125,6 @@ export class CreateTaskModal extends Modal {
 
 			try {
 				const file = await this.app.vault.create(filePath, '')
-				this.plugin.markSelfModified(file.path)
 				await this.app.fileManager.processFrontMatter(
 					file,
 					(frontmatter) => {
