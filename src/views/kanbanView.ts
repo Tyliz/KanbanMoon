@@ -4,6 +4,7 @@ import type KanbanMoonlight from '../main'
 import { renderKanbanColumns } from './renderKanban/renderColumns'
 import { normalizeTag } from './renderKanban/utils'
 import { CreateTaskModal } from '../ui/createTaskModal'
+import { BoardModal } from '../ui/boardModal'
 import { toSafeFm, getFmStringArray, getFmString } from '../utils/frontmatter'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
@@ -32,19 +33,27 @@ export class KanbanMoonlightView extends ItemView {
 		const container = this.contentEl
 		container.empty()
 
-		const tag = this.plugin.settings.tagNotes
-		const folder = this.plugin.settings.folderNotes
-		const filters = [tag, folder].filter(Boolean).join(', ')
-		container.createEl('h3', {
-			text: t('FILTER_NOTICE') + ` ${filters}`,
-		})
-
 		this.drawKanbanBoard()
 	}
 
 	drawKanbanBoard = () => {
 		const container = this.contentEl
 		container.empty()
+
+		this.createTabBar(container)
+
+		const board = this.plugin.getActiveBoard()
+
+		const filterNotice = container.createEl('div', {
+			cls: 'kanban-filter-notice',
+		})
+		const tag = board.tagNotes
+		const folder = board.folderNotes
+		const filters = [tag, folder].filter(Boolean).join(', ')
+		filterNotice.createEl('span', {
+			text: t('FILTER_NOTICE') + ` ${filters}`,
+			cls: 'kanban-filter-notice-text',
+		})
 
 		const mainContainer = container.createEl('div', {
 			cls: 'main-kanban-container',
@@ -73,21 +82,26 @@ export class KanbanMoonlightView extends ItemView {
 			new CreateTaskModal(this.app, this.plugin).open()
 		})
 
-		const tagNotes = this.plugin.settings.tagNotes
-		const folderNotes = this.plugin.settings.folderNotes
+		const tagNotes = board.tagNotes
+		const folderNotes = board.folderNotes
 		const allNotes = this.app.vault.getMarkdownFiles()
 
 		const notesWithTag = allNotes.filter((note) => {
 			const cache = this.app.metadataCache.getFileCache(note)
 			const fm = toSafeFm(cache)
-			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
-				normalizeTag(tag).startsWith(normalizeTag(tagNotes)),
-			)
+
 			const normalizedFolder = folderNotes
 				? folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
 				: ''
 			const inFolder =
 				normalizedFolder && note.path.startsWith(normalizedFolder)
+
+			const hasTag = tagNotes.trim()
+				? getFmStringArray(fm, 'tags').some((tag) =>
+					normalizeTag(tag).startsWith(normalizeTag(tagNotes)),
+				)
+				: false
+
 			return hasTag || inFolder
 		})
 
@@ -110,11 +124,58 @@ export class KanbanMoonlightView extends ItemView {
 		})
 
 		renderKanbanColumns(this, notesWithTag)
+
+		const settingsBtn = container.createEl('div', {
+			cls: 'kanban-settings-btn',
+			attr: { title: t('OPEN_SETTINGS') },
+		})
+		setIcon(settingsBtn, 'settings')
+		settingsBtn.addEventListener('click', () => {
+			this.openPluginSettings()
+		})
+	}
+
+	private createTabBar(container: HTMLElement) {
+		const tabBar = container.createEl('div', {
+			cls: 'kanban-tab-bar',
+		})
+
+		const boards = this.plugin.settings.boards
+		const activeBoardId = this.plugin.settings.activeBoardId
+
+		boards.forEach((board) => {
+			const tab = tabBar.createEl('div', {
+				cls: `kanban-tab${board.id === activeBoardId ? ' kanban-tab--active' : ''}`,
+				text: board.name,
+			})
+
+			tab.addEventListener('click', () => {
+				if (board.id === activeBoardId) return
+				this.plugin.settings.activeBoardId = board.id
+				void this.plugin.saveSettings()
+				this.drawKanbanBoard()
+			})
+
+			tab.addEventListener('dblclick', (e) => {
+				e.stopPropagation()
+				new BoardModal(this.app, this.plugin, board).open()
+			})
+		})
+
+		const addTabBtn = tabBar.createEl('div', {
+			cls: 'kanban-tab kanban-tab-add',
+			attr: { title: t('ADD_BOARD') },
+		})
+		setIcon(addTabBtn, 'plus')
+		addTabBtn.addEventListener('click', () => {
+			new BoardModal(this.app, this.plugin).open()
+		})
 	}
 
 	filterKanbanBoard = async (allNotes: TFile[], searchTerm: string) => {
-		const tagNotes = this.plugin.settings.tagNotes
-		const folderNotes = this.plugin.settings.folderNotes
+		const board = this.plugin.getActiveBoard()
+		const tagNotes = board.tagNotes
+		const folderNotes = board.folderNotes
 		const normalizedFolder = folderNotes
 			? folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
 			: ''
@@ -123,12 +184,16 @@ export class KanbanMoonlightView extends ItemView {
 			const cache = this.app.metadataCache.getFileCache(note)
 			const fm = toSafeFm(cache)
 
-			const normalizedSearch = normalizeTag(tagNotes).toLowerCase()
-			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
-				normalizeTag(tag).toLowerCase().includes(normalizedSearch),
-			)
 			const inFolder =
 				normalizedFolder && note.path.startsWith(normalizedFolder)
+
+			const hasTag = tagNotes.trim()
+				? getFmStringArray(fm, 'tags').some((tag) => {
+					const normalizedSearch = normalizeTag(tagNotes).toLowerCase()
+					return normalizeTag(tag).toLowerCase().includes(normalizedSearch)
+				})
+				: false
+
 			const isProjectNote = hasTag || inFolder
 			if (!isProjectNote) return false
 			if (!searchTerm) return true
@@ -136,11 +201,11 @@ export class KanbanMoonlightView extends ItemView {
 			const title = note.basename.toLowerCase()
 			const description = getFmString(
 				fm,
-				this.plugin.settings.propertyDescription || 'description',
+				board.propertyDescription || 'description',
 			)
 			const category = getFmString(
 				fm,
-				this.plugin.settings.propertyCategory || 'category',
+				board.propertyCategory || 'category',
 			)
 
 			const tags = getFmStringArray(fm, 'tags').map((t) =>
@@ -161,4 +226,13 @@ export class KanbanMoonlightView extends ItemView {
 	}
 
 	debounceTimer: number | null = null
+
+	private openPluginSettings() {
+		// Access Obsidian's internal settings API
+		const app = this.app as unknown as { setting?: { open: () => void; openTabById: (id: string) => void } }
+		if (app.setting) {
+			app.setting.open()
+			app.setting.openTabById(this.plugin.manifest.id)
+		}
+	}
 }

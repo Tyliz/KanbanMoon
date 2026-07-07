@@ -13,12 +13,13 @@ export const createCardElement = (
 	columnSetting: IColumn,
 	categories: ICategory[],
 ) => {
+	const board = view.plugin.getActiveBoard()
 	const noteCache = view.plugin.app.metadataCache.getFileCache(note)
 	const fm = toSafeFm(noteCache)
 
 	let noteCategoryName = ''
 	if (fm) {
-		const rawCategory = fm[view.plugin.settings.propertyCategory || 'category']
+		const rawCategory = fm[board.propertyCategory || 'category']
 		if (typeof rawCategory === 'string') {
 			noteCategoryName = rawCategory.toLowerCase()
 		}
@@ -73,7 +74,7 @@ export const createCardElement = (
 
 	const description = getFmString(
 		fm,
-		view.plugin.settings.propertyDescription,
+		board.propertyDescription,
 	)
 
 	const descriptionShorted =
@@ -92,7 +93,7 @@ export const createCardElement = (
 
 	const tags = getFmStringArray(fm, 'tags')
 	const tagsNotes = tags
-	const normalizedProjectTag = normalizeTag(view.plugin.settings.tagNotes)
+	const normalizedProjectTag = normalizeTag(board.tagNotes)
 	const relevantTags = tagsNotes.filter(
 		(tag: string) => normalizeTag(tag) !== normalizedProjectTag,
 	)
@@ -146,8 +147,8 @@ export const createCardElement = (
 	const isCompleted =
 		noteCache &&
 		noteCache.frontmatter &&
-		noteCache.frontmatter[view.plugin.settings.propertyState] ===
-			view.plugin.settings.completedColumn.id
+		noteCache.frontmatter[board.propertyState] ===
+			board.completedColumn.id
 
 	if (!isCompleted) {
 		const btnComplete = btnFooter.createEl('button', {
@@ -156,7 +157,7 @@ export const createCardElement = (
 
 		setIcon(
 			btnComplete,
-			view.plugin.settings.completedColumn.icon || 'check',
+			board.completedColumn.icon || 'check',
 		)
 
 		btnComplete.createEl('span', {
@@ -172,6 +173,7 @@ export const createCardElement = (
 					return
 				}
 
+				view.plugin.markSelfModified(file.path)
 				await view.app.fileManager.processFrontMatter(
 				file,
 				(frontmatter) => {
@@ -181,15 +183,15 @@ export const createCardElement = (
 
 					history.push({
 						state: t('COLUMN_COMPLETED'),
-						stateId: view.plugin.settings.completedColumn.id,
+						stateId: board.completedColumn.id,
 						date: today,
 						from: columnSetting.title,
 					})
 
 					fm['history'] = history
 
-					fm[view.plugin.settings.propertyState ?? 'state'] =
-						view.plugin.settings.completedColumn.id
+					fm[board.propertyState ?? 'state'] =
+						board.completedColumn.id
 
 					new Notice(t('NOTICE_COMPLETED'))
 				},

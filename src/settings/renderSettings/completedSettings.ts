@@ -11,17 +11,19 @@ export const renderCompletedSettings = (
 ): void => {
 	new Setting(containerEl).setName(t('COMPLETED_SETTINGS_TITLE')).setHeading()
 
+	const board = plugin.getActiveBoard()
+
 	new Setting(containerEl)
 		.setName(t('COMPLETE_SETTING_BASIC'))
 		.setDesc(t('COMPLETE_SETTING_BASIC_DESC'))
 		.setClass('kanban-setting-section')
 		.addButton((button) => {
 			button.setButtonText('')
-			button.setIcon(plugin.settings.completedColumn.icon)
+			button.setIcon(board.completedColumn.icon)
 			button.setTooltip(t('SELECT_ICON'))
 			button.onClick(() => {
 				new IconSuggestModal(plugin.app, (selectedIcon) => {
-					plugin.settings.completedColumn.icon = selectedIcon
+					board.completedColumn.icon = selectedIcon
 					void plugin.saveSettings()
 					display()
 				}).open()
@@ -29,9 +31,9 @@ export const renderCompletedSettings = (
 		})
 		.addColorPicker((colorPicker) =>
 			colorPicker
-				.setValue(plugin.settings.completedColumn.color)
+				.setValue(board.completedColumn.color)
 				.onChange(async (value) => {
-					plugin.settings.completedColumn.color = value
+					board.completedColumn.color = value
 					await plugin.saveSettings()
 				}),
 		)
@@ -47,12 +49,12 @@ export const renderCompletedSettings = (
 				.addOption(TimeOptions.month.toString(), t('MONTH'))
 				.addOption(TimeOptions.year.toString(), t('YEAR'))
 				.setValue(
-					plugin.settings.completedColumn.limitDate
-						? plugin.settings.completedColumn.limitDate.toString()
+					board.completedColumn.limitDate
+						? board.completedColumn.limitDate.toString()
 						: TimeOptions.week.toString(),
 				)
 				.onChange(async (value) => {
-					plugin.settings.completedColumn.limitDate = parseInt(value)
+					board.completedColumn.limitDate = parseInt(value)
 					await plugin.saveSettings()
 				})
 		})

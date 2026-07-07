@@ -68,17 +68,19 @@ export const setupColumnDragDrop = (
 			}
 
 			try {
+				view.plugin.markSelfModified(note.path)
 				await view.app.fileManager.processFrontMatter(
 					note,
 					(frontmatter) => {
 						const fm = frontmatter as Record<string, unknown>
+						const board = view.plugin.getActiveBoard()
 						const lastStateId =
-							getFmString(fm, view.plugin.settings.propertyState) ||
-							view.plugin.settings.columns[0]?.id ||
+							getFmString(fm, board.propertyState) ||
+							board.columns[0]?.id ||
 							'backlog'
 						const allColumns = [
-							...view.plugin.settings.columns,
-							view.plugin.settings.completedColumn,
+							...board.columns,
+							board.completedColumn,
 						]
 						const lastColumn = allColumns.find(
 							(c) => c.id === lastStateId,
@@ -98,12 +100,12 @@ export const setupColumnDragDrop = (
 						})
 
 						fm['history'] = history
-						fm[view.plugin.settings.propertyState] =
+						fm[board.propertyState] =
 							columnSetting.id
 
 						const isCompleted =
 							columnSetting.id ===
-							view.plugin.settings.completedColumn.id
+							board.completedColumn.id
 						new Notice(
 							isCompleted
 								? `${t('COMPLETE_NOTE')}`

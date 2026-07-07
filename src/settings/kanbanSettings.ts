@@ -1,4 +1,4 @@
-import { t } from '../lang/helpers' // Importamos la función de traducción
+import { t } from '../lang/helpers'
 
 export interface IColumn {
 	id: string
@@ -25,7 +25,9 @@ export interface ICategory {
 	icon: string
 }
 
-export interface IKanbanSettings {
+export interface IBoard {
+	id: string
+	name: string
 	tagNotes: string
 	folderNotes: string
 	propertyState: string
@@ -36,44 +38,68 @@ export interface IKanbanSettings {
 	completedColumn: ICompletedColumn
 }
 
-export const DEFAULT_SETTINGS: IKanbanSettings = {
+export const DEFAULT_BOARD_COLUMNS: IColumn[] = [
+	{
+		id: 'backlog',
+		icon: 'inbox',
+		title: t('COLUMN_BACKLOG'),
+		color: '#ac46ff',
+	},
+	{
+		id: 'todo',
+		icon: 'clipboard-list',
+		title: t('COLUMN_TODO'),
+		color: '#3498db',
+	},
+	{
+		id: 'workingOn',
+		icon: 'cog',
+		title: t('COLUMN_WORKING_ON'),
+		color: '#00a8ff',
+	},
+	{
+		id: 'review',
+		icon: 'eye',
+		title: t('COLUMN_REVIEW'),
+		color: '#f39c12',
+	},
+]
+
+export const DEFAULT_COMPLETED_COLUMN: ICompletedColumn = {
+	id: 'completed',
+	icon: 'check-check',
+	title: t('COLUMN_COMPLETED'),
+	color: '#27ae60',
+	limitDate: TimeOptions.week,
+}
+
+export const DEFAULT_BOARD: IBoard = {
+	id: 'default',
+	name: 'Default',
 	tagNotes: '#task',
 	folderNotes: '',
 	propertyState: 'state',
 	propertyDescription: 'description',
 	propertyCategory: 'category',
-	columns: [
-		{
-			id: 'backlog',
-			icon: 'inbox',
-			title: t('COLUMN_BACKLOG'),
-			color: '#ac46ff',
-		},
-		{
-			id: 'todo',
-			icon: 'clipboard-list',
-			title: t('COLUMN_TODO'),
-			color: '#3498db',
-		},
-		{
-			id: 'workingOn',
-			icon: 'cog',
-			title: t('COLUMN_WORKING_ON'),
-			color: '#00a8ff',
-		},
-		{
-			id: 'review',
-			icon: 'eye',
-			title: t('COLUMN_REVIEW'),
-			color: '#f39c12',
-		},
-	],
+	columns: DEFAULT_BOARD_COLUMNS,
 	categories: [],
-	completedColumn: {
-		id: 'completed',
-		icon: 'check-check',
-		title: t('COLUMN_COMPLETED'),
-		color: '#27ae60',
-		limitDate: TimeOptions.week,
-	},
+	completedColumn: DEFAULT_COMPLETED_COLUMN,
+}
+
+export interface IKanbanSettings {
+	boards: IBoard[]
+	activeBoardId: string
+}
+
+export const DEFAULT_SETTINGS: IKanbanSettings = {
+	boards: [DEFAULT_BOARD],
+	activeBoardId: 'default',
+}
+
+export function getActiveBoard(settings: IKanbanSettings): IBoard {
+	return (
+		settings.boards.find((b) => b.id === settings.activeBoardId) ||
+		settings.boards[0] ||
+		DEFAULT_BOARD
+	)
 }
