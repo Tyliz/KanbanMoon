@@ -160,6 +160,16 @@ Follow Obsidian's **Developer Policies** and **Plugin Guidelines**. In particula
 - Introduce network calls without an obvious user-facing reason and documentation.
 - Ship features that require cloud services without clear disclosure and explicit opt-in.
 - Store or transmit vault contents unless essential and consented.
+- Include test-related changes in CHANGELOG.md (tests are internal implementation details, not user-facing features).
+
+## CHANGELOG conventions
+
+- Document user-facing features, improvements, and bug fixes only.
+- Do not include test additions, refactors, or internal tooling changes.
+- Use [Keep a Changelog](https://keepachangelog.com/) format.
+- Group changes under `Added`, `Changed`, `Fixed`, or `Removed` sections.
+- Mention migration steps if the change requires user action.
+- Use `dd/mm/yyyy` date format for all dates.
 
 ## Common tasks
 

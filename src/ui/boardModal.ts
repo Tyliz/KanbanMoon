@@ -183,20 +183,81 @@ export class BoardModal extends Modal {
 	private async deleteBoard() {
 		if (!this.board) return
 
-		const boards = this.plugin.settings.boards
-		const index = boards.findIndex((b) => b.id === this.board!.id)
+		const boardName = this.board.name
+		const boardId = this.board.id
 
-		if (index === -1) return
+		const confirmModal = new DeleteBoardConfirmModal(
+			this.app,
+			this.plugin,
+			boardName,
+			async () => {
+				const boards = this.plugin.settings.boards
+				const index = boards.findIndex((b) => b.id === boardId)
 
-		boards.splice(index, 1)
+				if (index === -1) return
 
-		if (this.plugin.settings.activeBoardId === this.board.id) {
-			this.plugin.settings.activeBoardId = boards[0]?.id || 'default'
-		}
+				boards.splice(index, 1)
 
-		await this.plugin.saveSettings()
-		new Notice(t('BOARD_MODAL_DELETED'))
-		this.close()
+				if (this.plugin.settings.activeBoardId === boardId) {
+					this.plugin.settings.activeBoardId = boards[0]?.id || 'default'
+				}
+
+				await this.plugin.saveSettings()
+				new Notice(t('BOARD_MODAL_DELETED'))
+				this.close()
+			},
+		)
+		confirmModal.open()
+	}
+
+	onClose() {
+		const { contentEl } = this
+		contentEl.empty()
+	}
+}
+
+class DeleteBoardConfirmModal extends Modal {
+	plugin: KanbanMoonlightPlugin
+	boardName: string
+	onConfirm: () => Promise<void>
+
+	constructor(
+		app: App,
+		plugin: KanbanMoonlightPlugin,
+		boardName: string,
+		onConfirm: () => Promise<void>,
+	) {
+		super(app)
+		this.plugin = plugin
+		this.boardName = boardName
+		this.onConfirm = onConfirm
+	}
+
+	async onOpen() {
+		const { contentEl } = this
+		contentEl.empty()
+		this.titleEl.setText(t('DELETE_CONFIRM'))
+
+		contentEl.createEl('p', {
+			text: t('SETTINGS_DELETE_BOARD_CONFIRM').replace(
+				'{name}',
+				this.boardName,
+			),
+		})
+
+		new Setting(contentEl)
+			.addButton((btn) => {
+				btn.setButtonText(t('CREATE_TASK_CANCEL'))
+				btn.onClick(() => this.close())
+			})
+			.addButton((btn) => {
+				btn.setWarning()
+				btn.setButtonText(t('DELETE_CONFIRM_YES'))
+				btn.onClick(async () => {
+					await this.onConfirm()
+					this.close()
+				})
+			})
 	}
 
 	onClose() {

@@ -146,8 +146,9 @@ export class KanbanMoonlightView extends ItemView {
 		boards.forEach((board) => {
 			const tab = tabBar.createEl('div', {
 				cls: `kanban-tab${board.id === activeBoardId ? ' kanban-tab--active' : ''}`,
-				text: board.name,
+				attr: { title: t('BOARD_TAB_TOOLTIP') },
 			})
+			tab.createEl('span', { text: board.name })
 
 			tab.addEventListener('click', () => {
 				if (board.id === activeBoardId) return
