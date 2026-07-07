@@ -68,6 +68,7 @@ export const setupColumnDragDrop = (
 			}
 
 			try {
+				view.plugin.markSelfModified(note.path)
 				await view.app.fileManager.processFrontMatter(
 					note,
 					(frontmatter) => {

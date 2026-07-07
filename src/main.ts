@@ -1,5 +1,9 @@
 import { Plugin, Notice } from 'obsidian'
-import { IKanbanSettings, DEFAULT_SETTINGS, getActiveBoard } from './settings/kanbanSettings'
+import {
+	IKanbanSettings,
+	DEFAULT_SETTINGS,
+	getActiveBoard,
+} from './settings/kanbanSettings'
 import { migrateSettings } from './settings/migration'
 import { KanbanMoonlightSettingTab } from './settings/settingsTab'
 import { KanbanMoonlightView, VIEW_TYPE_KANBAN } from './views/kanbanView'
@@ -12,9 +16,17 @@ import { toSafeFm, getFmStringArray } from './utils/frontmatter'
 export default class KanbanMoonlightPlugin extends Plugin {
 	settings: IKanbanSettings = DEFAULT_SETTINGS
 	private refreshTimer: number | null = null
+	private selfModifiedFiles = new Set<string>()
 
 	getActiveBoard() {
 		return getActiveBoard(this.settings)
+	}
+
+	markSelfModified(path: string) {
+		this.selfModifiedFiles.add(path)
+		window.setTimeout(() => {
+			this.selfModifiedFiles.delete(path)
+		}, 500)
 	}
 
 	async onload() {
@@ -54,15 +66,13 @@ export default class KanbanMoonlightPlugin extends Plugin {
 				}
 
 				const cache = this.app.metadataCache.getFileCache(activeFile)
-			const fm = toSafeFm(cache)
-			const board = this.getActiveBoard()
-			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
-					normalizeTag(tag).startsWith(
-						normalizeTag(board.tagNotes),
-					),
+				const fm = toSafeFm(cache)
+				const board = this.getActiveBoard()
+				const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
+					normalizeTag(tag).startsWith(normalizeTag(board.tagNotes)),
 				)
-	
-			const folder = board.folderNotes
+
+				const folder = board.folderNotes
 				const inFolder =
 					folder &&
 					activeFile.path.startsWith(
@@ -80,13 +90,14 @@ export default class KanbanMoonlightPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.metadataCache.on('changed', (file) => {
-			const cache = this.app.metadataCache.getFileCache(file)
-			const fm = toSafeFm(cache)
-			const board = this.getActiveBoard()
-			const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
-					normalizeTag(tag).startsWith(
-						normalizeTag(board.tagNotes),
-					),
+				if (this.selfModifiedFiles.has(file.path)) {
+					return
+				}
+				const cache = this.app.metadataCache.getFileCache(file)
+				const fm = toSafeFm(cache)
+				const board = this.getActiveBoard()
+				const hasTag = getFmStringArray(fm, 'tags').some((tag) =>
+					normalizeTag(tag).startsWith(normalizeTag(board.tagNotes)),
 				)
 				const folder = board.folderNotes
 				const inFolder =
@@ -97,12 +108,6 @@ export default class KanbanMoonlightPlugin extends Plugin {
 				if (hasTag || inFolder) {
 					this.refreshView()
 				}
-			}),
-		)
-
-		this.registerEvent(
-			this.app.metadataCache.on('resolve', (file) => {
-				this.refreshView()
 			}),
 		)
 
@@ -145,7 +150,7 @@ export default class KanbanMoonlightPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		const raw = await this.loadData() as Record<string, unknown> | null
+		const raw = (await this.loadData()) as Record<string, unknown> | null
 		this.settings = migrateSettings(raw)
 	}
 
