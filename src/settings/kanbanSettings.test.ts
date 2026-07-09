@@ -16,6 +16,8 @@ describe('getActiveBoard', () => {
 				{ ...DEFAULT_BOARD, id: 'board-2', name: 'Board 2' },
 			],
 			activeBoardId: 'board-2',
+			people: [],
+			peopleFolder: 'people',
 		}
 
 		const result = getActiveBoard(settings)
@@ -30,6 +32,8 @@ describe('getActiveBoard', () => {
 				{ ...DEFAULT_BOARD, id: 'board-2', name: 'Board 2' },
 			],
 			activeBoardId: 'nonexistent',
+			people: [],
+			peopleFolder: 'people',
 		}
 
 		const result = getActiveBoard(settings)
@@ -40,6 +44,8 @@ describe('getActiveBoard', () => {
 		const settings = {
 			boards: [],
 			activeBoardId: '',
+			people: [],
+			peopleFolder: 'people',
 		}
 
 		const result = getActiveBoard(settings)

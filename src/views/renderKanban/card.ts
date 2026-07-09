@@ -1,10 +1,16 @@
 import { Notice, setIcon, TFile } from 'obsidian'
-import { IColumn, ICategory } from '../../settings/kanbanSettings'
+import { IColumn, ICategory, IPerson } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { getContrastColor, normalizeTag } from './utils'
 import { DeleteConfirmModal } from '../../ui/deleteConfirmModal'
-import { toSafeFm, getFmString, getFmStringArray, getFmRecordArray } from '../../utils/frontmatter'
+import { EditTaskModal } from '../../ui/editTaskModal'
+import {
+	toSafeFm,
+	getFmString,
+	getFmStringArray,
+	getFmRecordArray,
+} from '../../utils/frontmatter'
 
 export const createCardElement = (
 	columnEl: HTMLElement,
@@ -72,10 +78,7 @@ export const createCardElement = (
 		})()
 	})
 
-	const description = getFmString(
-		fm,
-		board.propertyDescription,
-	)
+	const description = getFmString(fm, board.propertyDescription)
 
 	const descriptionShorted =
 		description.length > 55
@@ -125,6 +128,43 @@ export const createCardElement = (
 		})
 	})
 
+	const assigneeIds = getFmStringArray(
+		fm,
+		board.propertyAssignee || 'assignee',
+	)
+	const assignedPeople = view.plugin.settings.people.filter((person) =>
+		assigneeIds.includes(person.id),
+	)
+
+	const peopleContainer = tagContainer.createEl('div', {
+		cls: 'kanban-card__people',
+	})
+
+		if (assignedPeople.length > 0) {
+			assignedPeople.slice(0, 3).forEach((person: IPerson) => {
+				const avatarEl = peopleContainer.createEl('div', {
+					cls: 'kanban-person-avatar',
+					attr: {
+						style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
+						title: person.name,
+					},
+				})
+			avatarEl.textContent = person.name
+				.split(' ')
+				.map((n) => n[0])
+				.join('')
+				.toUpperCase()
+				.slice(0, 2)
+		})
+
+		if (assignedPeople.length > 3) {
+			peopleContainer.createEl('div', {
+				cls: 'kanban-person-avatar kanban-person-avatar--more',
+				text: `+${assignedPeople.length - 3}`,
+			})
+		}
+	}
+
 	const noteDate = note.stat?.mtime || note.stat?.ctime
 
 	const dd = String(new Date(noteDate).getDate()).padStart(2, '0')
@@ -144,21 +184,25 @@ export const createCardElement = (
 		cls: 'kanban-card__footer',
 	})
 
+	const btnEditAssignee = btnFooter.createEl('button', {
+		cls: 'btn-edit-assignee',
+	})
+	setIcon(btnEditAssignee, 'users')
+	btnEditAssignee.addEventListener('click', () => {
+		new EditTaskModal(view.app, view.plugin, note).open()
+	})
+
 	const isCompleted =
 		noteCache &&
 		noteCache.frontmatter &&
-		noteCache.frontmatter[board.propertyState] ===
-			board.completedColumn.id
+		noteCache.frontmatter[board.propertyState] === board.completedColumn.id
 
 	if (!isCompleted) {
 		const btnComplete = btnFooter.createEl('button', {
 			cls: 'btn-complete',
 		})
 
-		setIcon(
-			btnComplete,
-			board.completedColumn.icon || 'check',
-		)
+		setIcon(btnComplete, board.completedColumn.icon || 'check')
 
 		btnComplete.createEl('span', {
 			text: t('COMPLETE_NOTE'),
@@ -174,27 +218,27 @@ export const createCardElement = (
 				}
 
 				await view.app.fileManager.processFrontMatter(
-				file,
-				(frontmatter) => {
-					const fm = frontmatter as Record<string, unknown>
-					const today = new Date().toISOString().split('T')[0]!
-					const history = getFmRecordArray(fm, 'history')
+					file,
+					(frontmatter) => {
+						const fm = frontmatter as Record<string, unknown>
+						const today = new Date().toISOString().split('T')[0]!
+						const history = getFmRecordArray(fm, 'history')
 
-					history.push({
-						state: t('COLUMN_COMPLETED'),
-						stateId: board.completedColumn.id,
-						date: today,
-						from: columnSetting.title,
-					})
+						history.push({
+							state: t('COLUMN_COMPLETED'),
+							stateId: board.completedColumn.id,
+							date: today,
+							from: columnSetting.title,
+						})
 
-					fm['history'] = history
+						fm['history'] = history
 
-					fm[board.propertyState ?? 'state'] =
-						board.completedColumn.id
+						fm[board.propertyState ?? 'state'] =
+							board.completedColumn.id
 
-					new Notice(t('NOTICE_COMPLETED'))
-				},
-			)
+						new Notice(t('NOTICE_COMPLETED'))
+					},
+				)
 			})()
 		})
 	}

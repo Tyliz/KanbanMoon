@@ -4,6 +4,7 @@ import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { setupColumnDragDrop } from './dragDrop'
 import { createCardElement } from './card'
+import { getContrastColor } from './utils'
 
 export const createColumnElement = (
 	container: HTMLElement,
@@ -42,11 +43,13 @@ export const createColumnElement = (
 		text: `${columnSetting.title}`,
 	})
 
+	const columnColor = columnSetting.color || '#ac46ff'
+
 	headerEl.createEl('span', {
 		text: `${notes.length}`,
 		cls: 'kanban-column__color-indicator',
 		attr: {
-			style: `background-color: ${columnSetting.color || '#ac46ff'}`,
+			style: `background-color: ${columnColor}; color: ${getContrastColor(columnColor)}`,
 		},
 	})
 
