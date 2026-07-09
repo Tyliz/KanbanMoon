@@ -484,10 +484,53 @@ input.kanban-card-input:focus {
 	gap: 4px;
 }
 
+.kanban-card__footer .btn-edit-assignee {
+	flex: 0;
+	padding: 2px 6px;
+	border-radius: 4px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .kanban-card__footer .btn-complete svg,
 .kanban-card__footer .btn-delete svg {
 	width: 12px;
 	height: 12px;
+}
+
+.kanban-card__footer .btn-edit-assignee svg {
+	width: 14px;
+	height: 14px;
+}
+
+button.btn-edit-assignee {
+	background: var(--background-primary);
+	border: 1px solid var(--text-muted);
+	color: var(--text-muted);
+}
+
+button.btn-edit-assignee span {
+	color: var(--text-muted);
+}
+
+button.btn-edit-assignee svg {
+	color: var(--text-muted);
+}
+
+button.btn-edit-assignee:hover {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+button.btn-edit-assignee:hover span {
+	color: var(--text-on-accent);
+}
+
+button.btn-edit-assignee:hover svg {
+	color: var(--text-on-accent);
 }
 
 button.btn-delete {
@@ -633,4 +676,138 @@ button.btn-delete:hover svg {
 .kanban-settings-btn svg {
 	width: 18px;
 	height: 18px;
+}
+
+.kanban-person-avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	font-size: 11px;
+	font-weight: bold;
+	line-height: 1;
+	color: white;
+	flex-shrink: 0;
+}
+
+.kanban-person-avatar--more {
+	background: var(--background-modifier-border);
+	color: var(--text-muted);
+	font-size: 9px;
+}
+
+.kanban-card__persons {
+	display: flex;
+	gap: 2px;
+	align-items: center;
+	margin-left: 4px;
+}
+
+.kanban-card__persons .kanban-person-avatar {
+	margin-left: -4px;
+}
+
+.kanban-card__people .kanban-person-avatar:first-child {
+	margin-left: 0;
+}
+
+.kanban-edit-task-modal .kanban-people-list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.kanban-edit-task-modal .kanban-person-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+.kanban-edit-task-modal .kanban-person-checkbox:hover {
+	background: var(--background-modifier-hover);
+}
+
+.kanban-edit-task-modal .kanban-person-checkbox input[type='checkbox'] {
+	margin: 0;
+	cursor: pointer;
+}
+
+.kanban-edit-task-modal .kanban-person-checkbox .kanban-person-name {
+	font-size: 13px;
+	color: var(--text-normal);
+}
+
+.kanban-edit-task-empty {
+	text-align: center;
+	color: var(--text-muted);
+	font-size: 13px;
+	padding: 20px 0;
+}
+
+.kanban-edit-task-add-btn {
+	margin-bottom: 12px;
+}
+
+.kanban-people-selection {
+	margin: 8px 0;
+}
+
+.kanban-people-label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-normal);
+	margin-bottom: 8px;
+}
+
+.kanban-people-list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.kanban-person-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 8px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+.kanban-person-checkbox:hover {
+	background: var(--background-modifier-hover);
+}
+
+.kanban-person-checkbox input[type='checkbox'] {
+	margin: 0;
+	cursor: pointer;
+}
+
+.kanban-person-checkbox .kanban-person-name {
+	font-size: 13px;
+	color: var(--text-normal);
+}
+
+.kanban-person-modal .kanban-create-task-textarea {
+	width: 100%;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	color: var(--text-normal);
+	padding: 8px;
+	font-size: 13px;
+	resize: vertical;
+}
+
+.kanban-person-modal .kanban-create-task-textarea:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
 }

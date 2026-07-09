@@ -25,6 +25,14 @@ export interface ICategory {
 	icon: string
 }
 
+export interface IPerson {
+	id: string
+	name: string
+	email: string
+	color: string
+	notes: string
+}
+
 export interface IBoard {
 	id: string
 	name: string
@@ -33,6 +41,7 @@ export interface IBoard {
 	propertyState: string
 	propertyDescription: string
 	propertyCategory: string
+	propertyAssignee: string
 	columns: IColumn[]
 	categories: ICategory[]
 	completedColumn: ICompletedColumn
@@ -81,6 +90,7 @@ export const DEFAULT_BOARD: IBoard = {
 	propertyState: 'state',
 	propertyDescription: 'description',
 	propertyCategory: 'category',
+	propertyAssignee: 'assignee',
 	columns: DEFAULT_BOARD_COLUMNS,
 	categories: [],
 	completedColumn: DEFAULT_COMPLETED_COLUMN,
@@ -89,11 +99,15 @@ export const DEFAULT_BOARD: IBoard = {
 export interface IKanbanSettings {
 	boards: IBoard[]
 	activeBoardId: string
+	people: IPerson[]
+	peopleFolder: string
 }
 
 export const DEFAULT_SETTINGS: IKanbanSettings = {
 	boards: [DEFAULT_BOARD],
 	activeBoardId: 'default',
+	people: [],
+	peopleFolder: 'people',
 }
 
 export function getActiveBoard(settings: IKanbanSettings): IBoard {

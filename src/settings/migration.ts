@@ -4,6 +4,7 @@ import {
 	DEFAULT_BOARD,
 	DEFAULT_BOARD_COLUMNS,
 	DEFAULT_COMPLETED_COLUMN,
+	IPerson,
 } from './kanbanSettings'
 
 interface LegacyKanbanSettings {
@@ -39,13 +40,46 @@ export function migrateSettings(
 		return {
 			boards: [{ ...DEFAULT_BOARD }],
 			activeBoardId: 'default',
+			people: [],
+			peopleFolder: 'people',
 		}
 	}
 
 	if (isNewFormat(raw)) {
+		let people: IPerson[] = []
+		let peopleFolder = 'people'
+
+		if (Array.isArray(raw.people) && raw.people.length > 0) {
+			people = raw.people
+			peopleFolder = raw.peopleFolder || 'people'
+		} else if (Array.isArray(raw.persons) && raw.persons.length > 0) {
+			people = raw.persons as IPerson[]
+			peopleFolder = (raw.personsFolder as string) || 'people'
+		} else {
+			for (const board of raw.boards) {
+				const boardData = board as unknown as Record<string, unknown>
+				if (
+					Array.isArray(boardData.persons) &&
+					(boardData.persons as IPerson[]).length > 0
+				) {
+					people = boardData.persons as IPerson[]
+					peopleFolder = (boardData.personsFolder as string) || 'people'
+					break
+				}
+			}
+		}
+
+		const boards = raw.boards.map((board) => ({
+			...board,
+			propertyAssignee:
+				(board as unknown as Record<string, unknown>).propertyAssignee || 'assignee',
+		})) as IBoard[]
+
 		return {
-			boards: raw.boards,
+			boards,
 			activeBoardId: raw.activeBoardId,
+			people,
+			peopleFolder,
 		}
 	}
 
@@ -65,6 +99,7 @@ export function migrateSettings(
 			propertyCategory:
 				(raw.propertyCategory as string) ||
 				DEFAULT_BOARD.propertyCategory,
+			propertyAssignee: DEFAULT_BOARD.propertyAssignee,
 			columns:
 				raw.columns && raw.columns.length > 0
 					? raw.columns
@@ -78,11 +113,15 @@ export function migrateSettings(
 		return {
 			boards: [migratedBoard],
 			activeBoardId: 'default',
+			people: [],
+			peopleFolder: 'people',
 		}
 	}
 
 	return {
 		boards: [{ ...DEFAULT_BOARD }],
 		activeBoardId: 'default',
+		people: [],
+		peopleFolder: 'people',
 	}
 }

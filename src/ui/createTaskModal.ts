@@ -1,5 +1,6 @@
 import { App, Modal, Setting, Notice } from 'obsidian'
 import { t } from '../lang/helpers'
+import { getContrastColor } from '../utils/color'
 import type KanbanMoonlightPlugin from '../main'
 
 export class CreateTaskModal extends Modal {
@@ -21,6 +22,7 @@ export class CreateTaskModal extends Modal {
 		let description = ''
 		let category = ''
 		let state = board.columns[0]?.id || 'backlog'
+		let selectedPersons: string[] = []
 
 		new Setting(contentEl)
 			.setName(t('CREATE_TASK_TITLE_LABEL'))
@@ -36,8 +38,6 @@ export class CreateTaskModal extends Modal {
 					}
 				})
 			})
-
-		contentEl.createEl('hr')
 
 		const descriptionSetting = new Setting(contentEl)
 			.setName(t('CREATE_TASK_DESC_LABEL'))
@@ -56,8 +56,6 @@ export class CreateTaskModal extends Modal {
 		descriptionTextarea.addEventListener('input', () => {
 			description = descriptionTextarea.value
 		})
-
-		contentEl.createEl('hr')
 
 		new Setting(contentEl)
 			.setName(t('CREATE_TASK_CATEGORY_LABEL'))
@@ -83,7 +81,61 @@ export class CreateTaskModal extends Modal {
 				})
 			})
 
-		contentEl.createEl('hr')
+		if (this.plugin.settings.people.length > 0) {
+			const peopleSection = contentEl.createEl('div', {
+				cls: 'kanban-people-selection',
+			})
+
+			peopleSection.createEl('label', {
+				text: t('ASSIGNEE_LABEL'),
+				cls: 'kanban-people-label',
+			})
+
+			const peopleList = peopleSection.createEl('div', {
+				cls: 'kanban-people-list',
+			})
+
+			this.plugin.settings.people.forEach((person) => {
+				const personCheckbox = peopleList.createEl('div', {
+					cls: 'kanban-person-checkbox',
+				})
+
+				const checkbox = personCheckbox.createEl('input', {
+					attr: {
+						type: 'checkbox',
+						value: person.id,
+					},
+				})
+
+				const avatarEl = personCheckbox.createEl('div', {
+					cls: 'kanban-person-avatar',
+					attr: {
+						style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
+					},
+				})
+				avatarEl.textContent = person.name
+					.split(' ')
+					.map((n) => n[0])
+					.join('')
+					.toUpperCase()
+					.slice(0, 2)
+
+				personCheckbox.createEl('span', {
+					text: person.name,
+					cls: 'kanban-person-name',
+				})
+
+				checkbox.addEventListener('change', () => {
+					if (checkbox.checked) {
+						selectedPersons.push(person.id)
+					} else {
+						selectedPersons = selectedPersons.filter(
+							(id) => id !== person.id,
+						)
+					}
+				})
+			})
+		}
 
 		const createTask = async () => {
 			if (!title.trim()) {
@@ -129,29 +181,23 @@ export class CreateTaskModal extends Modal {
 					file,
 					(frontmatter) => {
 						const fm = frontmatter as Record<string, unknown>
-						const tagValue = board.tagNotes.replace(
-							'#',
-							'',
-						)
+						const tagValue = board.tagNotes.replace('#', '')
 						fm['tags'] = [tagValue]
-						const stateKey =
-							board.propertyState || 'state'
+						const stateKey = board.propertyState || 'state'
 						fm[stateKey] = state
 						if (description.trim()) {
-							fm[
-								board.propertyDescription ||
-									'description'
-							] = description.trim()
+							fm[board.propertyDescription || 'description'] =
+								description.trim()
 						}
 						if (category.trim()) {
-							fm[
-								board.propertyCategory ||
-									'category'
-							] = category.trim()
+							fm[board.propertyCategory || 'category'] =
+								category.trim()
 						}
-						const column = board.columns.find(
-							(c) => c.id === state,
-						)
+						if (selectedPersons.length > 0) {
+							fm[board.propertyAssignee || 'assignee'] =
+								selectedPersons
+						}
+						const column = board.columns.find((c) => c.id === state)
 						const today = new Date().toISOString().split('T')[0]
 						fm['history'] = [
 							{
