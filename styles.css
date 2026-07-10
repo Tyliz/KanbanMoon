@@ -1204,6 +1204,10 @@ button.btn-delete:hover svg {
 	font-weight: 600;
 }
 
+.gantt-timeline-cell--small.gantt-timeline-cell--today {
+	color: var(--text-on-accent);
+}
+
 .gantt-timeline-cell--small {
 	font-size: 10px;
 	color: var(--text-faint);

@@ -1,6 +1,7 @@
 import { TFile, App } from 'obsidian'
 import { t } from '../lang/helpers'
 import { GanttZoom, IBoard } from '../settings/kanbanSettings'
+import { getContrastColor } from '../utils/color'
 
 interface GanttTask {
 	note: TFile
@@ -358,7 +359,50 @@ function renderTimelineHeader(
 			})
 		})
 	} else {
-		const row = container.createEl('div', {
+		const months = new Map<
+			string,
+			{ startIdx: number; endIdx: number; label: string }
+		>()
+
+		columns.forEach((col, idx) => {
+			const key = `${col.date.getFullYear()}-${col.date.getMonth()}`
+			const existing = months.get(key)
+			if (existing) {
+				existing.endIdx = idx
+			} else {
+				months.set(key, {
+					startIdx: idx,
+					endIdx: idx,
+					label: col.date.toLocaleDateString(undefined, {
+						month: 'long',
+						year: 'numeric',
+					}),
+				})
+			}
+		})
+
+		const row1 = container.createEl('div', {
+			cls: 'gantt-timeline-row',
+			attr: {
+				style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
+			},
+		})
+
+		months.forEach(({ startIdx, endIdx, label }) => {
+			const daysInMonth = endIdx - startIdx + 1
+			const cellWidth = (daysInMonth / totalDays) * 100
+			const cell = row1.createEl('div', {
+				cls: 'gantt-timeline-cell',
+				text: label,
+				attr: { style: `width: ${cellWidth}%;` },
+			})
+			const midIdx = Math.floor((startIdx + endIdx) / 2)
+			if (columns[midIdx] && isToday(columns[midIdx].date)) {
+				cell.classList.add('gantt-timeline-cell--today')
+			}
+		})
+
+		const row2 = container.createEl('div', {
 			cls: 'gantt-timeline-row',
 			attr: {
 				style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -370,13 +414,9 @@ function renderTimelineHeader(
 			const today = isToday(col.date)
 			const isSun = col.date.getDay() === 0
 			const isSat = col.date.getDay() === 6
-			const isFirst = col.date.getDate() === 1
-			const label = isFirst
-				? col.date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
-				: `${col.date.getDate()}`
-			row.createEl('div', {
-				cls: `gantt-timeline-cell${isSun || isSat ? ' gantt-timeline-cell--weekend' : ''}${today ? ' gantt-timeline-cell--today' : ''}`,
-				text: label,
+			row2.createEl('div', {
+				cls: `gantt-timeline-cell gantt-timeline-cell--small${isSun || isSat ? ' gantt-timeline-cell--weekend' : ''}${today ? ' gantt-timeline-cell--today' : ''}`,
+				text: `${col.date.getDate()}`,
 				attr: { style: `width: ${cellWidth}%;` },
 			})
 		})
@@ -552,9 +592,11 @@ export function renderGantt(
 		})
 
 		if (barWidth > 60) {
+			const textColor = getContrastColor(task.color)
 			bar.createEl('span', {
 				cls: 'gantt-bar-label',
 				text: task.title,
+				attr: { style: `color: ${textColor};` },
 			})
 		}
 	})
