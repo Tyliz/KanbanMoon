@@ -221,17 +221,11 @@ function renderTimelineHeader(
 	container: HTMLElement,
 	columns: TimelineColumn[],
 	totalDays: number,
+	totalWidthPx: number,
+	zoom: GanttZoom,
 ): void {
-	const totalWidthPx = totalDays
 
 	if (columns.length === 0) return
-
-	const zoom: GanttZoom =
-		columns.length > 100
-			? GanttZoom.day
-			: columns.length > 30
-				? GanttZoom.week
-				: GanttZoom.month
 
 	if (zoom === GanttZoom.month) {
 		const months = new Map<
@@ -285,19 +279,26 @@ function renderTimelineHeader(
 		})
 
 		columns.forEach((col) => {
-			const cellWidth = (col.widthDays / totalDays) * 100
-			const firstDayOfMonth = new Date(
-				col.date.getFullYear(),
-				col.date.getMonth(),
-				1,
-			)
-			const dayOfWeek = firstDayOfMonth.getDay()
-			const weekNum = Math.ceil((col.date.getDate() + dayOfWeek) / 7)
-			row2.createEl('div', {
-				cls: 'gantt-timeline-cell gantt-timeline-cell--small',
-				text: `S${weekNum}`,
-				attr: { style: `width: ${cellWidth}%;` },
-			})
+			const monthStart = col.date
+			const monthEnd = getMonthEnd(monthStart)
+			let weekStart = new Date(monthStart)
+
+			while (weekStart <= monthEnd) {
+				const weekEnd = addDays(weekStart, 6)
+				const actualEnd = weekEnd > monthEnd ? monthEnd : weekEnd
+				const startDay = weekStart.getDate()
+				const endDay = actualEnd.getDate()
+				const daysInWeek = daysBetween(weekStart, actualEnd) + 1
+				const cellWidth = (daysInWeek / totalDays) * 100
+
+				row2.createEl('div', {
+					cls: 'gantt-timeline-cell gantt-timeline-cell--small',
+					text: `${startDay}-${endDay}`,
+					attr: { style: `width: ${cellWidth}%;` },
+				})
+
+				weekStart = addDays(actualEnd, 1)
+			}
 		})
 	} else if (zoom === GanttZoom.week) {
 		const row1 = container.createEl('div', {
@@ -367,9 +368,15 @@ function renderTimelineHeader(
 		columns.forEach((col) => {
 			const cellWidth = (1 / totalDays) * 100
 			const today = isToday(col.date)
+			const isSun = col.date.getDay() === 0
+			const isSat = col.date.getDay() === 6
+			const isFirst = col.date.getDate() === 1
+			const label = isFirst
+				? col.date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+				: `${col.date.getDate()}`
 			row.createEl('div', {
-				cls: `gantt-timeline-cell gantt-timeline-cell--small${isWeekend(col.date) ? ' gantt-timeline-cell--weekend' : ''}${today ? ' gantt-timeline-cell--today' : ''}`,
-				text: `${col.date.getDate()}`,
+				cls: `gantt-timeline-cell${isSun || isSat ? ' gantt-timeline-cell--weekend' : ''}${today ? ' gantt-timeline-cell--today' : ''}`,
+				text: label,
 				attr: { style: `width: ${cellWidth}%;` },
 			})
 		})
@@ -483,6 +490,8 @@ export function renderGantt(
 			timelineHeaderEl as HTMLElement,
 			columns,
 			totalDays,
+			totalWidthPx,
+			config.zoom,
 		)
 	}
 
