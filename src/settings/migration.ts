@@ -5,6 +5,8 @@ import {
 	DEFAULT_BOARD_COLUMNS,
 	DEFAULT_COMPLETED_COLUMN,
 	IPerson,
+	ViewType,
+	GanttZoom,
 } from './kanbanSettings'
 
 interface LegacyKanbanSettings {
@@ -42,6 +44,11 @@ export function migrateSettings(
 			activeBoardId: 'default',
 			people: [],
 			peopleFolder: 'people',
+			historyEnabled: true,
+			maxHistoryEvents: 50,
+			globalHistoryLimit: 20,
+			defaultView: ViewType.kanban,
+			ganttZoom: GanttZoom.week,
 		}
 	}
 
@@ -73,6 +80,10 @@ export function migrateSettings(
 			...board,
 			propertyAssignee:
 				(board as unknown as Record<string, unknown>).propertyAssignee || 'assignee',
+			propertyStartDate:
+				(board as unknown as Record<string, unknown>).propertyStartDate || 'startDate',
+			propertyDueDate:
+				(board as unknown as Record<string, unknown>).propertyDueDate || 'dueDate',
 		})) as IBoard[]
 
 		return {
@@ -80,6 +91,26 @@ export function migrateSettings(
 			activeBoardId: raw.activeBoardId,
 			people,
 			peopleFolder,
+			historyEnabled:
+				typeof raw.historyEnabled === 'boolean'
+					? raw.historyEnabled
+					: true,
+			maxHistoryEvents:
+				typeof raw.maxHistoryEvents === 'number'
+					? raw.maxHistoryEvents
+					: 50,
+			globalHistoryLimit:
+				typeof raw.globalHistoryLimit === 'number'
+					? raw.globalHistoryLimit
+					: 20,
+			defaultView:
+				typeof raw.defaultView === 'string' && Object.values(ViewType).includes(raw.defaultView as ViewType)
+					? raw.defaultView as ViewType
+					: ViewType.kanban,
+			ganttZoom:
+				typeof raw.ganttZoom === 'string' && Object.values(GanttZoom).includes(raw.ganttZoom as GanttZoom)
+					? raw.ganttZoom as GanttZoom
+					: GanttZoom.week,
 		}
 	}
 
@@ -100,6 +131,8 @@ export function migrateSettings(
 				(raw.propertyCategory as string) ||
 				DEFAULT_BOARD.propertyCategory,
 			propertyAssignee: DEFAULT_BOARD.propertyAssignee,
+			propertyStartDate: DEFAULT_BOARD.propertyStartDate,
+			propertyDueDate: DEFAULT_BOARD.propertyDueDate,
 			columns:
 				raw.columns && raw.columns.length > 0
 					? raw.columns
@@ -115,6 +148,11 @@ export function migrateSettings(
 			activeBoardId: 'default',
 			people: [],
 			peopleFolder: 'people',
+			historyEnabled: true,
+			maxHistoryEvents: 50,
+			globalHistoryLimit: 20,
+			defaultView: ViewType.kanban,
+			ganttZoom: GanttZoom.week,
 		}
 	}
 
@@ -123,5 +161,10 @@ export function migrateSettings(
 		activeBoardId: 'default',
 		people: [],
 		peopleFolder: 'people',
+		historyEnabled: true,
+		maxHistoryEvents: 50,
+		globalHistoryLimit: 20,
+		defaultView: ViewType.kanban,
+		ganttZoom: GanttZoom.week,
 	}
 }

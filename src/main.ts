@@ -132,7 +132,7 @@ export default class KanbanMoonlightPlugin extends Plugin {
 				.getLeavesOfType(VIEW_TYPE_KANBAN)
 				.forEach((leaf) => {
 					if (leaf.view instanceof KanbanMoonlightView) {
-						leaf.view.drawKanbanBoard()
+						leaf.view.drawCurrentView()
 					}
 				})
 		}, 100)

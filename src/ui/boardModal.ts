@@ -145,6 +145,8 @@ export class BoardModal extends Modal {
 				propertyDescription: 'description',
 				propertyCategory: 'category',
 				propertyAssignee: 'assignee',
+				propertyStartDate: 'startDate',
+				propertyDueDate: 'dueDate',
 				columns: [
 					{
 						id: 'backlog',
