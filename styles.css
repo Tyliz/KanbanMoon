@@ -649,6 +649,34 @@ button.btn-delete:hover svg {
 	flex: 1;
 }
 
+.kanban-radio-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+.kanban-radio-item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 13px;
+	color: var(--text-normal);
+	transition: background 0.15s ease;
+}
+
+.kanban-radio-item:hover {
+	background: var(--background-modifier-hover);
+}
+
+.kanban-radio-item input[type="radio"] {
+	margin: 0;
+	accent-color: var(--interactive-accent);
+}
+
 .kanban-settings-btn {
 	position: absolute;
 	bottom: 40px;
@@ -825,7 +853,9 @@ button.btn-delete:hover svg {
 	border-radius: 4px;
 	font-size: 11px;
 	flex: 0;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
 }
 
 .btn-history:hover {
@@ -1046,7 +1076,9 @@ button.btn-delete:hover svg {
 	border-radius: 6px;
 	font-size: 13px;
 	font-weight: 500;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
 }
 
 .kanban-view-tab:hover {
@@ -1097,7 +1129,9 @@ button.btn-delete:hover svg {
 	cursor: pointer;
 	border-radius: 4px;
 	font-size: 12px;
-	transition: background 0.15s ease, color 0.15s ease;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
 }
 
 .gantt-zoom-btn:hover {
@@ -1279,7 +1313,9 @@ button.btn-delete:hover svg {
 	min-width: 8px;
 	opacity: 0.9;
 	cursor: pointer;
-	transition: opacity 0.15s ease, transform 0.1s ease;
+	transition:
+		opacity 0.15s ease,
+		transform 0.1s ease;
 	display: flex;
 	align-items: center;
 	padding: 0 6px;

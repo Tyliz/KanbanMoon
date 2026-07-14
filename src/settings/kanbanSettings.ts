@@ -47,6 +47,7 @@ export interface IBoard {
 	columns: IColumn[]
 	categories: ICategory[]
 	completedColumn: ICompletedColumn
+	startColumnId: string
 }
 
 export const DEFAULT_BOARD_COLUMNS: IColumn[] = [
@@ -98,6 +99,7 @@ export const DEFAULT_BOARD: IBoard = {
 	columns: DEFAULT_BOARD_COLUMNS,
 	categories: [],
 	completedColumn: DEFAULT_COMPLETED_COLUMN,
+	startColumnId: 'workingOn',
 }
 
 export enum ViewType {

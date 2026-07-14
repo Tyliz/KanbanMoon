@@ -76,15 +76,29 @@ export function migrateSettings(
 			}
 		}
 
-		const boards = raw.boards.map((board) => ({
-			...board,
-			propertyAssignee:
-				(board as unknown as Record<string, unknown>).propertyAssignee || 'assignee',
-			propertyStartDate:
-				(board as unknown as Record<string, unknown>).propertyStartDate || 'startDate',
-			propertyDueDate:
-				(board as unknown as Record<string, unknown>).propertyDueDate || 'dueDate',
-		})) as IBoard[]
+		const boards = raw.boards.map((board) => {
+			const boardData = board as unknown as Record<string, unknown>
+			const existingStartCol = boardData.startColumnId
+			let startColumnId: string
+			if (existingStartCol && typeof existingStartCol === 'string') {
+				startColumnId = existingStartCol
+			} else {
+				const cols = boardData.columns as Array<{ id: string }> | undefined
+				const hasWorkingOn = Array.isArray(cols) &&
+					cols.some((c) => c.id === 'workingOn')
+				startColumnId = hasWorkingOn ? 'workingOn' : (cols?.[0]?.id) || 'backlog'
+			}
+			return {
+				...board,
+				propertyAssignee:
+					boardData.propertyAssignee || 'assignee',
+				propertyStartDate:
+					boardData.propertyStartDate || 'startDate',
+				propertyDueDate:
+					boardData.propertyDueDate || 'dueDate',
+				startColumnId,
+			}
+		}) as IBoard[]
 
 		return {
 			boards,
@@ -141,6 +155,7 @@ export function migrateSettings(
 			completedColumn:
 				raw.completedColumn ||
 				DEFAULT_COMPLETED_COLUMN,
+			startColumnId: DEFAULT_BOARD.startColumnId,
 		}
 
 		return {
