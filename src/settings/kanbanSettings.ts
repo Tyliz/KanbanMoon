@@ -42,9 +42,12 @@ export interface IBoard {
 	propertyDescription: string
 	propertyCategory: string
 	propertyAssignee: string
+	propertyStartDate: string
+	propertyDueDate: string
 	columns: IColumn[]
 	categories: ICategory[]
 	completedColumn: ICompletedColumn
+	startColumnId: string
 }
 
 export const DEFAULT_BOARD_COLUMNS: IColumn[] = [
@@ -91,9 +94,24 @@ export const DEFAULT_BOARD: IBoard = {
 	propertyDescription: 'description',
 	propertyCategory: 'category',
 	propertyAssignee: 'assignee',
+	propertyStartDate: 'startDate',
+	propertyDueDate: 'dueDate',
 	columns: DEFAULT_BOARD_COLUMNS,
 	categories: [],
 	completedColumn: DEFAULT_COMPLETED_COLUMN,
+	startColumnId: 'workingOn',
+}
+
+export enum ViewType {
+	kanban = 'kanban',
+	gantt = 'gantt',
+	dashboard = 'dashboard',
+}
+
+export enum GanttZoom {
+	day = 'day',
+	week = 'week',
+	month = 'month',
 }
 
 export interface IKanbanSettings {
@@ -101,6 +119,11 @@ export interface IKanbanSettings {
 	activeBoardId: string
 	people: IPerson[]
 	peopleFolder: string
+	historyEnabled: boolean
+	maxHistoryEvents: number
+	globalHistoryLimit: number
+	defaultView: ViewType
+	ganttZoom: GanttZoom
 }
 
 export const DEFAULT_SETTINGS: IKanbanSettings = {
@@ -108,6 +131,11 @@ export const DEFAULT_SETTINGS: IKanbanSettings = {
 	activeBoardId: 'default',
 	people: [],
 	peopleFolder: 'people',
+	historyEnabled: true,
+	maxHistoryEvents: 50,
+	globalHistoryLimit: 20,
+	defaultView: ViewType.kanban,
+	ganttZoom: GanttZoom.week,
 }
 
 export function getActiveBoard(settings: IKanbanSettings): IBoard {

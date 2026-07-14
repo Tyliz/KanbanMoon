@@ -5,6 +5,7 @@ import { toSafeFm, getFmStringArray } from '../utils/frontmatter'
 import { PersonModal } from './boardModal'
 import { getContrastColor } from '../utils/color'
 import { IPerson } from '../settings/kanbanSettings'
+import { pushHistoryEvent, getToday } from '../utils/history'
 
 export class EditTaskModal extends Modal {
 	plugin: KanbanMoonlightPlugin
@@ -146,6 +147,31 @@ export class EditTaskModal extends Modal {
 					const fm = frontmatter as Record<string, unknown>
 					const board = this.plugin.getActiveBoard()
 					const key = board.propertyAssignee || 'assignee'
+
+					const previousAssignees = getFmStringArray(
+						fm,
+						key,
+					)
+
+					const added = personIds.filter(
+						(id) => !previousAssignees.includes(id),
+					)
+					const removed = previousAssignees.filter(
+						(id) => !personIds.includes(id),
+					)
+
+					if (added.length > 0 || removed.length > 0) {
+						pushHistoryEvent(
+							fm,
+							{
+								type: 'assignee_changed',
+								date: getToday(),
+								added,
+								removed,
+							},
+							this.plugin.settings.maxHistoryEvents,
+						)
+					}
 
 					if (personIds.length > 0) {
 						fm[key] = personIds

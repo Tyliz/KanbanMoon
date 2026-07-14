@@ -30,6 +30,7 @@ export class BoardModal extends Modal {
 		let name = board?.name || `Board ${boards.length + 1}`
 		let tagNotes = board?.tagNotes || ''
 		let folderNotes = board?.folderNotes || ''
+		let startColumnId = board?.startColumnId || 'workingOn'
 
 		new Setting(contentEl)
 			.setName(t('BOARD_NAME_LABEL'))
@@ -67,6 +68,48 @@ export class BoardModal extends Modal {
 					}),
 			)
 
+		const allColumns = board
+			? [...board.columns, board.completedColumn]
+			: [
+					{ id: 'backlog', title: t('COLUMN_BACKLOG') },
+					{ id: 'todo', title: t('COLUMN_TODO') },
+					{ id: 'workingOn', title: t('COLUMN_WORKING_ON') },
+					{ id: 'review', title: t('COLUMN_REVIEW') },
+					{ id: 'completed', title: t('COLUMN_COMPLETED') },
+				]
+
+		const startColumnSetting = new Setting(contentEl)
+			.setName(t('START_COLUMN_LABEL'))
+			.setDesc(t('START_COLUMN_DESC'))
+
+		const radioGroup = startColumnSetting.settingEl.createEl('div', {
+			cls: 'kanban-radio-group',
+		})
+
+		allColumns.forEach((col) => {
+			const radioItem = radioGroup.createEl('label', {
+				cls: 'kanban-radio-item',
+			})
+
+			const radio = radioItem.createEl('input', {
+				attr: {
+					type: 'radio',
+					name: 'startColumn',
+					value: col.id,
+				},
+			})
+
+			if (startColumnId === col.id) {
+				radio.checked = true
+			}
+
+			radio.addEventListener('change', () => {
+				startColumnId = col.id
+			})
+
+			radioItem.createEl('span', { text: col.title })
+		})
+
 		const footerEl = contentEl.createEl('div', {
 			cls: 'kanban-board-modal-footer',
 		})
@@ -101,6 +144,7 @@ export class BoardModal extends Modal {
 				name,
 				tagNotes,
 				folderNotes,
+				startColumnId,
 			})
 		})
 	}
@@ -122,6 +166,7 @@ export class BoardModal extends Modal {
 		name: string
 		tagNotes: string
 		folderNotes: string
+		startColumnId: string
 	}) {
 		if (!data.name.trim()) {
 			new Notice(t('BOARD_MODAL_ERROR_NAME'))
@@ -145,6 +190,8 @@ export class BoardModal extends Modal {
 				propertyDescription: 'description',
 				propertyCategory: 'category',
 				propertyAssignee: 'assignee',
+				propertyStartDate: 'startDate',
+				propertyDueDate: 'dueDate',
 				columns: [
 					{
 						id: 'backlog',
@@ -179,6 +226,7 @@ export class BoardModal extends Modal {
 					color: '#27ae60',
 					limitDate: 1,
 				},
+				startColumnId: data.startColumnId,
 			}
 			boards.push(newBoard)
 			this.plugin.settings.activeBoardId = newBoard.id
@@ -189,6 +237,7 @@ export class BoardModal extends Modal {
 				existing.name = data.name.trim()
 				existing.tagNotes = data.tagNotes.trim()
 				existing.folderNotes = data.folderNotes.trim()
+				existing.startColumnId = data.startColumnId
 				new Notice(t('BOARD_MODAL_SAVED'))
 			}
 		}

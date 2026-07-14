@@ -2,6 +2,8 @@ import { App, Modal, Setting, Notice } from 'obsidian'
 import { t } from '../lang/helpers'
 import { getContrastColor } from '../utils/color'
 import type KanbanMoonlightPlugin from '../main'
+import type { HistoryEventCreated } from '../types/history'
+import { getToday } from '../utils/history'
 
 export class CreateTaskModal extends Modal {
 	plugin: KanbanMoonlightPlugin
@@ -198,15 +200,12 @@ export class CreateTaskModal extends Modal {
 								selectedPersons
 						}
 						const column = board.columns.find((c) => c.id === state)
-						const today = new Date().toISOString().split('T')[0]
-						fm['history'] = [
-							{
-								state: column?.title || state,
-								stateId: state,
-								date: today,
-								from: '',
-							},
-						]
+						const createdEvent: HistoryEventCreated = {
+							type: 'created',
+							date: getToday(),
+							column: column?.title || state,
+						}
+						fm['history'] = [createdEvent]
 					},
 				)
 				new Notice(t('CREATE_TASK_SUCCESS'))

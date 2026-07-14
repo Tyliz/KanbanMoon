@@ -5,12 +5,13 @@ import { KanbanMoonlightView } from '../kanbanView'
 import { getContrastColor, normalizeTag } from './utils'
 import { DeleteConfirmModal } from '../../ui/deleteConfirmModal'
 import { EditTaskModal } from '../../ui/editTaskModal'
+import { HistoryModal } from '../../ui/historyModal'
 import {
 	toSafeFm,
 	getFmString,
 	getFmStringArray,
-	getFmRecordArray,
 } from '../../utils/frontmatter'
+import { pushHistoryEvent, getToday } from '../../utils/history'
 
 export const createCardElement = (
 	columnEl: HTMLElement,
@@ -184,6 +185,14 @@ export const createCardElement = (
 		cls: 'kanban-card__footer',
 	})
 
+	const btnHistory = btnFooter.createEl('button', {
+		cls: 'btn-history',
+	})
+	setIcon(btnHistory, 'history')
+	btnHistory.addEventListener('click', () => {
+		new HistoryModal(view.app, view.plugin, note).open()
+	})
+
 	const btnEditAssignee = btnFooter.createEl('button', {
 		cls: 'btn-edit-assignee',
 	})
@@ -221,17 +230,17 @@ export const createCardElement = (
 					file,
 					(frontmatter) => {
 						const fm = frontmatter as Record<string, unknown>
-						const today = new Date().toISOString().split('T')[0]!
-						const history = getFmRecordArray(fm, 'history')
 
-						history.push({
-							state: t('COLUMN_COMPLETED'),
-							stateId: board.completedColumn.id,
-							date: today,
-							from: columnSetting.title,
-						})
-
-						fm['history'] = history
+						pushHistoryEvent(
+							fm,
+							{
+								type: 'state_changed',
+								date: getToday(),
+								from: columnSetting.title,
+								to: t('COLUMN_COMPLETED'),
+							},
+							view.plugin.settings.maxHistoryEvents,
+						)
 
 						fm[board.propertyState ?? 'state'] =
 							board.completedColumn.id
