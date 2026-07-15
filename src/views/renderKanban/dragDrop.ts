@@ -2,7 +2,8 @@ import { Notice, TFile } from 'obsidian'
 import { IColumn } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
-import { getFmString, getFmRecordArray } from '../../utils/frontmatter'
+import { getFmString } from '../../utils/frontmatter'
+import { pushHistoryEvent, getToday } from '../../utils/history'
 
 export const setupColumnDragDrop = (
 	columnEl: HTMLElement,
@@ -88,17 +89,17 @@ export const setupColumnDragDrop = (
 
 						if (lastStateId === columnSetting.id) return
 
-						const date = new Date().toISOString().split('T')[0]!
-						const history = getFmRecordArray(fm, 'history')
+						pushHistoryEvent(
+							fm,
+							{
+								type: 'state_changed',
+								date: getToday(),
+								from: lastStateTitle,
+								to: columnSetting.title,
+							},
+							view.plugin.settings.maxHistoryEvents,
+						)
 
-						history.push({
-							state: columnSetting.title,
-							stateId: columnSetting.id,
-							date,
-							from: lastStateTitle,
-						})
-
-						fm['history'] = history
 						fm[board.propertyState] =
 							columnSetting.id
 
