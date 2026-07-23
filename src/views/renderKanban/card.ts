@@ -79,6 +79,20 @@ export const createCardElement = (
 		})()
 	})
 
+	const externalLink = getFmString(fm, 'externalLink')
+	if (externalLink) {
+		const btnExternalLink = cardHeaderEl.createEl('a', {
+			cls: 'kanban-card__external-link',
+			attr: {
+				href: externalLink,
+				target: '_blank',
+				rel: 'noopener noreferrer',
+				title: externalLink,
+			},
+		})
+		setIcon(btnExternalLink, 'link')
+	}
+
 	const description = getFmString(fm, board.propertyDescription)
 
 	const descriptionShorted =
@@ -141,15 +155,15 @@ export const createCardElement = (
 		cls: 'kanban-card__people',
 	})
 
-		if (assignedPeople.length > 0) {
-			assignedPeople.slice(0, 3).forEach((person: IPerson) => {
-				const avatarEl = peopleContainer.createEl('div', {
-					cls: 'kanban-person-avatar',
-					attr: {
-						style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
-						title: person.name,
-					},
-				})
+	if (assignedPeople.length > 0) {
+		assignedPeople.slice(0, 3).forEach((person: IPerson) => {
+			const avatarEl = peopleContainer.createEl('div', {
+				cls: 'kanban-person-avatar',
+				attr: {
+					style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
+					title: person.name,
+				},
+			})
 			avatarEl.textContent = person.name
 				.split(' ')
 				.map((n) => n[0])

@@ -206,6 +206,25 @@ a.kanban-card__title.internal-link {
 	cursor: pointer;
 }
 
+.kanban-card__external-link {
+	display: inline-flex;
+	align-items: center;
+	color: var(--text-muted);
+	cursor: pointer;
+	padding: 2px;
+	border-radius: 4px;
+	flex-shrink: 0;
+}
+
+.kanban-card__external-link:hover {
+	color: var(--interactive-accent);
+}
+
+.kanban-card__external-link svg {
+	width: 12px;
+	height: 12px;
+}
+
 .kanban-card__description {
 	font-size: 11px;
 	color: var(--text-muted);
