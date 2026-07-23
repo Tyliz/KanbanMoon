@@ -1,7 +1,7 @@
 import { App, Modal, Setting, Notice, setIcon } from 'obsidian'
 import { t } from '../lang/helpers'
 import type KanbanMoonlightPlugin from '../main'
-import { IBoard } from '../settings/kanbanSettings'
+import { IBoard, IPerson } from '../settings/kanbanSettings'
 
 export class BoardModal extends Modal {
 	plugin: KanbanMoonlightPlugin
@@ -30,6 +30,7 @@ export class BoardModal extends Modal {
 		let name = board?.name || `Board ${boards.length + 1}`
 		let tagNotes = board?.tagNotes || ''
 		let folderNotes = board?.folderNotes || ''
+		let startColumnId = board?.startColumnId || 'workingOn'
 
 		new Setting(contentEl)
 			.setName(t('BOARD_NAME_LABEL'))
@@ -42,8 +43,6 @@ export class BoardModal extends Modal {
 						name = value
 					}),
 			)
-
-		contentEl.createEl('hr')
 
 		new Setting(contentEl)
 			.setName(t('BOARD_TAG_LABEL'))
@@ -69,7 +68,47 @@ export class BoardModal extends Modal {
 					}),
 			)
 
-		contentEl.createEl('hr')
+		const allColumns = board
+			? [...board.columns, board.completedColumn]
+			: [
+					{ id: 'backlog', title: t('COLUMN_BACKLOG') },
+					{ id: 'todo', title: t('COLUMN_TODO') },
+					{ id: 'workingOn', title: t('COLUMN_WORKING_ON') },
+					{ id: 'review', title: t('COLUMN_REVIEW') },
+					{ id: 'completed', title: t('COLUMN_COMPLETED') },
+				]
+
+		const startColumnSetting = new Setting(contentEl)
+			.setName(t('START_COLUMN_LABEL'))
+			.setDesc(t('START_COLUMN_DESC'))
+
+		const radioGroup = startColumnSetting.settingEl.createEl('div', {
+			cls: 'kanban-radio-group',
+		})
+
+		allColumns.forEach((col) => {
+			const radioItem = radioGroup.createEl('label', {
+				cls: 'kanban-radio-item',
+			})
+
+			const radio = radioItem.createEl('input', {
+				attr: {
+					type: 'radio',
+					name: 'startColumn',
+					value: col.id,
+				},
+			})
+
+			if (startColumnId === col.id) {
+				radio.checked = true
+			}
+
+			radio.addEventListener('change', () => {
+				startColumnId = col.id
+			})
+
+			radioItem.createEl('span', { text: col.title })
+		})
 
 		const footerEl = contentEl.createEl('div', {
 			cls: 'kanban-board-modal-footer',
@@ -105,6 +144,7 @@ export class BoardModal extends Modal {
 				name,
 				tagNotes,
 				folderNotes,
+				startColumnId,
 			})
 		})
 	}
@@ -126,6 +166,7 @@ export class BoardModal extends Modal {
 		name: string
 		tagNotes: string
 		folderNotes: string
+		startColumnId: string
 	}) {
 		if (!data.name.trim()) {
 			new Notice(t('BOARD_MODAL_ERROR_NAME'))
@@ -148,11 +189,34 @@ export class BoardModal extends Modal {
 				propertyState: 'state',
 				propertyDescription: 'description',
 				propertyCategory: 'category',
+				propertyAssignee: 'assignee',
+				propertyStartDate: 'startDate',
+				propertyDueDate: 'dueDate',
 				columns: [
-					{ id: 'backlog', icon: 'inbox', title: t('COLUMN_BACKLOG'), color: '#ac46ff' },
-					{ id: 'todo', icon: 'clipboard-list', title: t('COLUMN_TODO'), color: '#3498db' },
-					{ id: 'workingOn', icon: 'cog', title: t('COLUMN_WORKING_ON'), color: '#00a8ff' },
-					{ id: 'review', icon: 'eye', title: t('COLUMN_REVIEW'), color: '#f39c12' },
+					{
+						id: 'backlog',
+						icon: 'inbox',
+						title: t('COLUMN_BACKLOG'),
+						color: '#ac46ff',
+					},
+					{
+						id: 'todo',
+						icon: 'clipboard-list',
+						title: t('COLUMN_TODO'),
+						color: '#3498db',
+					},
+					{
+						id: 'workingOn',
+						icon: 'cog',
+						title: t('COLUMN_WORKING_ON'),
+						color: '#00a8ff',
+					},
+					{
+						id: 'review',
+						icon: 'eye',
+						title: t('COLUMN_REVIEW'),
+						color: '#f39c12',
+					},
 				],
 				categories: [],
 				completedColumn: {
@@ -162,6 +226,7 @@ export class BoardModal extends Modal {
 					color: '#27ae60',
 					limitDate: 1,
 				},
+				startColumnId: data.startColumnId,
 			}
 			boards.push(newBoard)
 			this.plugin.settings.activeBoardId = newBoard.id
@@ -172,6 +237,7 @@ export class BoardModal extends Modal {
 				existing.name = data.name.trim()
 				existing.tagNotes = data.tagNotes.trim()
 				existing.folderNotes = data.folderNotes.trim()
+				existing.startColumnId = data.startColumnId
 				new Notice(t('BOARD_MODAL_SAVED'))
 			}
 		}
@@ -199,7 +265,8 @@ export class BoardModal extends Modal {
 				boards.splice(index, 1)
 
 				if (this.plugin.settings.activeBoardId === boardId) {
-					this.plugin.settings.activeBoardId = boards[0]?.id || 'default'
+					this.plugin.settings.activeBoardId =
+						boards[0]?.id || 'default'
 				}
 
 				await this.plugin.saveSettings()
@@ -258,6 +325,173 @@ class DeleteBoardConfirmModal extends Modal {
 					this.close()
 				})
 			})
+	}
+
+	onClose() {
+		const { contentEl } = this
+		contentEl.empty()
+	}
+}
+
+export class PersonModal extends Modal {
+	plugin: KanbanMoonlightPlugin
+	person: IPerson | null
+	peopleFolder: string
+	onSave: (person: IPerson) => void
+
+	constructor(
+		app: App,
+		plugin: KanbanMoonlightPlugin,
+		person: IPerson | null,
+		peopleFolder: string,
+		onSave: (person: IPerson) => void,
+	) {
+		super(app)
+		this.plugin = plugin
+		this.person = person
+		this.peopleFolder = peopleFolder
+		this.onSave = onSave
+	}
+
+	async onOpen() {
+		const { contentEl } = this
+		contentEl.empty()
+		contentEl.addClass('kanban-person-modal')
+
+		this.titleEl.setText(
+			this.person ? t('PERSON_UPDATED') : t('PERSON_CREATED'),
+		)
+
+		let name = this.person?.name || ''
+		let email = this.person?.email || ''
+		let color = this.person?.color || '#3498db'
+		let notes = this.person?.notes || ''
+
+		new Setting(contentEl).setName(t('PERSON_NAME')).addText((text) =>
+			text
+				.setPlaceholder(t('PERSON_NAME_PLACEHOLDER'))
+				.setValue(name)
+				.onChange((value) => {
+					name = value
+				}),
+		)
+
+		new Setting(contentEl).setName(t('PERSON_EMAIL')).addText((text) =>
+			text
+				.setPlaceholder(t('PERSON_EMAIL_PLACEHOLDER'))
+				.setValue(email)
+				.onChange((value) => {
+					email = value
+				}),
+		)
+
+		new Setting(contentEl)
+			.setName(t('PERSON_COLOR'))
+			.addColorPicker((picker) =>
+				picker.setValue(color).onChange((value) => {
+					color = value
+				}),
+			)
+
+		const notesSetting = new Setting(contentEl).setName(t('PERSON_NOTES'))
+
+		const notesTextarea = notesSetting.descEl.createEl('textarea', {
+			cls: 'kanban-create-task-textarea',
+			attr: {
+				rows: 3,
+				placeholder: t('PERSON_NOTES_PLACEHOLDER'),
+			},
+		})
+		notesTextarea.value = notes
+		notesTextarea.addEventListener('input', () => {
+			notes = notesTextarea.value
+		})
+
+		const footerEl = contentEl.createEl('div', {
+			cls: 'kanban-board-modal-footer',
+		})
+
+		const cancelBtn = footerEl.createEl('button', {
+			text: t('CREATE_TASK_CANCEL'),
+		})
+		cancelBtn.addEventListener('click', () => this.close())
+
+		const saveBtn = footerEl.createEl('button', {
+			cls: 'mod-cta',
+			text: t('BOARD_MODAL_SAVE'),
+		})
+		saveBtn.addEventListener('click', () => {
+			void this.savePerson({
+				id: this.person?.id || `person-${Date.now()}`,
+				name: name.trim(),
+				email: email.trim(),
+				color,
+				notes: notes.trim(),
+			})
+		})
+	}
+
+	private async savePerson(person: IPerson) {
+		if (!person.name.trim()) {
+			new Notice(t('PERSON_ERROR_NAME'))
+			return
+		}
+
+		const existingPerson = this.plugin.settings.people.find(
+			(p: IPerson) =>
+				p.name.toLowerCase() === person.name.toLowerCase() &&
+				p.id !== person.id,
+		)
+
+		if (existingPerson) {
+			new Notice(t('PERSON_ERROR_EXISTS'))
+			return
+		}
+
+		await this.createPersonNote(person)
+
+		this.onSave(person)
+		this.close()
+	}
+
+	private async createPersonNote(person: IPerson) {
+		const folder = this.peopleFolder
+			.replace(/^\/+/, '')
+			.replace(/\/?$/, '/')
+
+		const filePath = `${folder}${person.name.replace(/[\\/:*?"<>|]/g, '-')}.md`
+
+		const existingFile = this.app.vault.getFileByPath(filePath)
+		if (existingFile) return
+
+		const folderPath = filePath.substring(0, filePath.lastIndexOf('/'))
+		if (folderPath && !this.app.vault.getFolderByPath(folderPath)) {
+			try {
+				await this.app.vault.createFolder(folderPath)
+			} catch (err) {
+				new Notice(t('PERSON_ERROR_CREATE'))
+				console.error('Error creating folder:', err)
+				return
+			}
+		}
+
+		try {
+			const file = await this.app.vault.create(filePath, '')
+			await this.app.fileManager.processFrontMatter(
+				file,
+				(frontmatter) => {
+					const fm = frontmatter as Record<string, unknown>
+					fm['tags'] = ['person']
+					fm['name'] = person.name
+					fm['email'] = person.email
+					fm['color'] = person.color
+					fm['notes'] = person.notes
+				},
+			)
+		} catch (err) {
+			new Notice(t('PERSON_ERROR_CREATE'))
+			console.error('Error creating person note:', err)
+		}
 	}
 
 	onClose() {

@@ -1,7 +1,7 @@
 {
 	"id": "kanban-moonlight",
 	"name": "Kanban Moonlight",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"minAppVersion": "1.7.2",
 	"description": "A native Kanban board plugin. Transform your markdown notes into an interactive, visual Kanban board with drag & drop, customizable columns, categories system, and completion tracking.",
 	"author": "Tyliz",

@@ -6,6 +6,8 @@ import {
 	DEFAULT_BOARD_COLUMNS,
 	DEFAULT_COMPLETED_COLUMN,
 	TimeOptions,
+	ViewType,
+	GanttZoom,
 } from './kanbanSettings'
 
 describe('getActiveBoard', () => {
@@ -16,6 +18,13 @@ describe('getActiveBoard', () => {
 				{ ...DEFAULT_BOARD, id: 'board-2', name: 'Board 2' },
 			],
 			activeBoardId: 'board-2',
+			people: [],
+			peopleFolder: 'people',
+			historyEnabled: true,
+			maxHistoryEvents: 50,
+			globalHistoryLimit: 20,
+			defaultView: ViewType.kanban,
+			ganttZoom: GanttZoom.week,
 		}
 
 		const result = getActiveBoard(settings)
@@ -30,6 +39,13 @@ describe('getActiveBoard', () => {
 				{ ...DEFAULT_BOARD, id: 'board-2', name: 'Board 2' },
 			],
 			activeBoardId: 'nonexistent',
+			people: [],
+			peopleFolder: 'people',
+			historyEnabled: true,
+			maxHistoryEvents: 50,
+			globalHistoryLimit: 20,
+			defaultView: ViewType.kanban,
+			ganttZoom: GanttZoom.week,
 		}
 
 		const result = getActiveBoard(settings)
@@ -40,6 +56,13 @@ describe('getActiveBoard', () => {
 		const settings = {
 			boards: [],
 			activeBoardId: '',
+			people: [],
+			peopleFolder: 'people',
+			historyEnabled: true,
+			maxHistoryEvents: 50,
+			globalHistoryLimit: 20,
+			defaultView: ViewType.kanban,
+			ganttZoom: GanttZoom.week,
 		}
 
 		const result = getActiveBoard(settings)

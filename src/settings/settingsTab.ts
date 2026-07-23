@@ -5,6 +5,7 @@ import { IBoard } from './kanbanSettings'
 import { renderCategorySettings } from './renderSettings/categorySettings'
 import { renderColumnSettings } from './renderSettings/columnSettings'
 import { renderCompletedSettings } from './renderSettings/completedSettings'
+import { renderPersonSettings } from './renderSettings/personSettings'
 import { BoardModal } from '../ui/boardModal'
 
 export class KanbanMoonlightSettingTab extends PluginSettingTab {
@@ -149,6 +150,12 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 		)
 
 		renderCategorySettings(
+			this.plugin,
+			containerEl,
+			this.display.bind(this),
+		)
+
+		renderPersonSettings(
 			this.plugin,
 			containerEl,
 			this.display.bind(this),

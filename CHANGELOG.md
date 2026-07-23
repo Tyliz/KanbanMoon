@@ -4,6 +4,34 @@ All notable changes to Kanban Moonlight will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.0] - 14/07/2026
+
+### Added
+
+- **Gantt chart**: Rewritten from scratch as a standalone module (`src/views/ganttChart.ts`).
+- **Start column configuration**: Each board now has a configurable "Start Column" via radio buttons in the Board Modal. The Gantt chart uses this to calculate task start dates from history.
+- **Today line**: A vertical line on the Gantt timeline indicating the current date.
+
+### Changed
+
+- **Gantt date calculation**: Task start/end dates now come from history events (created → start, last completed → end) instead of frontmatter `startDate`/`dueDate`.
+- **End date for in-progress tasks**: Tasks not yet completed show their bar extending to today's date instead of last modification date.
+- **Timeline headers**: All zoom levels now have two-row headers — Month shows month name + date ranges, Week shows week dates + day names, Day shows month name + day numbers.
+- **Month zoom**: Wider layout (minimum 600px) with readable date ranges (`1-7`, `8-14`, etc.) instead of compressed `S1, S2, S3` labels.
+- **Day zoom**: Fixed alignment between day numbers and task bars. Days use Obsidian locale via `moment.js`.
+- **Bar labels**: Contrast color (black/white) based on background color for readability.
+- **Scroll synchronization**: Uses `requestAnimationFrame` with anti-loop flag for smooth synchronized scrolling.
+- **Alternating rows**: Subtle background difference for better row tracking.
+
+### Fixed
+
+- Date alignment between timeline header and task bars.
+- Zoom level rendering (was inferring zoom from column count instead of using actual setting).
+- Scroll sync between left (task names) and right (timeline) panes.
+- Month timeline showing confusing `S1, S2, S3` labels.
+- Day zoom showing duplicated/overlapping date labels.
+- `--small` CSS class overriding today cell text color.
+
 ## [1.1.0] - 07/07/2026
 
 ### Added

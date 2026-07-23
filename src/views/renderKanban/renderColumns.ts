@@ -5,6 +5,7 @@ import { KanbanMoonlightView } from '../kanbanView'
 import { createColumnElement } from './column'
 import { sortByMtime } from './utils'
 import { toSafeFm, getFmString } from '../../utils/frontmatter'
+import { renderHistoryPanel } from './historyPanel'
 
 export const renderKanbanColumns = (
 	view: KanbanMoonlightView,
@@ -86,4 +87,25 @@ export const renderKanbanColumns = (
 		completedColumn,
 		completedNotes,
 	)
+
+	if (view.plugin.settings.historyEnabled) {
+		const historySection = (container as HTMLElement).createEl('div', {
+			cls: 'kanban-history-global',
+		})
+
+		const historyHeader = historySection.createEl('div', {
+			cls: 'kanban-history-global__header',
+		})
+
+		historyHeader.createEl('h3', {
+			text: t('HISTORY_GLOBAL_TITLE'),
+			cls: 'kanban-history-global__title',
+		})
+
+		const historyList = historySection.createEl('div', {
+			cls: 'kanban-history-global__container',
+		})
+
+		renderHistoryPanel(historyList, view.plugin, notes)
+	}
 }
