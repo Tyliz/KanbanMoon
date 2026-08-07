@@ -119,12 +119,12 @@ export function migrateSettings(
 					? raw.globalHistoryLimit
 					: 20,
 			defaultView:
-				typeof raw.defaultView === 'string' && Object.values(ViewType).includes(raw.defaultView as ViewType)
-					? raw.defaultView as ViewType
+				typeof raw.defaultView === 'string' && (Object.values(ViewType) as string[]).includes(raw.defaultView)
+					? raw.defaultView
 					: ViewType.kanban,
 			ganttZoom:
-				typeof raw.ganttZoom === 'string' && Object.values(GanttZoom).includes(raw.ganttZoom as GanttZoom)
-					? raw.ganttZoom as GanttZoom
+				typeof raw.ganttZoom === 'string' && (Object.values(GanttZoom) as string[]).includes(raw.ganttZoom)
+					? raw.ganttZoom
 					: GanttZoom.week,
 			lastSeenVersion:
 				typeof raw.lastSeenVersion === 'string'

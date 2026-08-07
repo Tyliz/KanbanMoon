@@ -1602,10 +1602,13 @@ button.btn-delete:hover svg {
 
 /* Update Modal */
 .kanban-update-modal__header {
-	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	margin-bottom: 20px;
 	padding-bottom: 16px;
 	border-bottom: 1px solid var(--background-modifier-border);
+	position: relative;
 }
 
 .kanban-update-modal__title {
@@ -1685,19 +1688,28 @@ button.btn-delete:hover svg {
 }
 
 .kanban-update-modal__funding-btn {
+	position: absolute;
+	top: 0;
+	right: 0;
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	padding: 8px 16px;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	padding: 0;
 	background: #FFDD00;
 	color: #000000;
 	border: none;
-	border-radius: 6px;
-	font-size: 13px;
-	font-weight: 500;
+	border-radius: 50%;
 	text-decoration: none;
 	cursor: pointer;
 	transition: opacity 0.15s ease;
+	flex-shrink: 0;
+}
+
+.kanban-update-modal__funding-btn svg {
+	width: 16px;
+	height: 16px;
 }
 
 .kanban-update-modal__funding-btn:hover {
