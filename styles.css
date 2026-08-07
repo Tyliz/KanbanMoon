@@ -1676,3 +1676,32 @@ button.btn-delete:hover svg {
 .kanban-update-modal__close-btn:hover {
 	background: var(--interactive-accent-hover);
 }
+
+.kanban-update-modal__funding {
+	text-align: center;
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.kanban-update-modal__funding-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	background: #FFDD00;
+	color: #000000;
+	border: none;
+	border-radius: 6px;
+	font-size: 13px;
+	font-weight: 500;
+	text-decoration: none;
+	cursor: pointer;
+	transition: opacity 0.15s ease;
+}
+
+.kanban-update-modal__funding-btn:hover {
+	opacity: 0.9;
+	background: #FFDD00;
+	color: #000000;
+}

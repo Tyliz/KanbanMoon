@@ -7,7 +7,7 @@ import { getFilteredNotes, searchNotes } from './renderKanban/utils'
 import { CreateTaskModal } from '../ui/createTaskModal'
 import { BoardModal } from '../ui/boardModal'
 import { renderGantt } from './ganttChart'
-import { UpdateModal, parseChangelog } from '../ui/updateModal'
+import { UpdateModal } from '../ui/updateModal'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
 
@@ -584,26 +584,79 @@ export class KanbanMoonlightView extends ItemView {
 
 		if (currentVersion === lastSeenVersion) return
 
-		const changelogFile = this.app.vault.getAbstractFileByPath('CHANGELOG.md')
-		if (!changelogFile || !(changelogFile instanceof TFile)) {
-			this.plugin.settings.lastSeenVersion = currentVersion
-			await this.plugin.saveSettings()
-			return
+		const sections = RELEASE_NOTES[currentVersion]
+
+		if (sections && sections.length > 0) {
+			new UpdateModal(this.app, currentVersion, sections, this.plugin).open()
 		}
 
-		try {
-			const content = await this.app.vault.read(changelogFile)
-			const sections = parseChangelog(content, currentVersion)
-
-			if (sections.length > 0) {
-				new UpdateModal(this.app, currentVersion, sections).open()
-			}
-
-			this.plugin.settings.lastSeenVersion = currentVersion
-			await this.plugin.saveSettings()
-		} catch {
-			this.plugin.settings.lastSeenVersion = currentVersion
-			await this.plugin.saveSettings()
-		}
+		this.plugin.settings.lastSeenVersion = currentVersion
+		await this.plugin.saveSettings()
 	}
+}
+
+const RELEASE_NOTES: Record<string, Array<{ title: string; items: string[] }>> = {
+	'1.3.0': [
+		{
+			title: 'Added',
+			items: [
+				'Gantt chart rewritten from scratch as a standalone module.',
+				'Start column configuration via radio buttons in the Board Modal.',
+				'Today line on the Gantt timeline.',
+			],
+		},
+		{
+			title: 'Changed',
+			items: [
+				'Task start/end dates now come from history events.',
+				'End date for in-progress tasks shows today\'s date.',
+				'All zoom levels now have two-row headers.',
+				'Month zoom with wider layout and readable date ranges.',
+				'Day zoom with fixed alignment.',
+				'Bar labels use contrast color for readability.',
+				'Scroll synchronization uses requestAnimationFrame.',
+				'Alternating rows for better tracking.',
+			],
+		},
+		{
+			title: 'Fixed',
+			items: [
+				'Date alignment between timeline header and task bars.',
+				'Zoom level rendering.',
+				'Scroll sync between task names and timeline.',
+				'Month timeline confusing labels.',
+				'Day zoom duplicated labels.',
+			],
+		},
+	],
+	'1.2.0': [
+		{
+			title: 'Added',
+			items: [
+				'Gantt chart rewritten from scratch.',
+				'Start column configuration.',
+				'Today line on Gantt timeline.',
+			],
+		},
+	],
+	'1.1.0': [
+		{
+			title: 'Added',
+			items: [
+				'Multi-board support.',
+				'Board tabs with tooltip.',
+				'Board modal for create/edit.',
+				'Delete board with confirmation.',
+				'Collapsible settings sections.',
+				'Settings button in Kanban view.',
+			],
+		},
+		{
+			title: 'Migration',
+			items: [
+				'Existing settings automatically migrated to multi-board format.',
+				'No user action required.',
+			],
+		},
+	],
 }
