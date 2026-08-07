@@ -159,6 +159,13 @@ const AUTHORS_LANGS = {
 		DASHBOARD_TOTAL_TASKS: 'Total Tasks',
 		DASHBOARD_COMPLETED: 'Completed',
 		DASHBOARD_PENDING: 'Pending',
+		UPDATE_SUBTITLE: 'What\'s new in this version:',
+		UPDATE_CLOSE: 'Got it!',
+		UPDATE_ADDED: 'Added',
+		UPDATE_CHANGED: 'Changed',
+		UPDATE_FIXED: 'Fixed',
+		UPDATE_REMOVED: 'Removed',
+		UPDATE_MIGRATION: 'Migration',
 	},
 	es: {
 		TAG_LABEL: 'Etiqueta de Proyectos',
@@ -320,6 +327,13 @@ const AUTHORS_LANGS = {
 		DASHBOARD_TOTAL_TASKS: 'Total de Tareas',
 		DASHBOARD_COMPLETED: 'Completadas',
 		DASHBOARD_PENDING: 'Pendientes',
+		UPDATE_SUBTITLE: 'Novedades en esta versión:',
+		UPDATE_CLOSE: '¡Entendido!',
+		UPDATE_ADDED: 'Añadido',
+		UPDATE_CHANGED: 'Cambiado',
+		UPDATE_FIXED: 'Corregido',
+		UPDATE_REMOVED: 'Eliminado',
+		UPDATE_MIGRATION: 'Migración',
 	},
 }
 
