@@ -72,7 +72,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				.addButton((btn) => {
 					btn
 						.setButtonText(t('DELETE_BTN'))
-						.setWarning()
+						.setDestructive()
 						.onClick(() => {
 							new DeleteBoardConfirmModal(
 								this.app,

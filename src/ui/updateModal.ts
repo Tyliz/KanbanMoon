@@ -80,7 +80,7 @@ export class UpdateModal extends Modal {
 
 		if (fundingUrl) {
 			const fundingBtn = fundingEl.createEl('a', {
-				text: '☕ Buy Me a Coffee',
+				text: '☕ Buy me a coffee',
 				cls: 'kanban-update-modal__funding-btn',
 				attr: {
 					href: fundingUrl,
