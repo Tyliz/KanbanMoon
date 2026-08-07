@@ -124,6 +124,7 @@ export interface IKanbanSettings {
 	globalHistoryLimit: number
 	defaultView: ViewType
 	ganttZoom: GanttZoom
+	lastSeenVersion: string
 }
 
 export const DEFAULT_SETTINGS: IKanbanSettings = {
@@ -136,6 +137,7 @@ export const DEFAULT_SETTINGS: IKanbanSettings = {
 	globalHistoryLimit: 20,
 	defaultView: ViewType.kanban,
 	ganttZoom: GanttZoom.week,
+	lastSeenVersion: '',
 }
 
 export function getActiveBoard(settings: IKanbanSettings): IBoard {

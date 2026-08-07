@@ -7,6 +7,7 @@ import { getFilteredNotes, searchNotes } from './renderKanban/utils'
 import { CreateTaskModal } from '../ui/createTaskModal'
 import { BoardModal } from '../ui/boardModal'
 import { renderGantt } from './ganttChart'
+import { UpdateModal, parseChangelog } from '../ui/updateModal'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
 
@@ -35,6 +36,8 @@ export class KanbanMoonlightView extends ItemView {
 	async onOpen() {
 		const container = this.contentEl
 		container.empty()
+
+		await this.checkForUpdate()
 
 		this.drawCurrentView()
 	}
@@ -572,6 +575,35 @@ export class KanbanMoonlightView extends ItemView {
 		if (app.setting) {
 			app.setting.open()
 			app.setting.openTabById(this.plugin.manifest.id)
+		}
+	}
+
+	private async checkForUpdate() {
+		const currentVersion = this.plugin.manifest.version
+		const lastSeenVersion = this.plugin.settings.lastSeenVersion
+
+		if (currentVersion === lastSeenVersion) return
+
+		const changelogFile = this.app.vault.getAbstractFileByPath('CHANGELOG.md')
+		if (!changelogFile || !(changelogFile instanceof TFile)) {
+			this.plugin.settings.lastSeenVersion = currentVersion
+			await this.plugin.saveSettings()
+			return
+		}
+
+		try {
+			const content = await this.app.vault.read(changelogFile)
+			const sections = parseChangelog(content, currentVersion)
+
+			if (sections.length > 0) {
+				new UpdateModal(this.app, currentVersion, sections).open()
+			}
+
+			this.plugin.settings.lastSeenVersion = currentVersion
+			await this.plugin.saveSettings()
+		} catch {
+			this.plugin.settings.lastSeenVersion = currentVersion
+			await this.plugin.saveSettings()
 		}
 	}
 }

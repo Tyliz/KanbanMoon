@@ -49,6 +49,7 @@ export function migrateSettings(
 			globalHistoryLimit: 20,
 			defaultView: ViewType.kanban,
 			ganttZoom: GanttZoom.week,
+			lastSeenVersion: '',
 		}
 	}
 
@@ -125,6 +126,10 @@ export function migrateSettings(
 				typeof raw.ganttZoom === 'string' && Object.values(GanttZoom).includes(raw.ganttZoom as GanttZoom)
 					? raw.ganttZoom as GanttZoom
 					: GanttZoom.week,
+			lastSeenVersion:
+				typeof raw.lastSeenVersion === 'string'
+					? raw.lastSeenVersion
+					: '',
 		}
 	}
 
@@ -168,6 +173,7 @@ export function migrateSettings(
 			globalHistoryLimit: 20,
 			defaultView: ViewType.kanban,
 			ganttZoom: GanttZoom.week,
+			lastSeenVersion: '',
 		}
 	}
 
@@ -181,5 +187,6 @@ export function migrateSettings(
 		globalHistoryLimit: 20,
 		defaultView: ViewType.kanban,
 		ganttZoom: GanttZoom.week,
+		lastSeenVersion: '',
 	}
 }

@@ -25,6 +25,7 @@ describe('getActiveBoard', () => {
 			globalHistoryLimit: 20,
 			defaultView: ViewType.kanban,
 			ganttZoom: GanttZoom.week,
+			lastSeenVersion: '',
 		}
 
 		const result = getActiveBoard(settings)
@@ -46,6 +47,7 @@ describe('getActiveBoard', () => {
 			globalHistoryLimit: 20,
 			defaultView: ViewType.kanban,
 			ganttZoom: GanttZoom.week,
+			lastSeenVersion: '',
 		}
 
 		const result = getActiveBoard(settings)
@@ -63,6 +65,7 @@ describe('getActiveBoard', () => {
 			globalHistoryLimit: 20,
 			defaultView: ViewType.kanban,
 			ganttZoom: GanttZoom.week,
+			lastSeenVersion: '',
 		}
 
 		const result = getActiveBoard(settings)
