@@ -1,4 +1,4 @@
-import { App, Modal } from 'obsidian'
+import { App, Modal, setIcon } from 'obsidian'
 import { t } from '../lang/helpers'
 import type KanbanMoonlightPlugin from '../main'
 
@@ -12,7 +12,12 @@ export class UpdateModal extends Modal {
 	private sections: ChangelogSection[]
 	private plugin: KanbanMoonlightPlugin
 
-	constructor(app: App, version: string, sections: ChangelogSection[], plugin: KanbanMoonlightPlugin) {
+	constructor(
+		app: App,
+		version: string,
+		sections: ChangelogSection[],
+		plugin: KanbanMoonlightPlugin,
+	) {
 		super(app)
 		this.version = version
 		this.sections = sections
@@ -27,6 +32,24 @@ export class UpdateModal extends Modal {
 		const headerEl = contentEl.createEl('div', {
 			cls: 'kanban-update-modal__header',
 		})
+
+		const fundingUrl = this.getFundingUrl()
+		if (fundingUrl) {
+			const fundingBtn = headerEl.createEl('a', {
+				cls: 'kanban-update-modal__funding-btn',
+				attr: {
+					href: fundingUrl,
+					target: '_blank',
+					rel: 'noopener noreferrer',
+					title: t('UPDATE_FUNDING'),
+				},
+			})
+			setIcon(fundingBtn, 'coffee')
+			fundingBtn.addEventListener('click', (e) => {
+				e.preventDefault()
+				void window.open(fundingUrl, '_blank')
+			})
+		}
 
 		headerEl.createEl('h2', {
 			text: `Kanban Moonlight v${this.version}`,
@@ -71,32 +94,13 @@ export class UpdateModal extends Modal {
 			cls: 'kanban-update-modal__close-btn',
 		})
 		closeBtn.addEventListener('click', () => this.close())
-
-		const fundingEl = contentEl.createEl('div', {
-			cls: 'kanban-update-modal__funding',
-		})
-
-		const fundingUrl = this.getFundingUrl()
-
-		if (fundingUrl) {
-			const fundingBtn = fundingEl.createEl('a', {
-				text: '☕ Buy me a coffee',
-				cls: 'kanban-update-modal__funding-btn',
-				attr: {
-					href: fundingUrl,
-					target: '_blank',
-					rel: 'noopener noreferrer',
-				},
-			})
-			fundingBtn.addEventListener('click', (e) => {
-				e.preventDefault()
-				void window.open(fundingUrl, '_blank')
-			})
-		}
 	}
 
 	private getFundingUrl(): string | null {
-		const manifest = this.plugin.manifest as unknown as Record<string, unknown>
+		const manifest = this.plugin.manifest as unknown as Record<
+			string,
+			unknown
+		>
 		const fundingUrl = manifest.fundingUrl
 
 		if (typeof fundingUrl === 'string') {
