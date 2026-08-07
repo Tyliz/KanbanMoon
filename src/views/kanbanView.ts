@@ -283,8 +283,6 @@ export class KanbanMoonlightView extends ItemView {
 		})
 	}
 
-
-
 	private renderDashboard(
 		container: HTMLElement,
 		notes: TFile[],
@@ -587,7 +585,12 @@ export class KanbanMoonlightView extends ItemView {
 		const sections = RELEASE_NOTES[currentVersion]
 
 		if (sections && sections.length > 0) {
-			new UpdateModal(this.app, currentVersion, sections, this.plugin).open()
+			new UpdateModal(
+				this.app,
+				currentVersion,
+				sections,
+				this.plugin,
+			).open()
 		}
 
 		this.plugin.settings.lastSeenVersion = currentVersion
@@ -595,37 +598,30 @@ export class KanbanMoonlightView extends ItemView {
 	}
 }
 
-const RELEASE_NOTES: Record<string, Array<{ title: string; items: string[] }>> = {
+const RELEASE_NOTES: Record<
+	string,
+	Array<{ title: string; items: string[] }>
+> = {
 	'1.3.0': [
 		{
 			title: 'Added',
 			items: [
-				'Gantt chart rewritten from scratch as a standalone module.',
-				'Start column configuration via radio buttons in the Board Modal.',
-				'Today line on the Gantt timeline.',
+				'Update modal shows changelog summary on first open after update.',
+				'Pending tasks shown in cards with checkbox toggle.',
 			],
 		},
 		{
 			title: 'Changed',
 			items: [
-				'Task start/end dates now come from history events.',
-				'End date for in-progress tasks shows today\'s date.',
-				'All zoom levels now have two-row headers.',
-				'Month zoom with wider layout and readable date ranges.',
-				'Day zoom with fixed alignment.',
-				'Bar labels use contrast color for readability.',
-				'Scroll synchronization uses requestAnimationFrame.',
-				'Alternating rows for better tracking.',
+				'Migrated to Obsidian 1.13+ declarative settings API.',
+				'Updated minimum Obsidian version to 1.13.4.',
 			],
 		},
 		{
 			title: 'Fixed',
 			items: [
-				'Date alignment between timeline header and task bars.',
-				'Zoom level rendering.',
-				'Scroll sync between task names and timeline.',
-				'Month timeline confusing labels.',
-				'Day zoom duplicated labels.',
+				'Removed unnecessary type assertions.',
+				'Cleaned up unused imports and obsolete files.',
 			],
 		},
 	],

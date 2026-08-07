@@ -4,6 +4,25 @@ All notable changes to Kanban Moonlight will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.3.0] - 07/08/2026
+
+### Added
+
+- **Update modal**: Shows a summary of changes when the plugin is updated. Displays on first Kanban view open after update.
+- **Buy me a coffee button**: Support link in the update modal header (icon from Lucide).
+- **Pending tasks in cards**: Collapsible task list showing unchecked items within each card. Click to mark tasks as done directly from the board.
+
+### Changed
+
+- **Settings API migration**: Migrated from deprecated `display()` to Obsidian 1.13+ declarative `getSettingDefinitions()` API.
+- **Destructive buttons**: Replaced deprecated `setWarning()` with `setDestructive()` for delete confirmations.
+- **Minimum Obsidian version**: Updated `minAppVersion` to `1.13.4`.
+
+### Fixed
+
+- Removed unnecessary type assertions in settings migration.
+- Cleaned up unused imports and removed obsolete render settings files.
+
 ## [1.2.0] - 14/07/2026
 
 ### Added
