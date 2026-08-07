@@ -1,5 +1,6 @@
 import { App, Modal } from 'obsidian'
 import { t } from '../lang/helpers'
+import type KanbanMoonlightPlugin from '../main'
 
 interface ChangelogSection {
 	title: string
@@ -9,11 +10,13 @@ interface ChangelogSection {
 export class UpdateModal extends Modal {
 	private version: string
 	private sections: ChangelogSection[]
+	private plugin: KanbanMoonlightPlugin
 
-	constructor(app: App, version: string, sections: ChangelogSection[]) {
+	constructor(app: App, version: string, sections: ChangelogSection[], plugin: KanbanMoonlightPlugin) {
 		super(app)
 		this.version = version
 		this.sections = sections
+		this.plugin = plugin
 	}
 
 	onOpen() {
@@ -68,47 +71,50 @@ export class UpdateModal extends Modal {
 			cls: 'kanban-update-modal__close-btn',
 		})
 		closeBtn.addEventListener('click', () => this.close())
+
+		const fundingEl = contentEl.createEl('div', {
+			cls: 'kanban-update-modal__funding',
+		})
+
+		const fundingUrl = this.getFundingUrl()
+
+		if (fundingUrl) {
+			const fundingBtn = fundingEl.createEl('a', {
+				text: '☕ Buy Me a Coffee',
+				cls: 'kanban-update-modal__funding-btn',
+				attr: {
+					href: fundingUrl,
+					target: '_blank',
+					rel: 'noopener noreferrer',
+				},
+			})
+			fundingBtn.addEventListener('click', (e) => {
+				e.preventDefault()
+				void window.open(fundingUrl, '_blank')
+			})
+		}
+	}
+
+	private getFundingUrl(): string | null {
+		const manifest = this.plugin.manifest as unknown as Record<string, unknown>
+		const fundingUrl = manifest.fundingUrl
+
+		if (typeof fundingUrl === 'string') {
+			return fundingUrl
+		}
+
+		if (typeof fundingUrl === 'object' && fundingUrl !== null) {
+			const values = Object.values(fundingUrl as Record<string, string>)
+			if (values.length > 0) {
+				return values[0] ?? null
+			}
+		}
+
+		return null
 	}
 
 	onClose() {
 		const { contentEl } = this
 		contentEl.empty()
 	}
-}
-
-export function parseChangelog(changelog: string, version: string): ChangelogSection[] {
-	const sections: ChangelogSection[] = []
-	const versionRegex = new RegExp(`## \\[${escapeRegex(version)}\\]`)
-	const nextVersionRegex = /## \[\d+\.\d+\.\d+\]/
-
-	const versionStart = changelog.search(versionRegex)
-	if (versionStart === -1) return sections
-
-	const afterVersion = changelog.slice(versionStart)
-	const nextVersionMatch = afterVersion.slice(1).search(nextVersionRegex)
-	const versionEnd = nextVersionMatch !== -1 ? nextVersionMatch + 1 : afterVersion.length
-	const versionBlock = afterVersion.slice(0, versionEnd)
-
-	const sectionRegex = /### (Added|Changed|Fixed|Removed|Migration)\n([\s\S]*?)(?=### |\n## |$)/g
-	let match
-
-	while ((match = sectionRegex.exec(versionBlock)) !== null) {
-		const title = match[1] ?? ''
-		const content = match[2] ?? ''
-
-		const items = content
-			.split('\n')
-			.map((line) => line.replace(/^- \*\*/, '').replace(/\*\*/, '').replace(/^- /, '').trim())
-			.filter((line) => line.length > 0)
-
-		if (items.length > 0) {
-			sections.push({ title, items })
-		}
-	}
-
-	return sections
-}
-
-function escapeRegex(str: string): string {
-	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }

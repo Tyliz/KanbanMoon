@@ -6,7 +6,8 @@ const AUTHORS_LANGS = {
 		TAG_LABEL: 'Project Tag',
 		TAG_DESC: 'The tag that notes must have to appear on the Kanban board.',
 		FOLDER_LABEL: 'Project Folder',
-		FOLDER_DESC: 'Optional folder path. Notes inside will appear on the board. Leave empty to use only the tag.',
+		FOLDER_DESC:
+			'Optional folder path. Notes inside will appear on the board. Leave empty to use only the tag.',
 		COLUMN_NAME: 'Column',
 		COLUMNS_TITLE: 'Board Columns',
 		COLUMN_BACKLOG: 'Backlog',
@@ -33,7 +34,8 @@ const AUTHORS_LANGS = {
 		PROPERTY_STATE: 'State',
 		PROPERTY_DESCRIPTION: 'Description',
 		PROPERTY_CATEGORY: 'Category',
-		PROPERTIES_NOTE: 'To change these, edit the property name in your notes or request it as a configurable option.',
+		PROPERTIES_NOTE:
+			'To change these, edit the property name in your notes or request it as a configurable option.',
 		VIEW_TITLE: 'Kanban Moonlight Board',
 		FILTER_NOTICE: 'Board: Filtering by',
 		MOVED_NOTE_TO: 'Note moved to',
@@ -51,7 +53,8 @@ const AUTHORS_LANGS = {
 		YEAR: 'Year',
 		CREATE_TASK_TITLE: 'Create New Task',
 		CREATE_TASK_TITLE_LABEL: 'Title',
-		CREATE_TASK_TITLE_DESC: 'The title of the task (will be the note filename).',
+		CREATE_TASK_TITLE_DESC:
+			'The title of the task (will be the note filename).',
 		CREATE_TASK_TITLE_PLACEHOLDER: 'Enter task title...',
 		CREATE_TASK_DESC_LABEL: 'Description',
 		CREATE_TASK_DESC_DESC: 'Short description of the task.',
@@ -79,10 +82,12 @@ const AUTHORS_LANGS = {
 		BOARD_NAME_DESC: 'Display name for this board.',
 		BOARD_NAME_PLACEHOLDER: 'My Project',
 		BOARD_TAG_LABEL: 'Project Tag',
-		BOARD_TAG_DESC: 'Tag that identifies notes for this board (e.g. #project-alpha).',
+		BOARD_TAG_DESC:
+			'Tag that identifies notes for this board (e.g. #project-alpha).',
 		BOARD_TAG_PLACEHOLDER: '#tag/2',
 		BOARD_FOLDER_LABEL: 'Project Folder',
-		BOARD_FOLDER_DESC: 'Optional folder path. Notes inside will appear on this board.',
+		BOARD_FOLDER_DESC:
+			'Optional folder path. Notes inside will appear on this board.',
 		BOARD_MODAL_ERROR_NAME: 'Please enter a board name.',
 		BOARD_MODAL_ERROR_FILTER: 'Please enter a tag or folder.',
 		BOARD_MODAL_CREATED: 'Board created.',
@@ -95,7 +100,8 @@ const AUTHORS_LANGS = {
 		SETTINGS_BOARD_CURRENT: 'Configuring',
 		SETTINGS_DELETE_BOARD: 'Delete Board',
 		SETTINGS_DELETE_BOARD_DESC: 'Permanently remove this board.',
-		SETTINGS_DELETE_BOARD_CONFIRM: 'Are you sure you want to delete "{name}"? This cannot be undone.',
+		SETTINGS_DELETE_BOARD_CONFIRM:
+			'Are you sure you want to delete "{name}"? This cannot be undone.',
 		PERSONS_TITLE: 'Board People',
 		ADD_PERSON_BTN: '+ Add Person',
 		PERSON_NAME: 'Person Name',
@@ -139,9 +145,11 @@ const AUTHORS_LANGS = {
 		HISTORY_SETTINGS_ENABLED: 'Enable History',
 		HISTORY_SETTINGS_ENABLED_DESC: 'Track changes to tasks.',
 		HISTORY_SETTINGS_MAX: 'Max events per task',
-		HISTORY_SETTINGS_MAX_DESC: 'Maximum number of history events to keep per task.',
+		HISTORY_SETTINGS_MAX_DESC:
+			'Maximum number of history events to keep per task.',
 		HISTORY_SETTINGS_GLOBAL: 'Global history limit',
-		HISTORY_SETTINGS_GLOBAL_DESC: 'Number of events to show in the activity log.',
+		HISTORY_SETTINGS_GLOBAL_DESC:
+			'Number of events to show in the activity log.',
 		GANTT_TITLE: 'Gantt Chart',
 		GANTT_EMPTY: 'No tasks with dates found.',
 		GANTT_ZOOM_DAY: 'Day',
@@ -150,7 +158,8 @@ const AUTHORS_LANGS = {
 		GANTT_START_DATE: 'Start Date',
 		GANTT_DUE_DATE: 'Due Date',
 		START_COLUMN_LABEL: 'Start Column',
-		START_COLUMN_DESC: 'Column that marks when a task begins. Used by the Gantt chart to calculate task start dates from history.',
+		START_COLUMN_DESC:
+			'Column that marks when a task begins. Used by the Gantt chart to calculate task start dates from history.',
 		DASHBOARD_BY_STATE: 'Tasks by Status',
 		DASHBOARD_BY_PERSON: 'Tasks by Person',
 		DASHBOARD_BY_CATEGORY: 'Tasks by Category',
@@ -159,13 +168,14 @@ const AUTHORS_LANGS = {
 		DASHBOARD_TOTAL_TASKS: 'Total Tasks',
 		DASHBOARD_COMPLETED: 'Completed',
 		DASHBOARD_PENDING: 'Pending',
-		UPDATE_SUBTITLE: 'What\'s new in this version:',
+		UPDATE_SUBTITLE: "What's new in this version:",
 		UPDATE_CLOSE: 'Got it!',
 		UPDATE_ADDED: 'Added',
 		UPDATE_CHANGED: 'Changed',
 		UPDATE_FIXED: 'Fixed',
 		UPDATE_REMOVED: 'Removed',
 		UPDATE_MIGRATION: 'Migration',
+		UPDATE_FUNDING: 'Buy Me a Coffee',
 	},
 	es: {
 		TAG_LABEL: 'Etiqueta de Proyectos',
@@ -199,7 +209,8 @@ const AUTHORS_LANGS = {
 		PROPERTY_STATE: 'Estado',
 		PROPERTY_DESCRIPTION: 'Descripción',
 		PROPERTY_CATEGORY: 'Categoría',
-		PROPERTIES_NOTE: 'Para cambiarlos, edita el nombre de la propiedad en tus notas o solicítalo como opción configurable.',
+		PROPERTIES_NOTE:
+			'Para cambiarlos, edita el nombre de la propiedad en tus notas o solicítalo como opción configurable.',
 		VIEW_TITLE: 'Tablero Kanban Moonlight',
 		FILTER_NOTICE: 'Tablero: Filtrando por',
 		MOVED_NOTE_TO: 'Nota movida a',
@@ -215,7 +226,8 @@ const AUTHORS_LANGS = {
 		NEW_COLUMN_PLACEHOLDER: 'Nueva Columna',
 		CREATE_TASK_TITLE: 'Crear Nueva Tarea',
 		CREATE_TASK_TITLE_LABEL: 'Título',
-		CREATE_TASK_TITLE_DESC: 'El título de la tarea (será el nombre del archivo).',
+		CREATE_TASK_TITLE_DESC:
+			'El título de la tarea (será el nombre del archivo).',
 		CREATE_TASK_TITLE_PLACEHOLDER: 'Ingresa el título...',
 		CREATE_TASK_DESC_LABEL: 'Descripción',
 		CREATE_TASK_DESC_DESC: 'Descripción breve de la tarea.',
@@ -247,10 +259,12 @@ const AUTHORS_LANGS = {
 		BOARD_NAME_DESC: 'Nombre visible para este tablero.',
 		BOARD_NAME_PLACEHOLDER: 'Mi Proyecto',
 		BOARD_TAG_LABEL: 'Etiqueta de Proyecto',
-		BOARD_TAG_DESC: 'Etiqueta que identifica las notas de este tablero (ej: #proyecto-alpha).',
+		BOARD_TAG_DESC:
+			'Etiqueta que identifica las notas de este tablero (ej: #proyecto-alpha).',
 		BOARD_TAG_PLACEHOLDER: '#tag/2',
 		BOARD_FOLDER_LABEL: 'Carpeta de Proyecto',
-		BOARD_FOLDER_DESC: 'Ruta de carpeta opcional. Las notas dentro aparecerán en este tablero.',
+		BOARD_FOLDER_DESC:
+			'Ruta de carpeta opcional. Las notas dentro aparecerán en este tablero.',
 		BOARD_MODAL_ERROR_NAME: 'Por favor ingresa un nombre para el tablero.',
 		BOARD_MODAL_ERROR_FILTER: 'Por favor ingresa una etiqueta o carpeta.',
 		BOARD_MODAL_CREATED: 'Tablero creado.',
@@ -263,7 +277,8 @@ const AUTHORS_LANGS = {
 		SETTINGS_BOARD_CURRENT: 'Configurando',
 		SETTINGS_DELETE_BOARD: 'Eliminar Tablero',
 		SETTINGS_DELETE_BOARD_DESC: 'Eliminar este tablero permanentemente.',
-		SETTINGS_DELETE_BOARD_CONFIRM: '¿Estás seguro de que quieres eliminar "{name}"? Esta acción no se puede deshacer.',
+		SETTINGS_DELETE_BOARD_CONFIRM:
+			'¿Estás seguro de que quieres eliminar "{name}"? Esta acción no se puede deshacer.',
 		PERSONS_TITLE: 'Personas del Tablero',
 		ADD_PERSON_BTN: '+ Agregar Persona',
 		PERSON_NAME: 'Nombre',
@@ -274,7 +289,8 @@ const AUTHORS_LANGS = {
 		PERSON_NOTES: 'Notas',
 		PERSON_NOTES_PLACEHOLDER: 'Notas adicionales...',
 		PEOPLE_FOLDER: 'Carpeta de Personas',
-		PEOPLE_FOLDER_DESC: 'Ruta de carpeta donde se crearán las notas de personas.',
+		PEOPLE_FOLDER_DESC:
+			'Ruta de carpeta donde se crearán las notas de personas.',
 		PEOPLE_FOLDER_PLACEHOLDER: 'personas',
 		PROPERTY_ASSIGNEE: 'Asignado',
 		ASSIGNEE_LABEL: 'Asignado',
@@ -307,9 +323,11 @@ const AUTHORS_LANGS = {
 		HISTORY_SETTINGS_ENABLED: 'Habilitar Historial',
 		HISTORY_SETTINGS_ENABLED_DESC: 'Registrar cambios en las tareas.',
 		HISTORY_SETTINGS_MAX: 'Máximo de eventos por tarea',
-		HISTORY_SETTINGS_MAX_DESC: 'Número máximo de eventos de historial a mantener por tarea.',
+		HISTORY_SETTINGS_MAX_DESC:
+			'Número máximo de eventos de historial a mantener por tarea.',
 		HISTORY_SETTINGS_GLOBAL: 'Límite de historial global',
-		HISTORY_SETTINGS_GLOBAL_DESC: 'Número de eventos a mostrar en el registro de actividad.',
+		HISTORY_SETTINGS_GLOBAL_DESC:
+			'Número de eventos a mostrar en el registro de actividad.',
 		GANTT_TITLE: 'Diagrama de Gantt',
 		GANTT_EMPTY: 'No se encontraron tareas con fechas.',
 		GANTT_ZOOM_DAY: 'Día',
@@ -318,7 +336,8 @@ const AUTHORS_LANGS = {
 		GANTT_START_DATE: 'Fecha de Inicio',
 		GANTT_DUE_DATE: 'Fecha de Vencimiento',
 		START_COLUMN_LABEL: 'Columna de Inicio',
-		START_COLUMN_DESC: 'Columna que marca cuándo comienza una tarea. El diagrama de Gantt usa esta fecha del historial para calcular el inicio.',
+		START_COLUMN_DESC:
+			'Columna que marca cuándo comienza una tarea. El diagrama de Gantt usa esta fecha del historial para calcular el inicio.',
 		DASHBOARD_BY_STATE: 'Tareas por Estado',
 		DASHBOARD_BY_PERSON: 'Tareas por Persona',
 		DASHBOARD_BY_CATEGORY: 'Tareas por Categoría',
@@ -334,6 +353,7 @@ const AUTHORS_LANGS = {
 		UPDATE_FIXED: 'Corregido',
 		UPDATE_REMOVED: 'Eliminado',
 		UPDATE_MIGRATION: 'Migración',
+		UPDATE_FUNDING: 'Invitame un Café',
 	},
 }
 
