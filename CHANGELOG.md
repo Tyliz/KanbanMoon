@@ -4,6 +4,14 @@ All notable changes to Kanban Moonlight will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.3.0] - 07/08/2026
+
+### Added
+
+- **Pending tasks in cards**: Collapsible task list showing unchecked items within each card. Click to mark tasks as done directly from the board.
+- **External links on cards**: Notes with an `externalLink` frontmatter property now display a clickable link icon in the card header.
+- **Update modal**: Shows a summary of changes when the plugin is updated after installing a new version.
+
 ## [1.2.0] - 14/07/2026
 
 ### Added
