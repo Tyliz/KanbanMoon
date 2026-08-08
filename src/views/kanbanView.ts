@@ -606,22 +606,9 @@ const RELEASE_NOTES: Record<
 		{
 			title: 'Added',
 			items: [
-				'Update modal shows changelog summary on first open after update.',
 				'Pending tasks shown in cards with checkbox toggle.',
-			],
-		},
-		{
-			title: 'Changed',
-			items: [
-				'Migrated to Obsidian 1.13+ declarative settings API.',
-				'Updated minimum Obsidian version to 1.13.4.',
-			],
-		},
-		{
-			title: 'Fixed',
-			items: [
-				'Removed unnecessary type assertions.',
-				'Cleaned up unused imports and obsolete files.',
+				'External link icon on cards with externalLink property.',
+				'Update modal shows changelog on first open after update.',
 			],
 		},
 	],

@@ -8,20 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- **Update modal**: Shows a summary of changes when the plugin is updated. Displays on first Kanban view open after update.
-- **Buy me a coffee button**: Support link in the update modal header (icon from Lucide).
 - **Pending tasks in cards**: Collapsible task list showing unchecked items within each card. Click to mark tasks as done directly from the board.
-
-### Changed
-
-- **Settings API migration**: Migrated from deprecated `display()` to Obsidian 1.13+ declarative `getSettingDefinitions()` API.
-- **Destructive buttons**: Replaced deprecated `setWarning()` with `setDestructive()` for delete confirmations.
-- **Minimum Obsidian version**: Updated `minAppVersion` to `1.13.4`.
-
-### Fixed
-
-- Removed unnecessary type assertions in settings migration.
-- Cleaned up unused imports and removed obsolete render settings files.
+- **External links on cards**: Notes with an `externalLink` frontmatter property now display a clickable link icon in the card header.
+- **Update modal**: Shows a summary of changes when the plugin is updated after installing a new version.
 
 ## [1.2.0] - 14/07/2026
 

@@ -123,7 +123,7 @@ export const createCardElement = (
 		setIcon(tasksToggle, 'chevron-right')
 
 		tasksHeader.createEl('span', {
-			text: `${t('DASHBOARD_PENDING')} > (${pendingTasks.length})`,
+			text: `${t('DASHBOARD_PENDING')} (${pendingTasks.length})`,
 			cls: 'kanban-card__tasks-title',
 		})
 
