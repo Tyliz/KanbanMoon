@@ -7,6 +7,7 @@ import { getFilteredNotes, searchNotes } from './renderKanban/utils'
 import { CreateTaskModal } from '../ui/createTaskModal'
 import { BoardModal } from '../ui/boardModal'
 import { renderGantt } from './ganttChart'
+import { UpdateModal } from '../ui/updateModal'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
 
@@ -35,6 +36,8 @@ export class KanbanMoonlightView extends ItemView {
 	async onOpen() {
 		const container = this.contentEl
 		container.empty()
+
+		await this.checkForUpdate()
 
 		this.drawCurrentView()
 	}
@@ -279,8 +282,6 @@ export class KanbanMoonlightView extends ItemView {
 			this.openPluginSettings()
 		})
 	}
-
-
 
 	private renderDashboard(
 		container: HTMLElement,
@@ -574,4 +575,71 @@ export class KanbanMoonlightView extends ItemView {
 			app.setting.openTabById(this.plugin.manifest.id)
 		}
 	}
+
+	private async checkForUpdate() {
+		const currentVersion = this.plugin.manifest.version
+		const lastSeenVersion = this.plugin.settings.lastSeenVersion
+
+		if (currentVersion === lastSeenVersion) return
+
+		const sections = RELEASE_NOTES[currentVersion]
+
+		if (sections && sections.length > 0) {
+			new UpdateModal(
+				this.app,
+				currentVersion,
+				sections,
+				this.plugin,
+			).open()
+		}
+
+		this.plugin.settings.lastSeenVersion = currentVersion
+		await this.plugin.saveSettings()
+	}
+}
+
+const RELEASE_NOTES: Record<
+	string,
+	Array<{ title: string; items: string[] }>
+> = {
+	'1.3.0': [
+		{
+			title: 'Added',
+			items: [
+				'Pending tasks shown in cards with checkbox toggle.',
+				'External link icon on cards with externalLink property.',
+				'Update modal shows changelog on first open after update.',
+			],
+		},
+	],
+	'1.2.0': [
+		{
+			title: 'Added',
+			items: [
+				'Gantt chart rewritten from scratch.',
+				'Start column configuration.',
+				'Today line on Gantt timeline.',
+			],
+		},
+	],
+	'1.1.0': [
+		{
+			title: 'Added',
+			items: [
+				'Multi-board support.',
+				'Board tabs with tooltip.',
+				'Board modal for create/edit.',
+				'Delete board with confirmation.',
+				'Collapsible settings sections.',
+				'Settings button in Kanban view.',
+			],
+		},
+		{
+			title: 'Migration',
+			items: [
+				'Existing settings automatically migrated to multi-board format.',
+				'No user action required.',
+			],
+		},
+	],
 }

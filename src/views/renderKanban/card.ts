@@ -79,6 +79,20 @@ export const createCardElement = (
 		})()
 	})
 
+	const externalLink = getFmString(fm, 'externalLink')
+	if (externalLink) {
+		const btnExternalLink = cardHeaderEl.createEl('a', {
+			cls: 'kanban-card__external-link',
+			attr: {
+				href: externalLink,
+				target: '_blank',
+				rel: 'noopener noreferrer',
+				title: externalLink,
+			},
+		})
+		setIcon(btnExternalLink, 'link')
+	}
+
 	const description = getFmString(fm, board.propertyDescription)
 
 	const descriptionShorted =
@@ -90,6 +104,87 @@ export const createCardElement = (
 		text: descriptionShorted,
 		cls: 'kanban-card__description',
 	})
+
+	const pendingTasks =
+		noteCache?.listItems?.filter((item) => item.task === ' ') ?? []
+
+	if (pendingTasks.length > 0) {
+		const tasksContainer = cardEl.createEl('div', {
+			cls: 'kanban-card__tasks',
+		})
+
+		const tasksHeader = tasksContainer.createEl('div', {
+			cls: 'kanban-card__tasks-header',
+		})
+
+		const tasksToggle = tasksHeader.createEl('span', {
+			cls: 'kanban-card__tasks-toggle',
+		})
+		setIcon(tasksToggle, 'chevron-right')
+
+		tasksHeader.createEl('span', {
+			text: `${t('DASHBOARD_PENDING')} (${pendingTasks.length})`,
+			cls: 'kanban-card__tasks-title',
+		})
+
+		const tasksContent = tasksContainer.createEl('div', {
+			cls: 'kanban-card__tasks-content',
+		})
+
+		let loaded = false
+
+		tasksHeader.addEventListener('click', () => {
+			tasksContainer.classList.toggle('kanban-card__tasks-expanded')
+
+			if (!loaded) {
+				loaded = true
+				void (async () => {
+					const content = await view.app.vault.cachedRead(note)
+					const lines = content.split('\n')
+
+					pendingTasks.forEach((item) => {
+						const line = lines[item.position.start.line] ?? ''
+						const text = line.replace(/^[\s]*- \[ \]\s*/, '').trim()
+						if (text) {
+							const taskEl = tasksContent.createEl('div', {
+								cls: 'kanban-card__task-item',
+							})
+
+							const checkboxEl = taskEl.createEl('span', {
+								cls: 'kanban-card__task-checkbox',
+							})
+							setIcon(checkboxEl, 'square')
+
+							taskEl.createEl('span', { text })
+
+							taskEl.addEventListener('click', () => {
+								void (async () => {
+									await view.app.vault.process(
+										note,
+										(data) => {
+											const dataLines = data.split('\n')
+											const idx = item.position.start.line
+											if (dataLines[idx] === undefined)
+												return data
+
+											dataLines[idx] = dataLines[
+												idx
+											].replace(/^- \[ \]/, '- [x]')
+											return dataLines.join('\n')
+										},
+									)
+									setIcon(checkboxEl, 'check-square')
+									taskEl.classList.add(
+										'kanban-card__task-item--done',
+									)
+								})()
+							})
+						}
+					})
+				})()
+			}
+		})
+	}
 
 	const tagContainer = cardEl.createEl('div', {
 		cls: 'kanban-card__tag-container',
@@ -141,15 +236,15 @@ export const createCardElement = (
 		cls: 'kanban-card__people',
 	})
 
-		if (assignedPeople.length > 0) {
-			assignedPeople.slice(0, 3).forEach((person: IPerson) => {
-				const avatarEl = peopleContainer.createEl('div', {
-					cls: 'kanban-person-avatar',
-					attr: {
-						style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
-						title: person.name,
-					},
-				})
+	if (assignedPeople.length > 0) {
+		assignedPeople.slice(0, 3).forEach((person: IPerson) => {
+			const avatarEl = peopleContainer.createEl('div', {
+				cls: 'kanban-person-avatar',
+				attr: {
+					style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
+					title: person.name,
+				},
+			})
 			avatarEl.textContent = person.name
 				.split(' ')
 				.map((n) => n[0])
