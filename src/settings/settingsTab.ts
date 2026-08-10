@@ -1,4 +1,12 @@
-import { App, Modal, PluginSettingTab, Setting, setIcon, Notice, type SettingDefinitionItem } from 'obsidian'
+/* eslint-disable @typescript-eslint/no-deprecated */
+import {
+	App,
+	Modal,
+	PluginSettingTab,
+	Setting,
+	setIcon,
+	Notice,
+} from 'obsidian'
 import type KanbanMoonlight from '../main'
 import { t } from '../lang/helpers'
 import { IBoard, IPerson, TimeOptions } from './kanbanSettings'
@@ -20,47 +28,20 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 		this.plugin = plugin
 	}
 
-	getSettingDefinitions(): SettingDefinitionItem[] {
-		return [
-			{
-				name: t('SETTINGS_BOARD_SELECT'),
-				desc: t('SETTINGS_BOARD_SELECT_DESC'),
-				render: (setting: Setting) => this.renderBoardSelector(setting),
-			},
-			{
-				name: t('PROPERTIES_TITLE'),
-				render: (setting: Setting) => this.renderProperties(setting),
-			},
-			{
-				name: t('COLUMNS_TITLE'),
-				render: (setting: Setting) => this.renderColumnSettings(setting),
-			},
-			{
-				name: t('COMPLETED_SETTINGS_TITLE'),
-				render: (setting: Setting) => this.renderCompletedSettings(setting),
-			},
-			{
-				name: t('CATEGORIES_TITLE'),
-				render: (setting: Setting) => this.renderCategorySettings(setting),
-			},
-			{
-				name: t('PEOPLE_FOLDER'),
-				desc: t('PEOPLE_FOLDER_DESC'),
-				control: {
-					type: 'text',
-					key: 'peopleFolder',
-					placeholder: t('PEOPLE_FOLDER_PLACEHOLDER'),
-				},
-			},
-			{
-				name: t('PERSONS_TITLE'),
-				render: (setting: Setting) => this.renderPersonSettings(setting),
-			},
-		]
+	display(): void {
+		const { containerEl } = this
+		containerEl.empty()
+
+		this.renderBoardSettings(containerEl)
+		this.renderPropertiesSection(containerEl)
+		this.renderColumnSettingsSection(containerEl)
+		this.renderCompletedSettingsSection(containerEl)
+		this.renderCategorySettingsSection(containerEl)
+		this.renderPeopleFolderSetting(containerEl)
+		this.renderPersonSettingsSection(containerEl)
 	}
 
-	private renderBoardSelector(setting: Setting) {
-		const containerEl = setting.settingEl
+	private renderBoardSettings(containerEl: HTMLElement) {
 		const boards = this.plugin.settings.boards
 		const activeBoardId = this.plugin.settings.activeBoardId
 		const board = this.plugin.getActiveBoard()
@@ -77,7 +58,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.activeBoardId = value
 					await this.plugin.saveSettings()
-					this.update()
+					this.display()
 				})
 			})
 			.addButton((btn) => {
@@ -106,23 +87,21 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				.setDesc(t('SETTINGS_DELETE_BOARD_DESC'))
 				.setClass('kanban-setting-section')
 				.addButton((btn) => {
-					btn
-						.setButtonText(t('DELETE_BTN'))
+					btn.setButtonText(t('DELETE_BTN'))
 						.setDestructive()
 						.onClick(() => {
 							new DeleteBoardConfirmModal(
 								this.app,
 								this.plugin,
 								board,
-								() => this.update(),
+								() => this.display(),
 							).open()
 						})
 				})
 		}
 	}
 
-	private renderProperties(setting: Setting) {
-		const containerEl = setting.settingEl
+	private renderPropertiesSection(containerEl: HTMLElement) {
 		const board = this.plugin.getActiveBoard()
 
 		const propertiesContainer = containerEl.createEl('div', {
@@ -172,7 +151,9 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				'kanban-properties-expanded',
 			)
 			if (isExpanded) {
-				propertiesContainer.classList.remove('kanban-properties-expanded')
+				propertiesContainer.classList.remove(
+					'kanban-properties-expanded',
+				)
 				setIcon(propertiesToggle, 'chevron-right')
 			} else {
 				propertiesContainer.classList.add('kanban-properties-expanded')
@@ -181,8 +162,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 		})
 	}
 
-	private renderColumnSettings(setting: Setting) {
-		const containerEl = setting.settingEl
+	private renderColumnSettingsSection(containerEl: HTMLElement) {
 		const board = this.plugin.getActiveBoard()
 
 		board.columns.forEach((column, index) => {
@@ -204,7 +184,9 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				void this.plugin.saveSettings()
 			})
 
-			const actionsRow = section.createEl('div', { cls: 'kanban-card-row' })
+			const actionsRow = section.createEl('div', {
+				cls: 'kanban-card-row',
+			})
 
 			const iconBtn = actionsRow.createEl('button', {
 				cls: 'kanban-card-icon-btn',
@@ -215,7 +197,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				new IconSuggestModal(this.plugin.app, (selectedIcon) => {
 					board.columns[index]!.icon = selectedIcon
 					void this.plugin.saveSettings()
-					this.update()
+					this.display()
 				}).open()
 			})
 
@@ -239,7 +221,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				upBtn.addEventListener('click', () => {
 					moveArrayElement(board.columns, index, index - 1)
 					void this.plugin.saveSettings()
-					this.update()
+					this.display()
 				})
 			}
 
@@ -252,7 +234,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				downBtn.addEventListener('click', () => {
 					moveArrayElement(board.columns, index, index + 1)
 					void this.plugin.saveSettings()
-					this.update()
+					this.display()
 				})
 			}
 
@@ -264,31 +246,29 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			deleteBtn.addEventListener('click', () => {
 				board.columns.splice(index, 1)
 				void this.plugin.saveSettings()
-				this.update()
+				this.display()
 			})
 		})
 
-		new Setting(containerEl)
-			.addButton((btn) =>
-				btn
-					.setButtonText(t('ADD_COLUMN_BTN'))
-					.setCta()
-					.onClick(() => {
-						const nuevoId = `col-${Date.now()}`
-						board.columns.push({
-							id: nuevoId,
-							icon: 'plus',
-							title: t('NEW_COLUMN_PLACEHOLDER'),
-							color: '#ffffff',
-						})
-						void this.plugin.saveSettings()
-						this.update()
-					}),
-			)
+		new Setting(containerEl).addButton((btn) =>
+			btn
+				.setButtonText(t('ADD_COLUMN_BTN'))
+				.setCta()
+				.onClick(() => {
+					const nuevoId = `col-${Date.now()}`
+					board.columns.push({
+						id: nuevoId,
+						icon: 'plus',
+						title: t('NEW_COLUMN_PLACEHOLDER'),
+						color: '#ffffff',
+					})
+					void this.plugin.saveSettings()
+					this.display()
+				}),
+		)
 	}
 
-	private renderCompletedSettings(setting: Setting) {
-		const containerEl = setting.settingEl
+	private renderCompletedSettingsSection(containerEl: HTMLElement) {
 		const board = this.plugin.getActiveBoard()
 
 		new Setting(containerEl)
@@ -303,7 +283,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 					new IconSuggestModal(this.plugin.app, (selectedIcon) => {
 						board.completedColumn.icon = selectedIcon
 						void this.plugin.saveSettings()
-						this.update()
+						this.display()
 					}).open()
 				})
 			})
@@ -338,8 +318,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			})
 	}
 
-	private renderCategorySettings(setting: Setting) {
-		const containerEl = setting.settingEl
+	private renderCategorySettingsSection(containerEl: HTMLElement) {
 		const board = this.plugin.getActiveBoard()
 
 		board.categories.forEach((category, index) => {
@@ -361,7 +340,9 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				void this.plugin.saveSettings()
 			})
 
-			const actionsRow = section.createEl('div', { cls: 'kanban-card-row' })
+			const actionsRow = section.createEl('div', {
+				cls: 'kanban-card-row',
+			})
 
 			const iconBtn = actionsRow.createEl('button', {
 				cls: 'kanban-card-icon-btn',
@@ -372,7 +353,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				new IconSuggestModal(this.plugin.app, (selectedIcon) => {
 					board.categories[index]!.icon = selectedIcon
 					void this.plugin.saveSettings()
-					this.update()
+					this.display()
 				}).open()
 			})
 
@@ -395,7 +376,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			deleteBtn.addEventListener('click', () => {
 				board.categories.splice(index, 1)
 				void this.plugin.saveSettings()
-				this.update()
+				this.display()
 			})
 		})
 
@@ -414,13 +395,27 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 							icon: 'tag',
 						})
 						void this.plugin.saveSettings()
-						this.update()
+						this.display()
 					}),
 			)
 	}
 
-	private renderPersonSettings(setting: Setting) {
-		const containerEl = setting.settingEl
+	private renderPeopleFolderSetting(containerEl: HTMLElement) {
+		new Setting(containerEl)
+			.setName(t('PEOPLE_FOLDER'))
+			.setDesc(t('PEOPLE_FOLDER_DESC'))
+			.setClass('kanban-setting-section')
+			.addText((text) => {
+				text.setPlaceholder(t('PEOPLE_FOLDER_PLACEHOLDER'))
+					.setValue(this.plugin.settings.peopleFolder)
+					.onChange(async (value) => {
+						this.plugin.settings.peopleFolder = value
+						await this.plugin.saveSettings()
+					})
+			})
+	}
+
+	private renderPersonSettingsSection(containerEl: HTMLElement) {
 		const peopleSection = containerEl.createEl('div', {
 			cls: 'kanban-properties-collapsible',
 		})
@@ -429,7 +424,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			cls: 'kanban-properties-header',
 		})
 
-		const peopleToggle = peopleHeader.createEl('div', {
+		const peopleToggle = peopleHeader.createEl('span', {
 			cls: 'kanban-properties-toggle',
 		})
 		setIcon(peopleToggle, 'chevron-right')
@@ -508,7 +503,8 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 							person,
 							this.plugin.settings.peopleFolder,
 							(updatedPerson: IPerson) => {
-								this.plugin.settings.people[index] = updatedPerson
+								this.plugin.settings.people[index] =
+									updatedPerson
 								void this.plugin.saveSettings()
 								renderPeopleList()
 							},
