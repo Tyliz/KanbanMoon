@@ -4,6 +4,12 @@ All notable changes to Kanban Moonlight will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.3.1] - 09/08/2026
+
+### Changed
+
+- **Improved settings UI**: Redesigned settings panel for better compatibility with Obsidian 1.13.4. Enhanced spacing, border radius, hover states, and overall visual consistency across all setting components.
+
 ## [1.3.0] - 07/08/2026
 
 ### Added

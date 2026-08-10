@@ -602,6 +602,16 @@ const RELEASE_NOTES: Record<
 	string,
 	Array<{ title: string; items: string[] }>
 > = {
+	'1.3.1': [
+		{
+			title: 'Changed',
+			items: [
+				'Improved settings UI for better compatibility with Obsidian 1.13.4.',
+				'Redesigned spacing, border radius, hover states, and visual consistency.',
+				'Fixed settings duplication bug when switching active board.',
+			],
+		},
+	],
 	'1.3.0': [
 		{
 			title: 'Added',
