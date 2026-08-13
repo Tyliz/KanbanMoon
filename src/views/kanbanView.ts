@@ -602,6 +602,24 @@ const RELEASE_NOTES: Record<
 	string,
 	Array<{ title: string; items: string[] }>
 > = {
+	'1.4.0': [
+		{
+			title: 'Added',
+			items: [
+				'People data syncs bidirectionally with Markdown files.',
+				'Deleting a person removes its .md file from the vault.',
+				'Changing a person name auto-renames the .md file.',
+				'Unique personId field in frontmatter for stable identification.',
+				'Person files are synced on plugin load.',
+			],
+		},
+		{
+			title: 'Changed',
+			items: [
+				'Gantt chart uses window.moment for better compatibility.',
+			],
+		},
+	],
 	'1.3.1': [
 		{
 			title: 'Changed',

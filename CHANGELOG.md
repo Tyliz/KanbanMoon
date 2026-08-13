@@ -4,6 +4,20 @@ All notable changes to Kanban Moonlight will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.0] - 13/08/2026
+
+### Added
+
+- **Person sync with files**: People data now syncs bidirectionally with Markdown files. Editing a file with the `person` tag automatically updates the plugin settings.
+- **Person note deletion**: Deleting a person from Settings also removes its `.md` file from the vault.
+- **Person note renaming**: Changing a person's name automatically renames the corresponding `.md` file.
+- **`personId` frontmatter**: Each person file now includes a unique `personId` field in frontmatter for stable identification.
+- **Sync on load**: All person files in the configured folder are read and synced when the plugin starts.
+
+### Changed
+
+- **Gantt chart**: Replaced `moment` import with `window.moment` for better compatibility.
+
 ## [1.3.1] - 09/08/2026
 
 ### Changed
