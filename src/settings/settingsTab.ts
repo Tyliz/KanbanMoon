@@ -57,7 +57,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.activeBoardId = value
 					await this.plugin.saveSettings()
-					this.display()
+					this.getSettingDefinitions()
 				})
 			})
 			.addButton((btn) => {
@@ -93,7 +93,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 								this.app,
 								this.plugin,
 								board,
-								() => this.display(),
+								() => this.getSettingDefinitions(),
 							).open()
 						})
 				})
@@ -196,7 +196,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				new IconSuggestModal(this.plugin.app, (selectedIcon) => {
 					board.columns[index]!.icon = selectedIcon
 					void this.plugin.saveSettings()
-					this.display()
+					this.getSettingDefinitions()
 				}).open()
 			})
 
@@ -220,7 +220,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				upBtn.addEventListener('click', () => {
 					moveArrayElement(board.columns, index, index - 1)
 					void this.plugin.saveSettings()
-					this.display()
+					this.getSettingDefinitions()
 				})
 			}
 
@@ -233,7 +233,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				downBtn.addEventListener('click', () => {
 					moveArrayElement(board.columns, index, index + 1)
 					void this.plugin.saveSettings()
-					this.display()
+					this.getSettingDefinitions()
 				})
 			}
 
@@ -245,7 +245,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			deleteBtn.addEventListener('click', () => {
 				board.columns.splice(index, 1)
 				void this.plugin.saveSettings()
-				this.display()
+				this.getSettingDefinitions()
 			})
 		})
 
@@ -262,7 +262,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 						color: '#ffffff',
 					})
 					void this.plugin.saveSettings()
-					this.display()
+					this.getSettingDefinitions()
 				}),
 		)
 	}
@@ -282,7 +282,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 					new IconSuggestModal(this.plugin.app, (selectedIcon) => {
 						board.completedColumn.icon = selectedIcon
 						void this.plugin.saveSettings()
-						this.display()
+						this.getSettingDefinitions()
 					}).open()
 				})
 			})
@@ -352,7 +352,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				new IconSuggestModal(this.plugin.app, (selectedIcon) => {
 					board.categories[index]!.icon = selectedIcon
 					void this.plugin.saveSettings()
-					this.display()
+					this.getSettingDefinitions()
 				}).open()
 			})
 
@@ -375,7 +375,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 			deleteBtn.addEventListener('click', () => {
 				board.categories.splice(index, 1)
 				void this.plugin.saveSettings()
-				this.display()
+				this.getSettingDefinitions()
 			})
 		})
 
@@ -394,7 +394,7 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 							icon: 'tag',
 						})
 						void this.plugin.saveSettings()
-						this.display()
+						this.getSettingDefinitions()
 					}),
 			)
 	}
