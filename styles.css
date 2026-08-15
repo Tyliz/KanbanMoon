@@ -43,11 +43,19 @@
 }
 
 .kanban-setting-section {
-	padding: 12px;
+	display: grid;
+	grid-template-columns: 1fr;
+	row-gap: 0;
+	width: 100%;
 }
 
-.kanban-settings-container .setting-item:has(.kanban-setting-section) {
+.kanban-setting-section__delete-btn.mod-destructive {
+	gap: 5px;
+}
+
+.kanban-settings-container .setting-item {
 	padding: 0;
+	/* padding: 16px; */
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 8px;
 	margin-bottom: 12px;
@@ -77,6 +85,7 @@
 }
 
 .kanban-properties-collapsible {
+	width: 100%;
 	margin: 8px 16px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 8px;
@@ -172,6 +181,8 @@
 }
 
 .kanban-container-search {
+	display: flex;
+	flex-direction: row;
 	margin: 15px;
 	text-align: center;
 }
@@ -507,6 +518,7 @@ button.btn-complete:hover {
 
 .kanban-new-task-btn:hover {
 	background: var(--interactive-accent-hover);
+	color: var(--text-on-accent-inverted);
 }
 
 .kanban-new-task-btn svg {

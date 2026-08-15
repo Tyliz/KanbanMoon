@@ -66,22 +66,22 @@ export class KanbanMoonlightView extends ItemView {
 		const board = this.plugin.getActiveBoard()
 		const notesWithTag = getFilteredNotes(this.app, board)
 
-		const filterNotice = container.createEl('div', {
+		const filterNotice = container.createDiv({
 			cls: 'kanban-filter-notice',
 		})
 		const tag = board.tagNotes
 		const folder = board.folderNotes
 		const filters = [tag, folder].filter(Boolean).join(', ')
-		filterNotice.createEl('span', {
+		filterNotice.createSpan({
 			text: t('FILTER_NOTICE') + ` ${filters}`,
 			cls: 'kanban-filter-notice-text',
 		})
 
-		const mainContainer = container.createEl('div', {
+		const mainContainer = container.createDiv({
 			cls: 'main-kanban-container',
 		})
 
-		const searchContainer = mainContainer.createEl('div', {
+		const searchContainer = mainContainer.createDiv({
 			cls: 'kanban-container-search',
 		})
 
@@ -97,7 +97,7 @@ export class KanbanMoonlightView extends ItemView {
 			cls: 'kanban-new-task-btn',
 		})
 		setIcon(newTaskBtn, 'plus')
-		newTaskBtn.createEl('span', {
+		newTaskBtn.createSpan({
 			text: t('CREATE_TASK_BTN'),
 		})
 		newTaskBtn.addEventListener('click', () => {
@@ -124,13 +124,13 @@ export class KanbanMoonlightView extends ItemView {
 			}, 300)
 		})
 
-		mainContainer.createEl('div', {
+		mainContainer.createDiv({
 			cls: 'kanban-board',
 		})
 
 		renderKanbanColumns(this, notesWithTag)
 
-		const settingsBtn = container.createEl('div', {
+		const settingsBtn = container.createDiv({
 			cls: 'kanban-settings-btn',
 			attr: { title: t('OPEN_SETTINGS') },
 		})
@@ -149,22 +149,22 @@ export class KanbanMoonlightView extends ItemView {
 		const board = this.plugin.getActiveBoard()
 		const notesWithTag = getFilteredNotes(this.app, board)
 
-		const filterNotice = container.createEl('div', {
+		const filterNotice = container.createDiv({
 			cls: 'kanban-filter-notice',
 		})
 		const tag = board.tagNotes
 		const folder = board.folderNotes
 		const filters = [tag, folder].filter(Boolean).join(', ')
-		filterNotice.createEl('span', {
+		filterNotice.createSpan({
 			text: t('FILTER_NOTICE') + ` ${filters}`,
 			cls: 'kanban-filter-notice-text',
 		})
 
-		const mainContainer = container.createEl('div', {
+		const mainContainer = container.createDiv({
 			cls: 'main-kanban-container',
 		})
 
-		const searchContainer = mainContainer.createEl('div', {
+		const searchContainer = mainContainer.createDiv({
 			cls: 'kanban-container-search',
 		})
 
@@ -180,14 +180,14 @@ export class KanbanMoonlightView extends ItemView {
 			cls: 'kanban-new-task-btn',
 		})
 		setIcon(newTaskBtn, 'plus')
-		newTaskBtn.createEl('span', {
+		newTaskBtn.createSpan({
 			text: t('CREATE_TASK_BTN'),
 		})
 		newTaskBtn.addEventListener('click', () => {
 			new CreateTaskModal(this.app, this.plugin).open()
 		})
 
-		const ganttContainer = mainContainer.createEl('div', {
+		const ganttContainer = mainContainer.createDiv({
 			cls: 'kanban-gantt',
 		})
 
@@ -233,7 +233,7 @@ export class KanbanMoonlightView extends ItemView {
 			}, 300)
 		})
 
-		const settingsBtn = container.createEl('div', {
+		const settingsBtn = container.createDiv({
 			cls: 'kanban-settings-btn',
 			attr: { title: t('OPEN_SETTINGS') },
 		})
@@ -252,28 +252,28 @@ export class KanbanMoonlightView extends ItemView {
 		const board = this.plugin.getActiveBoard()
 		const notesWithTag = getFilteredNotes(this.app, board)
 
-		const filterNotice = container.createEl('div', {
+		const filterNotice = container.createDiv({
 			cls: 'kanban-filter-notice',
 		})
 		const tag = board.tagNotes
 		const folder = board.folderNotes
 		const filters = [tag, folder].filter(Boolean).join(', ')
-		filterNotice.createEl('span', {
+		filterNotice.createSpan({
 			text: t('FILTER_NOTICE') + ` ${filters}`,
 			cls: 'kanban-filter-notice-text',
 		})
 
-		const mainContainer = container.createEl('div', {
+		const mainContainer = container.createDiv({
 			cls: 'main-kanban-container',
 		})
 
-		const dashboardContainer = mainContainer.createEl('div', {
+		const dashboardContainer = mainContainer.createDiv({
 			cls: 'kanban-dashboard',
 		})
 
 		this.renderDashboard(dashboardContainer, notesWithTag, board)
 
-		const settingsBtn = container.createEl('div', {
+		const settingsBtn = container.createDiv({
 			cls: 'kanban-settings-btn',
 			attr: { title: t('OPEN_SETTINGS') },
 		})
@@ -291,11 +291,11 @@ export class KanbanMoonlightView extends ItemView {
 			categories: Array<{ id: string; name: string; color: string }>
 		},
 	) {
-		const dashboardGrid = container.createEl('div', {
+		const dashboardGrid = container.createDiv({
 			cls: 'kanban-dashboard__grid',
 		})
 
-		const tasksByState = dashboardGrid.createEl('div', {
+		const tasksByState = dashboardGrid.createDiv({
 			cls: 'kanban-dashboard__card',
 		})
 
@@ -321,41 +321,41 @@ export class KanbanMoonlightView extends ItemView {
 
 		const maxCount = Math.max(...Object.values(stateCounts), 1)
 
-		const stateBars = tasksByState.createEl('div', {
+		const stateBars = tasksByState.createDiv({
 			cls: 'kanban-dashboard__bars',
 		})
 
 		board.columns.forEach((col) => {
-			const barRow = stateBars.createEl('div', {
+			const barRow = stateBars.createDiv({
 				cls: 'kanban-dashboard__bar-row',
 			})
 
-			barRow.createEl('div', {
+			barRow.createDiv({
 				cls: 'kanban-dashboard__bar-label',
 				text: col.title,
 			})
 
-			const barContainer = barRow.createEl('div', {
+			const barContainer = barRow.createDiv({
 				cls: 'kanban-dashboard__bar-container',
 			})
 
 			const count = stateCounts[col.id] || 0
 			const percentage = (count / maxCount) * 100
 
-			barContainer.createEl('div', {
+			barContainer.createDiv({
 				cls: 'kanban-dashboard__bar',
 				attr: {
 					style: `width: ${percentage}%; background-color: ${col.color};`,
 				},
 			})
 
-			barRow.createEl('div', {
+			barRow.createDiv({
 				cls: 'kanban-dashboard__bar-count',
 				text: String(count),
 			})
 		})
 
-		const tasksByPerson = dashboardGrid.createEl('div', {
+		const tasksByPerson = dashboardGrid.createDiv({
 			cls: 'kanban-dashboard__card',
 		})
 
@@ -375,7 +375,7 @@ export class KanbanMoonlightView extends ItemView {
 			})
 		})
 
-		const personList = tasksByPerson.createEl('div', {
+		const personList = tasksByPerson.createDiv({
 			cls: 'kanban-dashboard__person-list',
 		})
 
@@ -393,11 +393,11 @@ export class KanbanMoonlightView extends ItemView {
 				const person = this.plugin.settings.people.find(
 					(p) => p.id === personId,
 				)
-				const personRow = personList.createEl('div', {
+				const personRow = personList.createDiv({
 					cls: 'kanban-dashboard__person-row',
 				})
 
-				const avatar = personRow.createEl('div', {
+				const avatar = personRow.createDiv({
 					cls: 'kanban-person-avatar',
 					attr: {
 						style: `background-color: ${person?.color || '#666'};`,
@@ -410,19 +410,19 @@ export class KanbanMoonlightView extends ItemView {
 					.toUpperCase()
 					.slice(0, 2)
 
-				personRow.createEl('span', {
+				personRow.createSpan({
 					text: person?.name || personId,
 					cls: 'kanban-dashboard__person-name',
 				})
 
-				personRow.createEl('span', {
+				personRow.createSpan({
 					text: String(count),
 					cls: 'kanban-dashboard__person-count',
 				})
 			})
 		}
 
-		const recentActivity = dashboardGrid.createEl('div', {
+		const recentActivity = dashboardGrid.createDiv({
 			cls: 'kanban-dashboard__card kanban-dashboard__card--wide',
 		})
 
@@ -431,7 +431,7 @@ export class KanbanMoonlightView extends ItemView {
 			cls: 'kanban-dashboard__card-title',
 		})
 
-		const activityList = recentActivity.createEl('div', {
+		const activityList = recentActivity.createDiv({
 			cls: 'kanban-dashboard__activity-list',
 		})
 
@@ -465,16 +465,16 @@ export class KanbanMoonlightView extends ItemView {
 			.sort((a, b) => b.date.localeCompare(a.date))
 			.slice(0, 10)
 			.forEach((activity) => {
-				const activityRow = activityList.createEl('div', {
+				const activityRow = activityList.createDiv({
 					cls: 'kanban-dashboard__activity-row',
 				})
 
-				activityRow.createEl('span', {
+				activityRow.createSpan({
 					text: activity.noteName,
 					cls: 'kanban-dashboard__activity-note',
 				})
 
-				activityRow.createEl('span', {
+				activityRow.createSpan({
 					text: activity.detail,
 					cls: 'kanban-dashboard__activity-detail',
 				})
@@ -485,7 +485,7 @@ export class KanbanMoonlightView extends ItemView {
 				const yyyy = String(date.getFullYear())
 
 				const formatedDate = `${dd}/${MM}/${yyyy}`
-				activityRow.createEl('span', {
+				activityRow.createSpan({
 					text: formatedDate,
 					cls: 'kanban-dashboard__activity-date',
 				})
@@ -493,11 +493,11 @@ export class KanbanMoonlightView extends ItemView {
 	}
 
 	private createTabBar(container: HTMLElement) {
-		const viewBar = container.createEl('div', {
+		const viewBar = container.createDiv({
 			cls: 'kanban-view-bar',
 		})
 
-		const viewTabs = viewBar.createEl('div', {
+		const viewTabs = viewBar.createDiv({
 			cls: 'kanban-view-tabs',
 		})
 
@@ -516,7 +516,7 @@ export class KanbanMoonlightView extends ItemView {
 				cls: `kanban-view-tab${this.currentView === type ? ' kanban-view-tab--active' : ''}`,
 			})
 			setIcon(tab, icon)
-			tab.createEl('span', { text: label })
+			tab.createSpan({ text: label })
 
 			tab.addEventListener('click', () => {
 				if (this.currentView === type) return
@@ -527,7 +527,7 @@ export class KanbanMoonlightView extends ItemView {
 			})
 		})
 
-		const tabBar = viewBar.createEl('div', {
+		const tabBar = viewBar.createDiv({
 			cls: 'kanban-tab-bar',
 		})
 
@@ -535,11 +535,11 @@ export class KanbanMoonlightView extends ItemView {
 		const activeBoardId = this.plugin.settings.activeBoardId
 
 		boards.forEach((board) => {
-			const tab = tabBar.createEl('div', {
+			const tab = tabBar.createDiv({
 				cls: `kanban-tab${board.id === activeBoardId ? ' kanban-tab--active' : ''}`,
 				attr: { title: t('BOARD_TAB_TOOLTIP') },
 			})
-			tab.createEl('span', { text: board.name })
+			tab.createSpan({ text: board.name })
 
 			tab.addEventListener('click', () => {
 				if (board.id === activeBoardId) return
@@ -554,7 +554,7 @@ export class KanbanMoonlightView extends ItemView {
 			})
 		})
 
-		const addTabBtn = tabBar.createEl('div', {
+		const addTabBtn = tabBar.createDiv({
 			cls: 'kanban-tab kanban-tab-add',
 			attr: { title: t('ADD_BOARD') },
 		})
@@ -602,6 +602,24 @@ const RELEASE_NOTES: Record<
 	string,
 	Array<{ title: string; items: string[] }>
 > = {
+	'1.4.0': [
+		{
+			title: 'Added',
+			items: [
+				'People data syncs bidirectionally with Markdown files.',
+				'Deleting a person removes its .md file from the vault.',
+				'Changing a person name auto-renames the .md file.',
+				'Unique personId field in frontmatter for stable identification.',
+				'Person files are synced on plugin load.',
+			],
+		},
+		{
+			title: 'Changed',
+			items: [
+				'Gantt chart uses window.moment for better compatibility.',
+			],
+		},
+	],
 	'1.3.1': [
 		{
 			title: 'Changed',

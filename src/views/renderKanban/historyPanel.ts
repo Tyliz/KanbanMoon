@@ -21,7 +21,7 @@ export function renderHistoryPanel(
 	const allEntries = collectAllEvents(plugin, notes)
 
 	if (allEntries.length === 0) {
-		container.createEl('div', {
+		container.createDiv({
 			text: t('HISTORY_GLOBAL_EMPTY'),
 			cls: 'kanban-history-global__empty',
 		})
@@ -32,7 +32,7 @@ export function renderHistoryPanel(
 		.sort((a, b) => b.event.date.localeCompare(a.event.date))
 		.slice(0, plugin.settings.globalHistoryLimit)
 
-	const listEl = container.createEl('div', {
+	const listEl = container.createDiv({
 		cls: 'kanban-history-global__list',
 	})
 
@@ -69,15 +69,15 @@ function renderGlobalEvent(
 	entry: GlobalHistoryEntry,
 	plugin: KanbanMoonlightPlugin,
 ) {
-	const eventEl = container.createEl('div', {
+	const eventEl = container.createDiv({
 		cls: 'kanban-history-global__event',
 	})
 
-	const iconEl = eventEl.createEl('div', {
+	const iconEl = eventEl.createDiv({
 		cls: 'kanban-history-global__icon',
 	})
 
-	const bodyEl = eventEl.createEl('div', {
+	const bodyEl = eventEl.createDiv({
 		cls: 'kanban-history-global__body',
 	})
 
@@ -97,11 +97,11 @@ function renderGlobalEvent(
 		})()
 	})
 
-	const textEl = bodyEl.createEl('div', {
+	const textEl = bodyEl.createDiv({
 		cls: 'kanban-history-global__text',
 	})
 
-	eventEl.createEl('div', {
+	eventEl.createDiv({
 		cls: 'kanban-history-global__date',
 		text: entry.event.date,
 	})
@@ -126,14 +126,18 @@ function renderGlobalEvent(
 		}
 		case 'assignee_changed': {
 			setIcon(iconEl, 'users')
-			textEl.textContent = t('HISTORY_EVENT_ASSIGNEE_CHANGED')
-				.replace('{title}', '')
+			textEl.textContent = t('HISTORY_EVENT_ASSIGNEE_CHANGED').replace(
+				'{title}',
+				'',
+			)
 			break
 		}
 		case 'category_changed': {
 			setIcon(iconEl, 'tag')
-			textEl.textContent = t('HISTORY_EVENT_CATEGORY_CHANGED')
-				.replace('{title}', '')
+			textEl.textContent = t('HISTORY_EVENT_CATEGORY_CHANGED').replace(
+				'{title}',
+				'',
+			)
 			break
 		}
 	}
