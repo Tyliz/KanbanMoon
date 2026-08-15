@@ -84,7 +84,7 @@ export class CreateTaskModal extends Modal {
 			})
 
 		if (this.plugin.settings.people.length > 0) {
-			const peopleSection = contentEl.createEl('div', {
+			const peopleSection = contentEl.createDiv({
 				cls: 'kanban-people-selection',
 			})
 
@@ -93,12 +93,12 @@ export class CreateTaskModal extends Modal {
 				cls: 'kanban-people-label',
 			})
 
-			const peopleList = peopleSection.createEl('div', {
+			const peopleList = peopleSection.createDiv({
 				cls: 'kanban-people-list',
 			})
 
 			this.plugin.settings.people.forEach((person) => {
-				const personCheckbox = peopleList.createEl('div', {
+				const personCheckbox = peopleList.createDiv({
 					cls: 'kanban-person-checkbox',
 				})
 
@@ -109,7 +109,7 @@ export class CreateTaskModal extends Modal {
 					},
 				})
 
-				const avatarEl = personCheckbox.createEl('div', {
+				const avatarEl = personCheckbox.createDiv({
 					cls: 'kanban-person-avatar',
 					attr: {
 						style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
@@ -122,7 +122,7 @@ export class CreateTaskModal extends Modal {
 					.toUpperCase()
 					.slice(0, 2)
 
-				personCheckbox.createEl('span', {
+				personCheckbox.createSpan({
 					text: person.name,
 					cls: 'kanban-person-name',
 				})

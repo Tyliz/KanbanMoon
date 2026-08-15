@@ -29,9 +29,7 @@ export const setupColumnDragDrop = (
 			)
 
 			if (draggedCard) {
-				const sourceColumn = draggedCard.closest(
-					'.kanban-column',
-				)
+				const sourceColumn = draggedCard.closest('.kanban-column')
 
 				const sourceCounter = sourceColumn?.querySelector(
 					'.kanban-column__color-indicator',
@@ -44,7 +42,9 @@ export const setupColumnDragDrop = (
 				const targetCount = parseInt(targetCounter?.textContent || '0')
 
 				if (sourceCounter)
-					sourceCounter.textContent = String(Math.max(0, sourceCount - 1))
+					sourceCounter.textContent = String(
+						Math.max(0, sourceCount - 1),
+					)
 				if (targetCounter)
 					targetCounter.textContent = String(targetCount + 1)
 
@@ -55,7 +55,7 @@ export const setupColumnDragDrop = (
 						'.kanban-column__empty-message',
 					)
 					if (!emptyMsg) {
-						sourceColumn.createEl('div', {
+						sourceColumn.createDiv({
 							text: t('EMPTY_COLUMN'),
 							cls: 'kanban-column__empty-message',
 						})
@@ -100,12 +100,10 @@ export const setupColumnDragDrop = (
 							view.plugin.settings.maxHistoryEvents,
 						)
 
-						fm[board.propertyState] =
-							columnSetting.id
+						fm[board.propertyState] = columnSetting.id
 
 						const isCompleted =
-							columnSetting.id ===
-							board.completedColumn.id
+							columnSetting.id === board.completedColumn.id
 						new Notice(
 							isCompleted
 								? `${t('COMPLETE_NOTE')}`

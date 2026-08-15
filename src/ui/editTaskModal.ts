@@ -39,7 +39,7 @@ export class EditTaskModal extends Modal {
 			text: t('ADD_PERSON_BTN'),
 		})
 
-		const peopleContainer = contentEl.createEl('div', {
+		const peopleContainer = contentEl.createDiv({
 			cls: 'kanban-people-list',
 		})
 
@@ -55,7 +55,7 @@ export class EditTaskModal extends Modal {
 				})
 			} else {
 				currentPeople.forEach((person) => {
-					const personCheckbox = peopleContainer.createEl('div', {
+					const personCheckbox = peopleContainer.createDiv({
 						cls: 'kanban-person-checkbox',
 					})
 
@@ -70,12 +70,12 @@ export class EditTaskModal extends Modal {
 						checkbox.checked = true
 					}
 
-				const avatarEl = personCheckbox.createEl('div', {
-					cls: 'kanban-person-avatar',
-					attr: {
-						style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
-					},
-				})
+					const avatarEl = personCheckbox.createDiv({
+						cls: 'kanban-person-avatar',
+						attr: {
+							style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
+						},
+					})
 					avatarEl.textContent = person.name
 						.split(' ')
 						.map((n) => n[0])
@@ -83,7 +83,7 @@ export class EditTaskModal extends Modal {
 						.toUpperCase()
 						.slice(0, 2)
 
-					personCheckbox.createEl('span', {
+					personCheckbox.createSpan({
 						text: person.name,
 						cls: 'kanban-person-name',
 					})
@@ -121,7 +121,7 @@ export class EditTaskModal extends Modal {
 
 		renderPeopleList()
 
-		const footerEl = contentEl.createEl('div', {
+		const footerEl = contentEl.createDiv({
 			cls: 'kanban-board-modal-footer',
 		})
 
@@ -148,10 +148,7 @@ export class EditTaskModal extends Modal {
 					const board = this.plugin.getActiveBoard()
 					const key = board.propertyAssignee || 'assignee'
 
-					const previousAssignees = getFmStringArray(
-						fm,
-						key,
-					)
+					const previousAssignees = getFmStringArray(fm, key)
 
 					const added = personIds.filter(
 						(id) => !previousAssignees.includes(id),
