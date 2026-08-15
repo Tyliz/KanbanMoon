@@ -21,14 +21,9 @@ export const renderKanbanColumns = (
 	board.columns.forEach((columna) => {
 		const columnNotes = notes
 			.filter((note) => {
-				const defaultId =
-					board.columns[0]?.id || 'backlog'
+				const defaultId = board.columns[0]?.id || 'backlog'
 				const fm = toSafeFm(view.app.metadataCache.getFileCache(note))
-				const state = getFmString(
-					fm,
-					board.propertyState,
-					defaultId,
-				)
+				const state = getFmString(fm, board.propertyState, defaultId)
 
 				return (
 					state.toLowerCase() === columna.id.toLowerCase() ||
@@ -89,11 +84,11 @@ export const renderKanbanColumns = (
 	)
 
 	if (view.plugin.settings.historyEnabled) {
-		const historySection = (container as HTMLElement).createEl('div', {
+		const historySection = (container as HTMLElement).createDiv({
 			cls: 'kanban-history-global',
 		})
 
-		const historyHeader = historySection.createEl('div', {
+		const historyHeader = historySection.createDiv({
 			cls: 'kanban-history-global__header',
 		})
 
@@ -102,7 +97,7 @@ export const renderKanbanColumns = (
 			cls: 'kanban-history-global__title',
 		})
 
-		const historyList = historySection.createEl('div', {
+		const historyList = historySection.createDiv({
 			cls: 'kanban-history-global__container',
 		})
 

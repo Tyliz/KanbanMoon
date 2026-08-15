@@ -29,7 +29,7 @@ export class UpdateModal extends Modal {
 		contentEl.empty()
 		contentEl.addClass('kanban-update-modal')
 
-		const headerEl = contentEl.createEl('div', {
+		const headerEl = contentEl.createDiv({
 			cls: 'kanban-update-modal__header',
 		})
 
@@ -61,14 +61,14 @@ export class UpdateModal extends Modal {
 			cls: 'kanban-update-modal__subtitle',
 		})
 
-		const sectionsEl = contentEl.createEl('div', {
+		const sectionsEl = contentEl.createDiv({
 			cls: 'kanban-update-modal__sections',
 		})
 
 		this.sections.forEach((section) => {
 			if (section.items.length === 0) return
 
-			const sectionEl = sectionsEl.createEl('div', {
+			const sectionEl = sectionsEl.createDiv({
 				cls: 'kanban-update-modal__section',
 			})
 
