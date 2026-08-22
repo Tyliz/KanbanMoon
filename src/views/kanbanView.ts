@@ -66,7 +66,6 @@ export class KanbanMoonlightView extends ItemView {
 	drawKanbanBoard = () => {
 		const container = this.contentEl
 		container.empty()
-		this.boardFilters = { ...DEFAULT_FILTERS }
 
 		this.createTabBar(container)
 
@@ -135,6 +134,7 @@ export class KanbanMoonlightView extends ItemView {
 				value: cat.name,
 			})
 		})
+		categorySelect.value = this.boardFilters.category
 
 		const priorityFilter = filterBar.createDiv({
 			cls: 'kanban-filter-item',
@@ -156,6 +156,7 @@ export class KanbanMoonlightView extends ItemView {
 				value: pri.name,
 			})
 		})
+		prioritySelect.value = this.boardFilters.priority
 
 		const assigneeFilter = filterBar.createDiv({
 			cls: 'kanban-filter-item',
@@ -177,6 +178,7 @@ export class KanbanMoonlightView extends ItemView {
 				value: person.id,
 			})
 		})
+		assigneeSelect.value = this.boardFilters.assignee
 
 		const applyFilters = () => {
 			if (this.debounceTimer) {
@@ -218,7 +220,14 @@ export class KanbanMoonlightView extends ItemView {
 			cls: 'kanban-board',
 		})
 
-		renderKanbanColumns(this, notesWithTag)
+		const initialFiltered = searchNotes(
+			notesWithTag,
+			this.app,
+			board,
+			'',
+			this.boardFilters,
+		)
+		renderKanbanColumns(this, initialFiltered)
 
 		const settingsBtn = container.createDiv({
 			cls: 'kanban-settings-btn',
@@ -634,6 +643,7 @@ export class KanbanMoonlightView extends ItemView {
 			tab.addEventListener('click', () => {
 				if (board.id === activeBoardId) return
 				this.plugin.settings.activeBoardId = board.id
+				this.boardFilters = { ...DEFAULT_FILTERS }
 				void this.plugin.saveSettings()
 				this.drawCurrentView()
 			})
