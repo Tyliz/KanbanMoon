@@ -602,6 +602,25 @@ const RELEASE_NOTES: Record<
 	string,
 	Array<{ title: string; items: string[] }>
 > = {
+	'1.5.0': [
+		{
+			title: 'Added',
+			items: [
+				'Priority system with configurable priority levels per board.',
+				'Priority badge displayed on task cards with color and icon.',
+				'Edit task modal now allows editing description, category, priority, and assignees.',
+				'Priority changes are tracked in task history.',
+				'Category changes are now tracked in task history.',
+			],
+		},
+		{
+			title: 'Changed',
+			items: [
+				'Renamed "Edit Task Assignment" to "Edit Task".',
+				'Improved edit modal layout with all editable fields.',
+			],
+		},
+	],
 	'1.4.0': [
 		{
 			title: 'Added',
