@@ -1,5 +1,5 @@
 import { setIcon, TFile } from 'obsidian'
-import { IColumn, ICategory } from '../../settings/kanbanSettings'
+import { IColumn, ICategory, IPriority } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { setupColumnDragDrop } from './dragDrop'
@@ -74,7 +74,9 @@ export const createColumnElement = (
 		...view.plugin.getActiveBoard().categories,
 	]
 
+	const priorities: IPriority[] = view.plugin.getActiveBoard().priorities
+
 	notes.forEach((note) => {
-		createCardElement(columnEl, view, note, columnSetting, categories)
+		createCardElement(columnEl, view, note, columnSetting, categories, priorities)
 	})
 }

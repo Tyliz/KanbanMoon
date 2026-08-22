@@ -3,6 +3,7 @@ export type HistoryEventType =
 	| 'state_changed'
 	| 'assignee_changed'
 	| 'category_changed'
+	| 'priority_changed'
 
 export interface HistoryEventCreated {
 	type: 'created'
@@ -31,11 +32,19 @@ export interface HistoryEventCategoryChanged {
 	to: string
 }
 
+export interface HistoryEventPriorityChanged {
+	type: 'priority_changed'
+	date: string
+	from: string
+	to: string
+}
+
 export type HistoryEvent =
 	| HistoryEventCreated
 	| HistoryEventStateChanged
 	| HistoryEventAssigneeChanged
 	| HistoryEventCategoryChanged
+	| HistoryEventPriorityChanged
 
 export interface LegacyHistoryEntry {
 	state?: string

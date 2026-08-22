@@ -1,7 +1,7 @@
-import { App, Modal, Notice, TFile } from 'obsidian'
+import { App, Modal, Notice, Setting, TFile } from 'obsidian'
 import { t } from '../lang/helpers'
 import type KanbanMoonlightPlugin from '../main'
-import { toSafeFm, getFmStringArray } from '../utils/frontmatter'
+import { toSafeFm, getFmString, getFmStringArray } from '../utils/frontmatter'
 import { PersonModal } from './boardModal'
 import { getContrastColor } from '../utils/color'
 import { IPerson } from '../settings/kanbanSettings'
@@ -26,6 +26,68 @@ export class EditTaskModal extends Modal {
 		const board = this.plugin.getActiveBoard()
 		const noteCache = this.plugin.app.metadataCache.getFileCache(this.file)
 		const fm = toSafeFm(noteCache)
+
+		const currentDescription = getFmString(
+			fm,
+			board.propertyDescription || 'description',
+		)
+		let newDescription = currentDescription
+
+		const descriptionSetting = new Setting(contentEl)
+			.setName(t('EDIT_TASK_DESC'))
+
+		const descriptionTextarea = descriptionSetting.descEl.createEl(
+			'textarea',
+			{
+				cls: 'kanban-create-task-textarea',
+				attr: {
+					rows: 3,
+					placeholder: t('CREATE_TASK_DESC_PLACEHOLDER'),
+				},
+			},
+		)
+		descriptionTextarea.value = currentDescription
+		descriptionTextarea.addEventListener('input', () => {
+			newDescription = descriptionTextarea.value
+		})
+
+		const currentCategory = getFmString(
+			fm,
+			board.propertyCategory || 'category',
+		)
+		let selectedCategory = currentCategory
+
+		new Setting(contentEl)
+			.setName(t('EDIT_TASK_CATEGORY'))
+			.addDropdown((dropdown) => {
+				dropdown.addOption('', t('CREATE_TASK_CATEGORY_NONE'))
+				board.categories.forEach((cat) => {
+					dropdown.addOption(cat.name, cat.name)
+				})
+				dropdown.setValue(selectedCategory)
+				dropdown.onChange((value) => {
+					selectedCategory = value
+				})
+			})
+
+		const currentPriority = getFmString(
+			fm,
+			board.propertyPriority || 'priority',
+		)
+		let selectedPriority = currentPriority
+
+		new Setting(contentEl)
+			.setName(t('EDIT_TASK_PRIORITY'))
+			.addDropdown((dropdown) => {
+				dropdown.addOption('', t('CREATE_TASK_PRIORITY_NONE'))
+				board.priorities.forEach((pri) => {
+					dropdown.addOption(pri.name, pri.name)
+				})
+				dropdown.setValue(selectedPriority)
+				dropdown.onChange((value) => {
+					selectedPriority = value
+				})
+			})
 
 		const currentAssignees = getFmStringArray(
 			fm,
@@ -135,20 +197,81 @@ export class EditTaskModal extends Modal {
 			text: t('BOARD_MODAL_SAVE'),
 		})
 		saveBtn.addEventListener('click', () => {
-			void this.saveAssignees(selectedPeople)
+			void this.saveChanges(
+				newDescription,
+				selectedCategory,
+				selectedPriority,
+				selectedPeople,
+			)
 		})
 	}
 
-	private async saveAssignees(personIds: string[]) {
+	private async saveChanges(
+		description: string,
+		category: string,
+		priority: string,
+		personIds: string[],
+	) {
 		try {
 			await this.plugin.app.fileManager.processFrontMatter(
 				this.file,
 				(frontmatter) => {
 					const fm = frontmatter as Record<string, unknown>
 					const board = this.plugin.getActiveBoard()
-					const key = board.propertyAssignee || 'assignee'
 
-					const previousAssignees = getFmStringArray(fm, key)
+					const descKey = board.propertyDescription || 'description'
+					if (description.trim()) {
+						fm[descKey] = description.trim()
+					} else {
+						delete fm[descKey]
+					}
+
+					const categoryKey = board.propertyCategory || 'category'
+					const previousCategory = getFmString(fm, categoryKey)
+
+					if (category !== previousCategory) {
+						pushHistoryEvent(
+							fm,
+							{
+								type: 'category_changed',
+								date: getToday(),
+								from: previousCategory,
+								to: category,
+							},
+							this.plugin.settings.maxHistoryEvents,
+						)
+
+						if (category.trim()) {
+							fm[categoryKey] = category.trim()
+						} else {
+							delete fm[categoryKey]
+						}
+					}
+
+					const priorityKey = board.propertyPriority || 'priority'
+					const previousPriority = getFmString(fm, priorityKey)
+
+					if (priority !== previousPriority) {
+						pushHistoryEvent(
+							fm,
+							{
+								type: 'priority_changed',
+								date: getToday(),
+								from: previousPriority,
+								to: priority,
+							},
+							this.plugin.settings.maxHistoryEvents,
+						)
+
+						if (priority.trim()) {
+							fm[priorityKey] = priority.trim()
+						} else {
+							delete fm[priorityKey]
+						}
+					}
+
+					const assigneeKey = board.propertyAssignee || 'assignee'
+					const previousAssignees = getFmStringArray(fm, assigneeKey)
 
 					const added = personIds.filter(
 						(id) => !previousAssignees.includes(id),
@@ -171,17 +294,17 @@ export class EditTaskModal extends Modal {
 					}
 
 					if (personIds.length > 0) {
-						fm[key] = personIds
+						fm[assigneeKey] = personIds
 					} else {
-						delete fm[key]
+						delete fm[assigneeKey]
 					}
 				},
 			)
-			new Notice(t('TASK_ASSIGNEES_UPDATED'))
+			new Notice(t('EDIT_TASK_UPDATED'))
 			this.close()
 		} catch (err) {
 			new Notice(t('TASK_ASSIGNEES_ERROR'))
-			console.error('Error updating assignees:', err)
+			console.error('Error updating task:', err)
 		}
 	}
 

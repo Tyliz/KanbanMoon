@@ -1,5 +1,10 @@
 import { Notice, setIcon, TFile } from 'obsidian'
-import { IColumn, ICategory, IPerson } from '../../settings/kanbanSettings'
+import {
+	IColumn,
+	ICategory,
+	IPriority,
+	IPerson,
+} from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { getContrastColor, normalizeTag } from './utils'
@@ -19,6 +24,7 @@ export const createCardElement = (
 	note: TFile,
 	columnSetting: IColumn,
 	categories: ICategory[],
+	priorities: IPriority[],
 ) => {
 	const board = view.plugin.getActiveBoard()
 	const noteCache = view.plugin.app.metadataCache.getFileCache(note)
@@ -37,6 +43,20 @@ export const createCardElement = (
 			(category) =>
 				category.name.toLocaleLowerCase() === noteCategoryName,
 		) ?? categories.first()
+
+	let notePriorityName = ''
+	if (fm) {
+		const rawPriority = fm[board.propertyPriority || 'priority']
+		if (typeof rawPriority === 'string') {
+			notePriorityName = rawPriority.toLowerCase()
+		}
+	}
+
+	const notePriority =
+		priorities.find(
+			(priority) =>
+				priority.name.toLocaleLowerCase() === notePriorityName,
+		) ?? null
 
 	const cardBorderColor = noteCategory?.color
 
@@ -217,6 +237,26 @@ export const createCardElement = (
 		})
 	}
 
+	if (notePriority) {
+		const fontColor = getContrastColor(notePriority.color)
+
+		const priorityTag = tagContainer.createSpan({
+			cls: 'kanban-card__tag kanban-card__priority-tag',
+			attr: {
+				style: `background: ${notePriority.color}; color: ${fontColor}; font-weight: normal !important;`,
+			},
+		})
+
+		const iconEl = priorityTag.createSpan({
+			cls: 'kanban-card__tag-icon',
+		})
+		setIcon(iconEl, notePriority.icon || 'flag')
+
+		priorityTag.createSpan({
+			text: notePriority.name,
+		})
+	}
+
 	relevantTags.slice(0, 2).forEach((tag: string) => {
 		tagContainer.createSpan({
 			text: tag,
@@ -291,7 +331,7 @@ export const createCardElement = (
 	const btnEditAssignee = btnFooter.createEl('button', {
 		cls: 'btn-edit-assignee',
 	})
-	setIcon(btnEditAssignee, 'users')
+	setIcon(btnEditAssignee, 'edit')
 	btnEditAssignee.addEventListener('click', () => {
 		new EditTaskModal(view.app, view.plugin, note).open()
 	})
