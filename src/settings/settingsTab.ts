@@ -74,6 +74,14 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 				},
 			},
 			{
+				name: t('PRIORITIES_TITLE'),
+				render: (setting) => {
+					setting.controlEl.empty()
+					setting.setClass('kanban-setting-section')
+					this.renderPrioritySettingsSection(setting)
+				},
+			},
+			{
 				name: t('PEOPLE_FOLDER'),
 				render: (setting) => {
 					setting.controlEl.empty()
@@ -190,6 +198,11 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 		new Setting(propertiesContent)
 			.setName(t('PROPERTY_CATEGORY'))
 			.setDesc(board.propertyCategory)
+			.setClass('kanban-setting-section')
+
+		new Setting(propertiesContent)
+			.setName(t('PROPERTY_PRIORITY'))
+			.setDesc(board.propertyPriority)
 			.setClass('kanban-setting-section')
 
 		propertiesContent.createEl('p', {
@@ -448,6 +461,109 @@ export class KanbanMoonlightSettingTab extends PluginSettingTab {
 						name: '',
 						color: '#ffffff',
 						icon: 'tag',
+					})
+					void this.plugin.saveSettings()
+					this.update()
+				}),
+		)
+	}
+
+	private renderPrioritySettingsSection(setting: Setting) {
+		const board = this.plugin.getActiveBoard()
+		const containerEl = setting.controlEl
+
+		containerEl.addClass('kanban-setting-section')
+
+		board.priorities.forEach((priority, index) => {
+			const section = containerEl.createDiv({
+				cls: 'kanban-setting-card',
+			})
+
+			const nameRow = section.createDiv({ cls: 'kanban-card-row' })
+			const nameInput = nameRow.createEl('input', {
+				cls: 'kanban-card-input',
+				attr: {
+					type: 'text',
+					value: priority.name,
+					placeholder: t('PRIORITY_NAME_PLACEHOLDER'),
+				},
+			})
+			nameInput.addEventListener('change', () => {
+				board.priorities[index]!.name = nameInput.value
+				void this.plugin.saveSettings()
+			})
+
+			const actionsRow = section.createDiv({
+				cls: 'kanban-card-row',
+			})
+
+			const iconBtn = actionsRow.createEl('button', {
+				cls: 'kanban-card-icon-btn',
+				attr: { title: t('PRIORITY_ICON') },
+			})
+			setIcon(iconBtn, priority.icon || 'flag')
+			iconBtn.addEventListener('click', () => {
+				new IconSuggestModal(this.plugin.app, (selectedIcon) => {
+					board.priorities[index]!.icon = selectedIcon
+					void this.plugin.saveSettings()
+					this.update()
+				}).open()
+			})
+
+			const colorPicker = actionsRow.createEl('input', {
+				cls: 'kanban-card-color',
+				attr: { type: 'color', value: priority.color },
+			})
+			colorPicker.addEventListener('input', () => {
+				board.priorities[index]!.color = colorPicker.value
+				void this.plugin.saveSettings()
+			})
+
+			const levelInput = actionsRow.createEl('input', {
+				cls: 'kanban-card-input kanban-card-input--small',
+				attr: {
+					type: 'number',
+					value: priority.level,
+					min: '1',
+					max: '10',
+					placeholder: t('PRIORITY_LEVEL'),
+					title: t('PRIORITY_LEVEL'),
+				},
+			})
+			levelInput.addEventListener('change', () => {
+				const val = parseInt(levelInput.value)
+				if (!isNaN(val) && val > 0) {
+					board.priorities[index]!.level = val
+					void this.plugin.saveSettings()
+				}
+			})
+
+			actionsRow.createSpan({ cls: 'kanban-card-spacer' })
+
+			const deleteBtn = actionsRow.createEl('button', {
+				cls: 'kanban-card-action-btn kanban-card-action-btn--danger',
+				attr: { title: t('DELETE_BTN') },
+			})
+			setIcon(deleteBtn, 'trash')
+			deleteBtn.addEventListener('click', () => {
+				board.priorities.splice(index, 1)
+				void this.plugin.saveSettings()
+				this.update()
+			})
+		})
+
+		setting.addButton((btn) =>
+			btn
+				.setButtonText(t('ADD_PRIORITY_BTN'))
+				.setCta()
+				.onClick(() => {
+					const nuevoId = `priority-${Date.now()}`
+					board.priorities.push({
+						id: nuevoId,
+						name: '',
+						color: '#ffffff',
+						icon: 'flag',
+						level: board.priorities.length + 1,
 					})
 					void this.plugin.saveSettings()
 					this.update()

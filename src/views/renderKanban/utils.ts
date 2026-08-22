@@ -78,6 +78,10 @@ export function searchNotes(
 			fm,
 			board.propertyCategory || 'category',
 		)
+		const priority = getFmString(
+			fm,
+			board.propertyPriority || 'priority',
+		)
 
 		const tags = getFmStringArray(fm, 'tags').map((t) =>
 			t.toLowerCase(),
@@ -87,6 +91,7 @@ export function searchNotes(
 			title.includes(searchTerm) ||
 			description.toLowerCase().includes(searchTerm) ||
 			category.toLowerCase().includes(searchTerm) ||
+			priority.toLowerCase().includes(searchTerm) ||
 			tags.some((tag: string) =>
 				tag.toLowerCase().includes(searchTerm),
 			)

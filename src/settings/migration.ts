@@ -93,10 +93,16 @@ export function migrateSettings(
 				...board,
 				propertyAssignee:
 					boardData.propertyAssignee || 'assignee',
+				propertyPriority:
+					boardData.propertyPriority || 'priority',
 				propertyStartDate:
 					boardData.propertyStartDate || 'startDate',
 				propertyDueDate:
 					boardData.propertyDueDate || 'dueDate',
+				priorities:
+					Array.isArray(boardData.priorities) && boardData.priorities.length > 0
+						? boardData.priorities
+						: DEFAULT_BOARD.priorities,
 				startColumnId,
 			}
 		}) as IBoard[]
@@ -149,6 +155,7 @@ export function migrateSettings(
 			propertyCategory:
 				(raw.propertyCategory as string) ||
 				DEFAULT_BOARD.propertyCategory,
+			propertyPriority: DEFAULT_BOARD.propertyPriority,
 			propertyAssignee: DEFAULT_BOARD.propertyAssignee,
 			propertyStartDate: DEFAULT_BOARD.propertyStartDate,
 			propertyDueDate: DEFAULT_BOARD.propertyDueDate,
@@ -157,6 +164,7 @@ export function migrateSettings(
 					? raw.columns
 					: DEFAULT_BOARD_COLUMNS,
 			categories: raw.categories || [],
+			priorities: DEFAULT_BOARD.priorities,
 			completedColumn:
 				raw.completedColumn ||
 				DEFAULT_COMPLETED_COLUMN,

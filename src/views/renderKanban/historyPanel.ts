@@ -140,5 +140,13 @@ function renderGlobalEvent(
 			)
 			break
 		}
+		case 'priority_changed': {
+			setIcon(iconEl, 'flag')
+			textEl.textContent = t('HISTORY_EVENT_PRIORITY_CHANGED').replace(
+				'{title}',
+				'',
+			)
+			break
+		}
 	}
 }

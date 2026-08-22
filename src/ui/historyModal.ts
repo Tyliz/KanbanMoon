@@ -132,6 +132,17 @@ export class HistoryModal extends Modal {
 				})
 				break
 			}
+			case 'priority_changed': {
+				setIcon(iconEl, 'flag')
+				const text = t('HISTORY_PRIORITY_CHANGED')
+					.replace('{from}', event.from || '—')
+					.replace('{to}', event.to || '—')
+				contentEl.createSpan({
+					text,
+					cls: 'kanban-history-event__label',
+				})
+				break
+			}
 		}
 	}
 

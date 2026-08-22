@@ -434,6 +434,17 @@ a.kanban-card__title.internal-link {
 	height: 10px;
 }
 
+.kanban-card__priority-tag {
+	margin-left: 2px;
+}
+
+input.kanban-card-input--small {
+	flex: 0 0 50px;
+	min-width: 0;
+	width: 50px;
+	text-align: center;
+}
+
 .kanban-card__date {
 	display: flex;
 	align-items: flex-end;
@@ -1049,7 +1060,8 @@ button.btn-delete:hover svg {
 	color: var(--text-normal);
 }
 
-.kanban-person-modal .kanban-create-task-textarea {
+.kanban-person-modal .kanban-create-task-textarea,
+.kanban-create-task-textarea {
 	width: 100%;
 	background: var(--background-secondary);
 	border: 1px solid var(--background-modifier-border);
@@ -1060,7 +1072,8 @@ button.btn-delete:hover svg {
 	resize: vertical;
 }
 
-.kanban-person-modal .kanban-create-task-textarea:focus {
+.kanban-person-modal .kanban-create-task-textarea:focus,
+.kanban-create-task-textarea:focus {
 	border-color: var(--interactive-accent);
 	outline: none;
 }
