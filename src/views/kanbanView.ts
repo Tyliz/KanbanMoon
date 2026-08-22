@@ -3,7 +3,12 @@ import { t } from '../lang/helpers'
 import type KanbanMoonlight from '../main'
 import { ViewType, GanttZoom } from '../settings/kanbanSettings'
 import { renderKanbanColumns } from './renderKanban/renderColumns'
-import { getFilteredNotes, searchNotes } from './renderKanban/utils'
+import {
+	getFilteredNotes,
+	searchNotes,
+	DEFAULT_FILTERS,
+	type BoardFilters,
+} from './renderKanban/utils'
 import { CreateTaskModal } from '../ui/createTaskModal'
 import { BoardModal } from '../ui/boardModal'
 import { renderGantt } from './ganttChart'
@@ -14,6 +19,7 @@ export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
 export class KanbanMoonlightView extends ItemView {
 	plugin: KanbanMoonlight
 	currentView: ViewType = ViewType.kanban
+	boardFilters: BoardFilters = { ...DEFAULT_FILTERS }
 
 	constructor(leaf: WorkspaceLeaf, plugin: KanbanMoonlight) {
 		super(leaf)
@@ -60,6 +66,7 @@ export class KanbanMoonlightView extends ItemView {
 	drawKanbanBoard = () => {
 		const container = this.contentEl
 		container.empty()
+		this.boardFilters = { ...DEFAULT_FILTERS }
 
 		this.createTabBar(container)
 
@@ -71,9 +78,9 @@ export class KanbanMoonlightView extends ItemView {
 		})
 		const tag = board.tagNotes
 		const folder = board.folderNotes
-		const filters = [tag, folder].filter(Boolean).join(', ')
+		const filterParts = [tag, folder].filter(Boolean).join(', ')
 		filterNotice.createSpan({
-			text: t('FILTER_NOTICE') + ` ${filters}`,
+			text: t('FILTER_NOTICE') + ` ${filterParts}`,
 			cls: 'kanban-filter-notice-text',
 		})
 
@@ -104,24 +111,107 @@ export class KanbanMoonlightView extends ItemView {
 			new CreateTaskModal(this.app, this.plugin).open()
 		})
 
-		searchInput.addEventListener('input', (event) => {
-			const searchTerm = (
-				event.target as HTMLInputElement
-			).value.toLowerCase()
+		const filterBar = mainContainer.createDiv({
+			cls: 'kanban-filter-bar',
+		})
 
+		const categoryFilter = filterBar.createDiv({
+			cls: 'kanban-filter-item',
+		})
+		categoryFilter.createSpan({
+			text: t('FILTER_CATEGORY'),
+			cls: 'kanban-filter-label',
+		})
+		const categorySelect = categoryFilter.createEl('select', {
+			cls: 'kanban-filter-select',
+		})
+		categorySelect.createEl('option', {
+			text: t('FILTER_ALL'),
+			value: '',
+		})
+		board.categories.forEach((cat) => {
+			categorySelect.createEl('option', {
+				text: cat.name,
+				value: cat.name,
+			})
+		})
+
+		const priorityFilter = filterBar.createDiv({
+			cls: 'kanban-filter-item',
+		})
+		priorityFilter.createSpan({
+			text: t('FILTER_PRIORITY'),
+			cls: 'kanban-filter-label',
+		})
+		const prioritySelect = priorityFilter.createEl('select', {
+			cls: 'kanban-filter-select',
+		})
+		prioritySelect.createEl('option', {
+			text: t('FILTER_ALL'),
+			value: '',
+		})
+		board.priorities.forEach((pri) => {
+			prioritySelect.createEl('option', {
+				text: pri.name,
+				value: pri.name,
+			})
+		})
+
+		const assigneeFilter = filterBar.createDiv({
+			cls: 'kanban-filter-item',
+		})
+		assigneeFilter.createSpan({
+			text: t('FILTER_ASSIGNEE'),
+			cls: 'kanban-filter-label',
+		})
+		const assigneeSelect = assigneeFilter.createEl('select', {
+			cls: 'kanban-filter-select',
+		})
+		assigneeSelect.createEl('option', {
+			text: t('FILTER_ALL'),
+			value: '',
+		})
+		this.plugin.settings.people.forEach((person) => {
+			assigneeSelect.createEl('option', {
+				text: person.name,
+				value: person.id,
+			})
+		})
+
+		const applyFilters = () => {
 			if (this.debounceTimer) {
 				window.clearTimeout(this.debounceTimer)
 			}
-
 			this.debounceTimer = window.setTimeout(() => {
+				const searchTerm = searchInput.value.toLowerCase()
 				const filtered = searchNotes(
 					notesWithTag,
 					this.app,
 					board,
 					searchTerm,
+					this.boardFilters,
 				)
 				renderKanbanColumns(this, filtered)
-			}, 300)
+			}, 150)
+		}
+
+		categorySelect.addEventListener('change', () => {
+			this.boardFilters.category = categorySelect.value
+			applyFilters()
+		})
+
+		prioritySelect.addEventListener('change', () => {
+			this.boardFilters.priority = prioritySelect.value
+			applyFilters()
+		})
+
+		assigneeSelect.addEventListener('change', () => {
+			this.boardFilters.assignee = assigneeSelect.value
+			applyFilters()
+		})
+
+		searchInput.addEventListener('input', () => {
+			applyFilters()
 		})
 
 		mainContainer.createDiv({
@@ -609,6 +699,7 @@ const RELEASE_NOTES: Record<
 				'Priority system with configurable priority levels per board.',
 				'Priority badge displayed on task cards with color and icon.',
 				'Edit task modal now allows editing description, category, priority, and assignees.',
+				'Advanced filters: filter tasks by category, priority, or assignee.',
 				'Priority changes are tracked in task history.',
 				'Category changes are now tracked in task history.',
 			],

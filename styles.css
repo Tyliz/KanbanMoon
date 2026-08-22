@@ -197,6 +197,41 @@
 	margin: 0 auto;
 }
 
+.kanban-filter-bar {
+	display: flex;
+	gap: 12px;
+	padding: 0 15px;
+	margin-bottom: 10px;
+	flex-wrap: wrap;
+}
+
+.kanban-filter-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.kanban-filter-label {
+	font-size: 12px;
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.kanban-filter-select {
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 12px;
+	cursor: pointer;
+	outline: none;
+}
+
+.kanban-filter-select:focus {
+	border-color: var(--interactive-accent);
+}
+
 .kanban-column {
 	position: relative;
 	min-width: 280px;
