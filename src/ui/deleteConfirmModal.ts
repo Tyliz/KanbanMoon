@@ -30,7 +30,7 @@ export class DeleteConfirmModal extends Modal {
 				btn.onClick(() => this.close())
 			})
 			.addButton((btn) => {
-				btn.setWarning()
+				btn.setDestructive()
 				btn.setButtonText(t('DELETE_CONFIRM_YES'))
 				btn.onClick(async () => {
 					try {

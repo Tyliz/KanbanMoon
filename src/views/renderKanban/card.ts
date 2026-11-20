@@ -1,5 +1,10 @@
 import { Notice, setIcon, TFile } from 'obsidian'
-import { IColumn, ICategory, IPerson } from '../../settings/kanbanSettings'
+import {
+	IColumn,
+	ICategory,
+	IPriority,
+	IPerson,
+} from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { getContrastColor, normalizeTag } from './utils'
@@ -19,6 +24,7 @@ export const createCardElement = (
 	note: TFile,
 	columnSetting: IColumn,
 	categories: ICategory[],
+	priorities: IPriority[],
 ) => {
 	const board = view.plugin.getActiveBoard()
 	const noteCache = view.plugin.app.metadataCache.getFileCache(note)
@@ -38,9 +44,23 @@ export const createCardElement = (
 				category.name.toLocaleLowerCase() === noteCategoryName,
 		) ?? categories.first()
 
+	let notePriorityName = ''
+	if (fm) {
+		const rawPriority = fm[board.propertyPriority || 'priority']
+		if (typeof rawPriority === 'string') {
+			notePriorityName = rawPriority.toLowerCase()
+		}
+	}
+
+	const notePriority =
+		priorities.find(
+			(priority) =>
+				priority.name.toLocaleLowerCase() === notePriorityName,
+		) ?? null
+
 	const cardBorderColor = noteCategory?.color
 
-	const cardEl = columnEl.createEl('div', {
+	const cardEl = columnEl.createDiv({
 		cls: 'kanban-card',
 		attr: {
 			style: `border-left-color: ${cardBorderColor};`,
@@ -58,7 +78,7 @@ export const createCardElement = (
 		cardEl.classList.remove('kanban-card--dragging')
 	})
 
-	const cardHeaderEl = cardEl.createEl('div', {
+	const cardHeaderEl = cardEl.createDiv({
 		cls: 'kanban-card__header',
 	})
 
@@ -79,6 +99,20 @@ export const createCardElement = (
 		})()
 	})
 
+	const externalLink = getFmString(fm, 'externalLink')
+	if (externalLink) {
+		const btnExternalLink = cardHeaderEl.createEl('a', {
+			cls: 'kanban-card__external-link',
+			attr: {
+				href: externalLink,
+				target: '_blank',
+				rel: 'noopener noreferrer',
+				title: externalLink,
+			},
+		})
+		setIcon(btnExternalLink, 'link')
+	}
+
 	const description = getFmString(fm, board.propertyDescription)
 
 	const descriptionShorted =
@@ -86,12 +120,93 @@ export const createCardElement = (
 			? description.substring(0, 55) + '...'
 			: description
 
-	cardEl.createEl('div', {
+	cardEl.createDiv({
 		text: descriptionShorted,
 		cls: 'kanban-card__description',
 	})
 
-	const tagContainer = cardEl.createEl('div', {
+	const pendingTasks =
+		noteCache?.listItems?.filter((item) => item.task === ' ') ?? []
+
+	if (pendingTasks.length > 0) {
+		const tasksContainer = cardEl.createDiv({
+			cls: 'kanban-card__tasks',
+		})
+
+		const tasksHeader = tasksContainer.createDiv({
+			cls: 'kanban-card__tasks-header',
+		})
+
+		const tasksToggle = tasksHeader.createSpan({
+			cls: 'kanban-card__tasks-toggle',
+		})
+		setIcon(tasksToggle, 'chevron-right')
+
+		tasksHeader.createSpan({
+			text: `${t('DASHBOARD_PENDING')} (${pendingTasks.length})`,
+			cls: 'kanban-card__tasks-title',
+		})
+
+		const tasksContent = tasksContainer.createDiv({
+			cls: 'kanban-card__tasks-content',
+		})
+
+		let loaded = false
+
+		tasksHeader.addEventListener('click', () => {
+			tasksContainer.classList.toggle('kanban-card__tasks-expanded')
+
+			if (!loaded) {
+				loaded = true
+				void (async () => {
+					const content = await view.app.vault.cachedRead(note)
+					const lines = content.split('\n')
+
+					pendingTasks.forEach((item) => {
+						const line = lines[item.position.start.line] ?? ''
+						const text = line.replace(/^[\s]*- \[ \]\s*/, '').trim()
+						if (text) {
+							const taskEl = tasksContent.createDiv({
+								cls: 'kanban-card__task-item',
+							})
+
+							const checkboxEl = taskEl.createSpan({
+								cls: 'kanban-card__task-checkbox',
+							})
+							setIcon(checkboxEl, 'square')
+
+							taskEl.createSpan({ text })
+
+							taskEl.addEventListener('click', () => {
+								void (async () => {
+									await view.app.vault.process(
+										note,
+										(data) => {
+											const dataLines = data.split('\n')
+											const idx = item.position.start.line
+											if (dataLines[idx] === undefined)
+												return data
+
+											dataLines[idx] = dataLines[
+												idx
+											].replace(/^- \[ \]/, '- [x]')
+											return dataLines.join('\n')
+										},
+									)
+									setIcon(checkboxEl, 'check-square')
+									taskEl.classList.add(
+										'kanban-card__task-item--done',
+									)
+								})()
+							})
+						}
+					})
+				})()
+			}
+		})
+	}
+
+	const tagContainer = cardEl.createDiv({
 		cls: 'kanban-card__tag-container',
 	})
 
@@ -105,25 +220,45 @@ export const createCardElement = (
 	if (noteCategory && noteCategory.name !== '') {
 		const fontColor = getContrastColor(noteCategory.color)
 
-		const categoryTag = tagContainer.createEl('span', {
+		const categoryTag = tagContainer.createSpan({
 			cls: 'kanban-card__tag',
 			attr: {
 				style: `background: ${noteCategory.color}; color: ${fontColor}; font-weight: normal !important;`,
 			},
 		})
 
-		const iconEl = categoryTag.createEl('span', {
+		const iconEl = categoryTag.createSpan({
 			cls: 'kanban-card__tag-icon',
 		})
 		setIcon(iconEl, noteCategory.icon || 'tag')
 
-		categoryTag.createEl('span', {
+		categoryTag.createSpan({
 			text: noteCategory.name,
 		})
 	}
 
+	if (notePriority) {
+		const fontColor = getContrastColor(notePriority.color)
+
+		const priorityTag = tagContainer.createSpan({
+			cls: 'kanban-card__tag kanban-card__priority-tag',
+			attr: {
+				style: `background: ${notePriority.color}; color: ${fontColor}; font-weight: normal !important;`,
+			},
+		})
+
+		const iconEl = priorityTag.createSpan({
+			cls: 'kanban-card__tag-icon',
+		})
+		setIcon(iconEl, notePriority.icon || 'flag')
+
+		priorityTag.createSpan({
+			text: notePriority.name,
+		})
+	}
+
 	relevantTags.slice(0, 2).forEach((tag: string) => {
-		tagContainer.createEl('span', {
+		tagContainer.createSpan({
 			text: tag,
 			cls: 'kanban-card__tag',
 		})
@@ -137,19 +272,19 @@ export const createCardElement = (
 		assigneeIds.includes(person.id),
 	)
 
-	const peopleContainer = tagContainer.createEl('div', {
+	const peopleContainer = tagContainer.createDiv({
 		cls: 'kanban-card__people',
 	})
 
-		if (assignedPeople.length > 0) {
-			assignedPeople.slice(0, 3).forEach((person: IPerson) => {
-				const avatarEl = peopleContainer.createEl('div', {
-					cls: 'kanban-person-avatar',
-					attr: {
-						style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
-						title: person.name,
-					},
-				})
+	if (assignedPeople.length > 0) {
+		assignedPeople.slice(0, 3).forEach((person: IPerson) => {
+			const avatarEl = peopleContainer.createDiv({
+				cls: 'kanban-person-avatar',
+				attr: {
+					style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
+					title: person.name,
+				},
+			})
 			avatarEl.textContent = person.name
 				.split(' ')
 				.map((n) => n[0])
@@ -159,7 +294,7 @@ export const createCardElement = (
 		})
 
 		if (assignedPeople.length > 3) {
-			peopleContainer.createEl('div', {
+			peopleContainer.createDiv({
 				cls: 'kanban-person-avatar kanban-person-avatar--more',
 				text: `+${assignedPeople.length - 3}`,
 			})
@@ -171,7 +306,7 @@ export const createCardElement = (
 	const dd = String(new Date(noteDate).getDate()).padStart(2, '0')
 	const MM = String(new Date(noteDate).getMonth() + 1).padStart(2, '0')
 
-	const dateEl = tagContainer.createEl('span', {
+	const dateEl = tagContainer.createSpan({
 		text: `${dd}/${MM}`,
 		cls: 'kanban-card__date',
 	})
@@ -181,7 +316,7 @@ export const createCardElement = (
 	})
 	setIcon(dateIconEl, 'calendar')
 
-	const btnFooter = cardEl.createEl('div', {
+	const btnFooter = cardEl.createDiv({
 		cls: 'kanban-card__footer',
 	})
 
@@ -196,7 +331,7 @@ export const createCardElement = (
 	const btnEditAssignee = btnFooter.createEl('button', {
 		cls: 'btn-edit-assignee',
 	})
-	setIcon(btnEditAssignee, 'users')
+	setIcon(btnEditAssignee, 'edit')
 	btnEditAssignee.addEventListener('click', () => {
 		new EditTaskModal(view.app, view.plugin, note).open()
 	})
@@ -213,7 +348,7 @@ export const createCardElement = (
 
 		setIcon(btnComplete, board.completedColumn.icon || 'check')
 
-		btnComplete.createEl('span', {
+		btnComplete.createSpan({
 			text: t('COMPLETE_NOTE'),
 		})
 
@@ -258,7 +393,7 @@ export const createCardElement = (
 
 	setIcon(btnDelete, 'trash-2')
 
-	btnDelete.createEl('span', {
+	btnDelete.createSpan({
 		text: t('DELETE_BTN'),
 	})
 

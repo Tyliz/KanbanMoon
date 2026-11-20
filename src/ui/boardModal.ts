@@ -30,6 +30,7 @@ export class BoardModal extends Modal {
 		let name = board?.name || `Board ${boards.length + 1}`
 		let tagNotes = board?.tagNotes || ''
 		let folderNotes = board?.folderNotes || ''
+		let startColumnId = board?.startColumnId || 'workingOn'
 
 		new Setting(contentEl)
 			.setName(t('BOARD_NAME_LABEL'))
@@ -67,7 +68,49 @@ export class BoardModal extends Modal {
 					}),
 			)
 
-		const footerEl = contentEl.createEl('div', {
+		const allColumns = board
+			? [...board.columns, board.completedColumn]
+			: [
+					{ id: 'backlog', title: t('COLUMN_BACKLOG') },
+					{ id: 'todo', title: t('COLUMN_TODO') },
+					{ id: 'workingOn', title: t('COLUMN_WORKING_ON') },
+					{ id: 'review', title: t('COLUMN_REVIEW') },
+					{ id: 'completed', title: t('COLUMN_COMPLETED') },
+				]
+
+		const startColumnSetting = new Setting(contentEl)
+			.setName(t('START_COLUMN_LABEL'))
+			.setDesc(t('START_COLUMN_DESC'))
+
+		const radioGroup = startColumnSetting.settingEl.createDiv({
+			cls: 'kanban-radio-group',
+		})
+
+		allColumns.forEach((col) => {
+			const radioItem = radioGroup.createEl('label', {
+				cls: 'kanban-radio-item',
+			})
+
+			const radio = radioItem.createEl('input', {
+				attr: {
+					type: 'radio',
+					name: 'startColumn',
+					value: col.id,
+				},
+			})
+
+			if (startColumnId === col.id) {
+				radio.checked = true
+			}
+
+			radio.addEventListener('change', () => {
+				startColumnId = col.id
+			})
+
+			radioItem.createSpan({ text: col.title })
+		})
+
+		const footerEl = contentEl.createDiv({
 			cls: 'kanban-board-modal-footer',
 		})
 
@@ -76,12 +119,12 @@ export class BoardModal extends Modal {
 				cls: 'btn-delete',
 			})
 			setIcon(deleteBtn, 'trash-2')
-			deleteBtn.createEl('span', { text: t('DELETE_BTN') })
+			deleteBtn.createSpan({ text: t('DELETE_BTN') })
 			deleteBtn.addEventListener('click', () => {
 				void this.deleteBoard()
 			})
 
-			const spacer = footerEl.createEl('div', {
+			const spacer = footerEl.createDiv({
 				cls: 'kanban-board-modal-spacer',
 			})
 			void spacer
@@ -101,6 +144,7 @@ export class BoardModal extends Modal {
 				name,
 				tagNotes,
 				folderNotes,
+				startColumnId,
 			})
 		})
 	}
@@ -122,6 +166,7 @@ export class BoardModal extends Modal {
 		name: string
 		tagNotes: string
 		folderNotes: string
+		startColumnId: string
 	}) {
 		if (!data.name.trim()) {
 			new Notice(t('BOARD_MODAL_ERROR_NAME'))
@@ -141,10 +186,11 @@ export class BoardModal extends Modal {
 				name: data.name.trim(),
 				tagNotes: data.tagNotes.trim(),
 				folderNotes: data.folderNotes.trim(),
-				propertyState: 'state',
-				propertyDescription: 'description',
-				propertyCategory: 'category',
-				propertyAssignee: 'assignee',
+			propertyState: 'state',
+			propertyDescription: 'description',
+			propertyCategory: 'category',
+			propertyPriority: 'priority',
+			propertyAssignee: 'assignee',
 				propertyStartDate: 'startDate',
 				propertyDueDate: 'dueDate',
 				columns: [
@@ -174,6 +220,7 @@ export class BoardModal extends Modal {
 					},
 				],
 				categories: [],
+				priorities: [],
 				completedColumn: {
 					id: 'completed',
 					icon: 'check-check',
@@ -181,6 +228,7 @@ export class BoardModal extends Modal {
 					color: '#27ae60',
 					limitDate: 1,
 				},
+				startColumnId: data.startColumnId,
 			}
 			boards.push(newBoard)
 			this.plugin.settings.activeBoardId = newBoard.id
@@ -191,6 +239,7 @@ export class BoardModal extends Modal {
 				existing.name = data.name.trim()
 				existing.tagNotes = data.tagNotes.trim()
 				existing.folderNotes = data.folderNotes.trim()
+				existing.startColumnId = data.startColumnId
 				new Notice(t('BOARD_MODAL_SAVED'))
 			}
 		}
@@ -271,7 +320,7 @@ class DeleteBoardConfirmModal extends Modal {
 				btn.onClick(() => this.close())
 			})
 			.addButton((btn) => {
-				btn.setWarning()
+				btn.setDestructive()
 				btn.setButtonText(t('DELETE_CONFIRM_YES'))
 				btn.onClick(async () => {
 					await this.onConfirm()
@@ -360,7 +409,7 @@ export class PersonModal extends Modal {
 			notes = notesTextarea.value
 		})
 
-		const footerEl = contentEl.createEl('div', {
+		const footerEl = contentEl.createDiv({
 			cls: 'kanban-board-modal-footer',
 		})
 

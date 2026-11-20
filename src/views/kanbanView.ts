@@ -3,16 +3,23 @@ import { t } from '../lang/helpers'
 import type KanbanMoonlight from '../main'
 import { ViewType, GanttZoom } from '../settings/kanbanSettings'
 import { renderKanbanColumns } from './renderKanban/renderColumns'
-import { getFilteredNotes, searchNotes } from './renderKanban/utils'
+import {
+	getFilteredNotes,
+	searchNotes,
+	DEFAULT_FILTERS,
+	type BoardFilters,
+} from './renderKanban/utils'
 import { CreateTaskModal } from '../ui/createTaskModal'
 import { BoardModal } from '../ui/boardModal'
 import { renderGantt } from './ganttChart'
+import { UpdateModal } from '../ui/updateModal'
 
 export const VIEW_TYPE_KANBAN = 'kanban-moonlight-view'
 
 export class KanbanMoonlightView extends ItemView {
 	plugin: KanbanMoonlight
 	currentView: ViewType = ViewType.kanban
+	boardFilters: BoardFilters = { ...DEFAULT_FILTERS }
 
 	constructor(leaf: WorkspaceLeaf, plugin: KanbanMoonlight) {
 		super(leaf)
@@ -35,6 +42,8 @@ export class KanbanMoonlightView extends ItemView {
 	async onOpen() {
 		const container = this.contentEl
 		container.empty()
+
+		await this.checkForUpdate()
 
 		this.drawCurrentView()
 	}
@@ -63,22 +72,22 @@ export class KanbanMoonlightView extends ItemView {
 		const board = this.plugin.getActiveBoard()
 		const notesWithTag = getFilteredNotes(this.app, board)
 
-		const filterNotice = container.createEl('div', {
+		const filterNotice = container.createDiv({
 			cls: 'kanban-filter-notice',
 		})
 		const tag = board.tagNotes
 		const folder = board.folderNotes
-		const filters = [tag, folder].filter(Boolean).join(', ')
-		filterNotice.createEl('span', {
-			text: t('FILTER_NOTICE') + ` ${filters}`,
+		const filterParts = [tag, folder].filter(Boolean).join(', ')
+		filterNotice.createSpan({
+			text: t('FILTER_NOTICE') + ` ${filterParts}`,
 			cls: 'kanban-filter-notice-text',
 		})
 
-		const mainContainer = container.createEl('div', {
+		const mainContainer = container.createDiv({
 			cls: 'main-kanban-container',
 		})
 
-		const searchContainer = mainContainer.createEl('div', {
+		const searchContainer = mainContainer.createDiv({
 			cls: 'kanban-container-search',
 		})
 
@@ -94,40 +103,133 @@ export class KanbanMoonlightView extends ItemView {
 			cls: 'kanban-new-task-btn',
 		})
 		setIcon(newTaskBtn, 'plus')
-		newTaskBtn.createEl('span', {
+		newTaskBtn.createSpan({
 			text: t('CREATE_TASK_BTN'),
 		})
 		newTaskBtn.addEventListener('click', () => {
 			new CreateTaskModal(this.app, this.plugin).open()
 		})
 
-		searchInput.addEventListener('input', (event) => {
-			const searchTerm = (
-				event.target as HTMLInputElement
-			).value.toLowerCase()
+		const filterBar = mainContainer.createDiv({
+			cls: 'kanban-filter-bar',
+		})
 
+		const categoryFilter = filterBar.createDiv({
+			cls: 'kanban-filter-item',
+		})
+		categoryFilter.createSpan({
+			text: t('FILTER_CATEGORY'),
+			cls: 'kanban-filter-label',
+		})
+		const categorySelect = categoryFilter.createEl('select', {
+			cls: 'kanban-filter-select',
+		})
+		categorySelect.createEl('option', {
+			text: t('FILTER_ALL'),
+			value: '',
+		})
+		board.categories.forEach((cat) => {
+			categorySelect.createEl('option', {
+				text: cat.name,
+				value: cat.name,
+			})
+		})
+		categorySelect.value = this.boardFilters.category
+
+		const priorityFilter = filterBar.createDiv({
+			cls: 'kanban-filter-item',
+		})
+		priorityFilter.createSpan({
+			text: t('FILTER_PRIORITY'),
+			cls: 'kanban-filter-label',
+		})
+		const prioritySelect = priorityFilter.createEl('select', {
+			cls: 'kanban-filter-select',
+		})
+		prioritySelect.createEl('option', {
+			text: t('FILTER_ALL'),
+			value: '',
+		})
+		board.priorities.forEach((pri) => {
+			prioritySelect.createEl('option', {
+				text: pri.name,
+				value: pri.name,
+			})
+		})
+		prioritySelect.value = this.boardFilters.priority
+
+		const assigneeFilter = filterBar.createDiv({
+			cls: 'kanban-filter-item',
+		})
+		assigneeFilter.createSpan({
+			text: t('FILTER_ASSIGNEE'),
+			cls: 'kanban-filter-label',
+		})
+		const assigneeSelect = assigneeFilter.createEl('select', {
+			cls: 'kanban-filter-select',
+		})
+		assigneeSelect.createEl('option', {
+			text: t('FILTER_ALL'),
+			value: '',
+		})
+		this.plugin.settings.people.forEach((person) => {
+			assigneeSelect.createEl('option', {
+				text: person.name,
+				value: person.id,
+			})
+		})
+		assigneeSelect.value = this.boardFilters.assignee
+
+		const applyFilters = () => {
 			if (this.debounceTimer) {
 				window.clearTimeout(this.debounceTimer)
 			}
-
 			this.debounceTimer = window.setTimeout(() => {
+				const searchTerm = searchInput.value.toLowerCase()
 				const filtered = searchNotes(
 					notesWithTag,
 					this.app,
 					board,
 					searchTerm,
+					this.boardFilters,
 				)
 				renderKanbanColumns(this, filtered)
-			}, 300)
+			}, 150)
+		}
+
+		categorySelect.addEventListener('change', () => {
+			this.boardFilters.category = categorySelect.value
+			applyFilters()
 		})
 
-		mainContainer.createEl('div', {
+		prioritySelect.addEventListener('change', () => {
+			this.boardFilters.priority = prioritySelect.value
+			applyFilters()
+		})
+
+		assigneeSelect.addEventListener('change', () => {
+			this.boardFilters.assignee = assigneeSelect.value
+			applyFilters()
+		})
+
+		searchInput.addEventListener('input', () => {
+			applyFilters()
+		})
+
+		mainContainer.createDiv({
 			cls: 'kanban-board',
 		})
 
-		renderKanbanColumns(this, notesWithTag)
+		const initialFiltered = searchNotes(
+			notesWithTag,
+			this.app,
+			board,
+			'',
+			this.boardFilters,
+		)
+		renderKanbanColumns(this, initialFiltered)
 
-		const settingsBtn = container.createEl('div', {
+		const settingsBtn = container.createDiv({
 			cls: 'kanban-settings-btn',
 			attr: { title: t('OPEN_SETTINGS') },
 		})
@@ -146,22 +248,22 @@ export class KanbanMoonlightView extends ItemView {
 		const board = this.plugin.getActiveBoard()
 		const notesWithTag = getFilteredNotes(this.app, board)
 
-		const filterNotice = container.createEl('div', {
+		const filterNotice = container.createDiv({
 			cls: 'kanban-filter-notice',
 		})
 		const tag = board.tagNotes
 		const folder = board.folderNotes
 		const filters = [tag, folder].filter(Boolean).join(', ')
-		filterNotice.createEl('span', {
+		filterNotice.createSpan({
 			text: t('FILTER_NOTICE') + ` ${filters}`,
 			cls: 'kanban-filter-notice-text',
 		})
 
-		const mainContainer = container.createEl('div', {
+		const mainContainer = container.createDiv({
 			cls: 'main-kanban-container',
 		})
 
-		const searchContainer = mainContainer.createEl('div', {
+		const searchContainer = mainContainer.createDiv({
 			cls: 'kanban-container-search',
 		})
 
@@ -177,14 +279,14 @@ export class KanbanMoonlightView extends ItemView {
 			cls: 'kanban-new-task-btn',
 		})
 		setIcon(newTaskBtn, 'plus')
-		newTaskBtn.createEl('span', {
+		newTaskBtn.createSpan({
 			text: t('CREATE_TASK_BTN'),
 		})
 		newTaskBtn.addEventListener('click', () => {
 			new CreateTaskModal(this.app, this.plugin).open()
 		})
 
-		const ganttContainer = mainContainer.createEl('div', {
+		const ganttContainer = mainContainer.createDiv({
 			cls: 'kanban-gantt',
 		})
 
@@ -230,7 +332,7 @@ export class KanbanMoonlightView extends ItemView {
 			}, 300)
 		})
 
-		const settingsBtn = container.createEl('div', {
+		const settingsBtn = container.createDiv({
 			cls: 'kanban-settings-btn',
 			attr: { title: t('OPEN_SETTINGS') },
 		})
@@ -249,28 +351,28 @@ export class KanbanMoonlightView extends ItemView {
 		const board = this.plugin.getActiveBoard()
 		const notesWithTag = getFilteredNotes(this.app, board)
 
-		const filterNotice = container.createEl('div', {
+		const filterNotice = container.createDiv({
 			cls: 'kanban-filter-notice',
 		})
 		const tag = board.tagNotes
 		const folder = board.folderNotes
 		const filters = [tag, folder].filter(Boolean).join(', ')
-		filterNotice.createEl('span', {
+		filterNotice.createSpan({
 			text: t('FILTER_NOTICE') + ` ${filters}`,
 			cls: 'kanban-filter-notice-text',
 		})
 
-		const mainContainer = container.createEl('div', {
+		const mainContainer = container.createDiv({
 			cls: 'main-kanban-container',
 		})
 
-		const dashboardContainer = mainContainer.createEl('div', {
+		const dashboardContainer = mainContainer.createDiv({
 			cls: 'kanban-dashboard',
 		})
 
 		this.renderDashboard(dashboardContainer, notesWithTag, board)
 
-		const settingsBtn = container.createEl('div', {
+		const settingsBtn = container.createDiv({
 			cls: 'kanban-settings-btn',
 			attr: { title: t('OPEN_SETTINGS') },
 		})
@@ -280,8 +382,6 @@ export class KanbanMoonlightView extends ItemView {
 		})
 	}
 
-
-
 	private renderDashboard(
 		container: HTMLElement,
 		notes: TFile[],
@@ -290,11 +390,11 @@ export class KanbanMoonlightView extends ItemView {
 			categories: Array<{ id: string; name: string; color: string }>
 		},
 	) {
-		const dashboardGrid = container.createEl('div', {
+		const dashboardGrid = container.createDiv({
 			cls: 'kanban-dashboard__grid',
 		})
 
-		const tasksByState = dashboardGrid.createEl('div', {
+		const tasksByState = dashboardGrid.createDiv({
 			cls: 'kanban-dashboard__card',
 		})
 
@@ -320,41 +420,41 @@ export class KanbanMoonlightView extends ItemView {
 
 		const maxCount = Math.max(...Object.values(stateCounts), 1)
 
-		const stateBars = tasksByState.createEl('div', {
+		const stateBars = tasksByState.createDiv({
 			cls: 'kanban-dashboard__bars',
 		})
 
 		board.columns.forEach((col) => {
-			const barRow = stateBars.createEl('div', {
+			const barRow = stateBars.createDiv({
 				cls: 'kanban-dashboard__bar-row',
 			})
 
-			barRow.createEl('div', {
+			barRow.createDiv({
 				cls: 'kanban-dashboard__bar-label',
 				text: col.title,
 			})
 
-			const barContainer = barRow.createEl('div', {
+			const barContainer = barRow.createDiv({
 				cls: 'kanban-dashboard__bar-container',
 			})
 
 			const count = stateCounts[col.id] || 0
 			const percentage = (count / maxCount) * 100
 
-			barContainer.createEl('div', {
+			barContainer.createDiv({
 				cls: 'kanban-dashboard__bar',
 				attr: {
 					style: `width: ${percentage}%; background-color: ${col.color};`,
 				},
 			})
 
-			barRow.createEl('div', {
+			barRow.createDiv({
 				cls: 'kanban-dashboard__bar-count',
 				text: String(count),
 			})
 		})
 
-		const tasksByPerson = dashboardGrid.createEl('div', {
+		const tasksByPerson = dashboardGrid.createDiv({
 			cls: 'kanban-dashboard__card',
 		})
 
@@ -374,7 +474,7 @@ export class KanbanMoonlightView extends ItemView {
 			})
 		})
 
-		const personList = tasksByPerson.createEl('div', {
+		const personList = tasksByPerson.createDiv({
 			cls: 'kanban-dashboard__person-list',
 		})
 
@@ -392,11 +492,11 @@ export class KanbanMoonlightView extends ItemView {
 				const person = this.plugin.settings.people.find(
 					(p) => p.id === personId,
 				)
-				const personRow = personList.createEl('div', {
+				const personRow = personList.createDiv({
 					cls: 'kanban-dashboard__person-row',
 				})
 
-				const avatar = personRow.createEl('div', {
+				const avatar = personRow.createDiv({
 					cls: 'kanban-person-avatar',
 					attr: {
 						style: `background-color: ${person?.color || '#666'};`,
@@ -409,19 +509,19 @@ export class KanbanMoonlightView extends ItemView {
 					.toUpperCase()
 					.slice(0, 2)
 
-				personRow.createEl('span', {
+				personRow.createSpan({
 					text: person?.name || personId,
 					cls: 'kanban-dashboard__person-name',
 				})
 
-				personRow.createEl('span', {
+				personRow.createSpan({
 					text: String(count),
 					cls: 'kanban-dashboard__person-count',
 				})
 			})
 		}
 
-		const recentActivity = dashboardGrid.createEl('div', {
+		const recentActivity = dashboardGrid.createDiv({
 			cls: 'kanban-dashboard__card kanban-dashboard__card--wide',
 		})
 
@@ -430,7 +530,7 @@ export class KanbanMoonlightView extends ItemView {
 			cls: 'kanban-dashboard__card-title',
 		})
 
-		const activityList = recentActivity.createEl('div', {
+		const activityList = recentActivity.createDiv({
 			cls: 'kanban-dashboard__activity-list',
 		})
 
@@ -464,16 +564,16 @@ export class KanbanMoonlightView extends ItemView {
 			.sort((a, b) => b.date.localeCompare(a.date))
 			.slice(0, 10)
 			.forEach((activity) => {
-				const activityRow = activityList.createEl('div', {
+				const activityRow = activityList.createDiv({
 					cls: 'kanban-dashboard__activity-row',
 				})
 
-				activityRow.createEl('span', {
+				activityRow.createSpan({
 					text: activity.noteName,
 					cls: 'kanban-dashboard__activity-note',
 				})
 
-				activityRow.createEl('span', {
+				activityRow.createSpan({
 					text: activity.detail,
 					cls: 'kanban-dashboard__activity-detail',
 				})
@@ -484,7 +584,7 @@ export class KanbanMoonlightView extends ItemView {
 				const yyyy = String(date.getFullYear())
 
 				const formatedDate = `${dd}/${MM}/${yyyy}`
-				activityRow.createEl('span', {
+				activityRow.createSpan({
 					text: formatedDate,
 					cls: 'kanban-dashboard__activity-date',
 				})
@@ -492,11 +592,11 @@ export class KanbanMoonlightView extends ItemView {
 	}
 
 	private createTabBar(container: HTMLElement) {
-		const viewBar = container.createEl('div', {
+		const viewBar = container.createDiv({
 			cls: 'kanban-view-bar',
 		})
 
-		const viewTabs = viewBar.createEl('div', {
+		const viewTabs = viewBar.createDiv({
 			cls: 'kanban-view-tabs',
 		})
 
@@ -515,7 +615,7 @@ export class KanbanMoonlightView extends ItemView {
 				cls: `kanban-view-tab${this.currentView === type ? ' kanban-view-tab--active' : ''}`,
 			})
 			setIcon(tab, icon)
-			tab.createEl('span', { text: label })
+			tab.createSpan({ text: label })
 
 			tab.addEventListener('click', () => {
 				if (this.currentView === type) return
@@ -526,7 +626,7 @@ export class KanbanMoonlightView extends ItemView {
 			})
 		})
 
-		const tabBar = viewBar.createEl('div', {
+		const tabBar = viewBar.createDiv({
 			cls: 'kanban-tab-bar',
 		})
 
@@ -534,15 +634,16 @@ export class KanbanMoonlightView extends ItemView {
 		const activeBoardId = this.plugin.settings.activeBoardId
 
 		boards.forEach((board) => {
-			const tab = tabBar.createEl('div', {
+			const tab = tabBar.createDiv({
 				cls: `kanban-tab${board.id === activeBoardId ? ' kanban-tab--active' : ''}`,
 				attr: { title: t('BOARD_TAB_TOOLTIP') },
 			})
-			tab.createEl('span', { text: board.name })
+			tab.createSpan({ text: board.name })
 
 			tab.addEventListener('click', () => {
 				if (board.id === activeBoardId) return
 				this.plugin.settings.activeBoardId = board.id
+				this.boardFilters = { ...DEFAULT_FILTERS }
 				void this.plugin.saveSettings()
 				this.drawCurrentView()
 			})
@@ -553,7 +654,7 @@ export class KanbanMoonlightView extends ItemView {
 			})
 		})
 
-		const addTabBtn = tabBar.createEl('div', {
+		const addTabBtn = tabBar.createDiv({
 			cls: 'kanban-tab kanban-tab-add',
 			attr: { title: t('ADD_BOARD') },
 		})
@@ -574,4 +675,121 @@ export class KanbanMoonlightView extends ItemView {
 			app.setting.openTabById(this.plugin.manifest.id)
 		}
 	}
+
+	private async checkForUpdate() {
+		const currentVersion = this.plugin.manifest.version
+		const lastSeenVersion = this.plugin.settings.lastSeenVersion
+
+		if (currentVersion === lastSeenVersion) return
+
+		const sections = RELEASE_NOTES[currentVersion]
+
+		if (sections && sections.length > 0) {
+			new UpdateModal(
+				this.app,
+				currentVersion,
+				sections,
+				this.plugin,
+			).open()
+		}
+
+		this.plugin.settings.lastSeenVersion = currentVersion
+		await this.plugin.saveSettings()
+	}
+}
+
+const RELEASE_NOTES: Record<
+	string,
+	Array<{ title: string; items: string[] }>
+> = {
+	'1.5.0': [
+		{
+			title: 'Added',
+			items: [
+				'Priority system with configurable priority levels per board.',
+				'Priority badge displayed on task cards with color and icon.',
+				'Edit task modal now allows editing description, category, priority, and assignees.',
+				'Advanced filters: filter tasks by category, priority, or assignee.',
+				'Filters are preserved across view refreshes.',
+				'Priority changes are tracked in task history.',
+				'Category changes are now tracked in task history.',
+			],
+		},
+		{
+			title: 'Changed',
+			items: [
+				'Renamed "Edit Task Assignment" to "Edit Task".',
+				'Improved edit modal layout with all editable fields.',
+				'Filters reset when switching boards.',
+			],
+		},
+	],
+	'1.4.0': [
+		{
+			title: 'Added',
+			items: [
+				'People data syncs bidirectionally with Markdown files.',
+				'Deleting a person removes its .md file from the vault.',
+				'Changing a person name auto-renames the .md file.',
+				'Unique personId field in frontmatter for stable identification.',
+				'Person files are synced on plugin load.',
+			],
+		},
+		{
+			title: 'Changed',
+			items: [
+				'Gantt chart uses window.moment for better compatibility.',
+			],
+		},
+	],
+	'1.3.1': [
+		{
+			title: 'Changed',
+			items: [
+				'Improved settings UI for better compatibility with Obsidian 1.13.4.',
+				'Redesigned spacing, border radius, hover states, and visual consistency.',
+				'Fixed settings duplication bug when switching active board.',
+			],
+		},
+	],
+	'1.3.0': [
+		{
+			title: 'Added',
+			items: [
+				'Pending tasks shown in cards with checkbox toggle.',
+				'External link icon on cards with externalLink property.',
+				'Update modal shows changelog on first open after update.',
+			],
+		},
+	],
+	'1.2.0': [
+		{
+			title: 'Added',
+			items: [
+				'Gantt chart rewritten from scratch.',
+				'Start column configuration.',
+				'Today line on Gantt timeline.',
+			],
+		},
+	],
+	'1.1.0': [
+		{
+			title: 'Added',
+			items: [
+				'Multi-board support.',
+				'Board tabs with tooltip.',
+				'Board modal for create/edit.',
+				'Delete board with confirmation.',
+				'Collapsible settings sections.',
+				'Settings button in Kanban view.',
+			],
+		},
+		{
+			title: 'Migration',
+			items: [
+				'Existing settings automatically migrated to multi-board format.',
+				'No user action required.',
+			],
+		},
+	],
 }

@@ -23,6 +23,7 @@ export class CreateTaskModal extends Modal {
 		let title = ''
 		let description = ''
 		let category = ''
+		let priority = ''
 		let state = board.columns[0]?.id || 'backlog'
 		let selectedPersons: string[] = []
 
@@ -72,6 +73,18 @@ export class CreateTaskModal extends Modal {
 			})
 
 		new Setting(contentEl)
+			.setName(t('CREATE_TASK_PRIORITY_LABEL'))
+			.addDropdown((dropdown) => {
+				dropdown.addOption('', t('CREATE_TASK_PRIORITY_NONE'))
+				board.priorities.forEach((pri) => {
+					dropdown.addOption(pri.name, pri.name)
+				})
+				dropdown.onChange((value) => {
+					priority = value
+				})
+			})
+
+		new Setting(contentEl)
 			.setName(t('CREATE_TASK_STATE_LABEL'))
 			.addDropdown((dropdown) => {
 				board.columns.forEach((col) => {
@@ -84,7 +97,7 @@ export class CreateTaskModal extends Modal {
 			})
 
 		if (this.plugin.settings.people.length > 0) {
-			const peopleSection = contentEl.createEl('div', {
+			const peopleSection = contentEl.createDiv({
 				cls: 'kanban-people-selection',
 			})
 
@@ -93,12 +106,12 @@ export class CreateTaskModal extends Modal {
 				cls: 'kanban-people-label',
 			})
 
-			const peopleList = peopleSection.createEl('div', {
+			const peopleList = peopleSection.createDiv({
 				cls: 'kanban-people-list',
 			})
 
 			this.plugin.settings.people.forEach((person) => {
-				const personCheckbox = peopleList.createEl('div', {
+				const personCheckbox = peopleList.createDiv({
 					cls: 'kanban-person-checkbox',
 				})
 
@@ -109,7 +122,7 @@ export class CreateTaskModal extends Modal {
 					},
 				})
 
-				const avatarEl = personCheckbox.createEl('div', {
+				const avatarEl = personCheckbox.createDiv({
 					cls: 'kanban-person-avatar',
 					attr: {
 						style: `background-color: ${person.color}; color: ${getContrastColor(person.color)};`,
@@ -122,7 +135,7 @@ export class CreateTaskModal extends Modal {
 					.toUpperCase()
 					.slice(0, 2)
 
-				personCheckbox.createEl('span', {
+				personCheckbox.createSpan({
 					text: person.name,
 					cls: 'kanban-person-name',
 				})
@@ -191,10 +204,14 @@ export class CreateTaskModal extends Modal {
 							fm[board.propertyDescription || 'description'] =
 								description.trim()
 						}
-						if (category.trim()) {
-							fm[board.propertyCategory || 'category'] =
-								category.trim()
-						}
+					if (category.trim()) {
+						fm[board.propertyCategory || 'category'] =
+							category.trim()
+					}
+					if (priority.trim()) {
+						fm[board.propertyPriority || 'priority'] =
+							priority.trim()
+					}
 						if (selectedPersons.length > 0) {
 							fm[board.propertyAssignee || 'assignee'] =
 								selectedPersons

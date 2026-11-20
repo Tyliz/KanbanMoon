@@ -25,6 +25,14 @@ export interface ICategory {
 	icon: string
 }
 
+export interface IPriority {
+	id: string
+	name: string
+	color: string
+	icon: string
+	level: number
+}
+
 export interface IPerson {
 	id: string
 	name: string
@@ -41,12 +49,15 @@ export interface IBoard {
 	propertyState: string
 	propertyDescription: string
 	propertyCategory: string
+	propertyPriority: string
 	propertyAssignee: string
 	propertyStartDate: string
 	propertyDueDate: string
 	columns: IColumn[]
 	categories: ICategory[]
+	priorities: IPriority[]
 	completedColumn: ICompletedColumn
+	startColumnId: string
 }
 
 export const DEFAULT_BOARD_COLUMNS: IColumn[] = [
@@ -84,6 +95,30 @@ export const DEFAULT_COMPLETED_COLUMN: ICompletedColumn = {
 	limitDate: TimeOptions.week,
 }
 
+export const DEFAULT_PRIORITIES: IPriority[] = [
+	{
+		id: 'priority-high',
+		name: 'High',
+		color: '#e74c3c',
+		icon: 'alert-triangle',
+		level: 1,
+	},
+	{
+		id: 'priority-medium',
+		name: 'Medium',
+		color: '#f39c12',
+		icon: 'minus',
+		level: 2,
+	},
+	{
+		id: 'priority-low',
+		name: 'Low',
+		color: '#27ae60',
+		icon: 'arrow-down',
+		level: 3,
+	},
+]
+
 export const DEFAULT_BOARD: IBoard = {
 	id: 'default',
 	name: 'Default',
@@ -92,12 +127,15 @@ export const DEFAULT_BOARD: IBoard = {
 	propertyState: 'state',
 	propertyDescription: 'description',
 	propertyCategory: 'category',
+	propertyPriority: 'priority',
 	propertyAssignee: 'assignee',
 	propertyStartDate: 'startDate',
 	propertyDueDate: 'dueDate',
 	columns: DEFAULT_BOARD_COLUMNS,
 	categories: [],
+	priorities: DEFAULT_PRIORITIES,
 	completedColumn: DEFAULT_COMPLETED_COLUMN,
+	startColumnId: 'workingOn',
 }
 
 export enum ViewType {
@@ -122,6 +160,7 @@ export interface IKanbanSettings {
 	globalHistoryLimit: number
 	defaultView: ViewType
 	ganttZoom: GanttZoom
+	lastSeenVersion: string
 }
 
 export const DEFAULT_SETTINGS: IKanbanSettings = {
@@ -134,6 +173,7 @@ export const DEFAULT_SETTINGS: IKanbanSettings = {
 	globalHistoryLimit: 20,
 	defaultView: ViewType.kanban,
 	ganttZoom: GanttZoom.week,
+	lastSeenVersion: '',
 }
 
 export function getActiveBoard(settings: IKanbanSettings): IBoard {

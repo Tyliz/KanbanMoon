@@ -1,5 +1,5 @@
 import { setIcon, TFile } from 'obsidian'
-import { IColumn, ICategory } from '../../settings/kanbanSettings'
+import { IColumn, ICategory, IPriority } from '../../settings/kanbanSettings'
 import { t } from '../../lang/helpers'
 import { KanbanMoonlightView } from '../kanbanView'
 import { setupColumnDragDrop } from './dragDrop'
@@ -12,14 +12,17 @@ export const createColumnElement = (
 	columnSetting: IColumn,
 	notes: TFile[],
 ) => {
-	const columnEl = container.createEl('div', {
+	const columnEl = container.createDiv({
 		cls: 'kanban-column',
 	})
-	columnEl.style.setProperty('--column-color', columnSetting.color || '#ac46ff')
+	columnEl.style.setProperty(
+		'--column-color',
+		columnSetting.color || '#ac46ff',
+	)
 
 	setupColumnDragDrop(columnEl, view, columnSetting)
 
-	const headerEl = columnEl.createEl('div', {
+	const headerEl = columnEl.createDiv({
 		cls: 'kanban-column__header',
 	})
 
@@ -30,7 +33,7 @@ export const createColumnElement = (
 		},
 	})
 
-	const iconEl = headerLink.createEl('span', {
+	const iconEl = headerLink.createSpan({
 		cls: `kanban-column__icon`,
 	})
 
@@ -45,7 +48,7 @@ export const createColumnElement = (
 
 	const columnColor = columnSetting.color || '#ac46ff'
 
-	headerEl.createEl('span', {
+	headerEl.createSpan({
 		text: `${notes.length}`,
 		cls: 'kanban-column__color-indicator',
 		attr: {
@@ -54,7 +57,7 @@ export const createColumnElement = (
 	})
 
 	if (notes.length === 0) {
-		columnEl.createEl('div', {
+		columnEl.createDiv({
 			text: t('EMPTY_COLUMN'),
 			cls: 'kanban-column__empty-message',
 		})
@@ -62,11 +65,18 @@ export const createColumnElement = (
 	}
 
 	const categories: ICategory[] = [
-		{ id: '-', name: '', color: columnSetting.color || '#696969', icon: 'tag' },
+		{
+			id: '-',
+			name: '',
+			color: columnSetting.color || '#696969',
+			icon: 'tag',
+		},
 		...view.plugin.getActiveBoard().categories,
 	]
 
+	const priorities: IPriority[] = view.plugin.getActiveBoard().priorities
+
 	notes.forEach((note) => {
-		createCardElement(columnEl, view, note, columnSetting, categories)
+		createCardElement(columnEl, view, note, columnSetting, categories, priorities)
 	})
 }

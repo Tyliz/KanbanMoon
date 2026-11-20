@@ -2,6 +2,8 @@ import { TFile, App } from 'obsidian'
 import { t } from '../lang/helpers'
 import { GanttZoom, IBoard } from '../settings/kanbanSettings'
 import { getContrastColor } from '../utils/color'
+import { getHistory } from '../utils/history'
+import type { HistoryEvent } from '../types/history'
 
 interface GanttTask {
 	note: TFile
@@ -47,10 +49,7 @@ function getMonthEnd(date: Date): Date {
 }
 
 function formatMonthLabel(date: Date): string {
-	return date.toLocaleDateString(undefined, {
-		month: 'short',
-		year: 'numeric',
-	})
+	return window.moment(date).format('MMMM YYYY')
 }
 
 function isToday(date: Date): boolean {
@@ -90,7 +89,7 @@ function buildTimeline(
 			const date = addDays(minDate, i)
 			columns.push({
 				date,
-				label: date.toLocaleDateString(undefined, { day: 'numeric' }),
+				label: window.moment(date).format('D'),
 				widthDays: 1,
 			})
 		}
@@ -99,10 +98,7 @@ function buildTimeline(
 		while (current <= maxDate) {
 			columns.push({
 				date: new Date(current),
-				label: current.toLocaleDateString(undefined, {
-					day: 'numeric',
-					month: 'short',
-				}),
+				label: window.moment(current).format('D MMM'),
 				widthDays: 7,
 			})
 			current = addDays(current, 7)
@@ -127,28 +123,57 @@ function buildTimeline(
 	return columns
 }
 
+function findStartDate(events: HistoryEvent[]): Date | null {
+	const created = events.find((e) => e.type === 'created')
+	if (created?.date) {
+		const d = new Date(created.date)
+		if (!isNaN(d.getTime())) return startOfDay(d)
+	}
+
+	return null
+}
+
+function findEndDate(
+	events: HistoryEvent[],
+	completedColumnId: string,
+): Date | null {
+	const stateEvents = events.filter(
+		(e): e is Extract<HistoryEvent, { type: 'state_changed' }> =>
+			e.type === 'state_changed',
+	)
+
+	const completedEntries = stateEvents.filter(
+		(e) => e.to === completedColumnId,
+	)
+	const lastEntry = completedEntries[completedEntries.length - 1]
+	if (lastEntry?.date) {
+		const d = new Date(lastEntry.date)
+		if (!isNaN(d.getTime())) return startOfDay(d)
+	}
+
+	return null
+}
+
 function parseTasks(notes: TFile[], board: IBoard, app: App): GanttTask[] {
 	return notes
 		.map((note) => {
 			const cache = app.metadataCache.getFileCache(note)
 			const fm = cache?.frontmatter
 
-			const startDate = fm?.[board.propertyStartDate] as
-				| string
-				| undefined
-			const dueDate = fm?.[board.propertyDueDate] as string | undefined
-
 			const createdAt = new Date(note.stat.ctime)
 			const modifiedAt = new Date(note.stat.mtime)
 
-			const start = startDate
-				? startOfDay(new Date(startDate))
-				: startOfDay(createdAt)
-			const end = dueDate
-				? startOfDay(new Date(dueDate))
-				: startOfDay(modifiedAt)
+			const events = getHistory(fm)
+			const historyStart = findStartDate(events)
+			const historyEnd = findEndDate(events, board.completedColumn.id)
+
+			const start = historyStart || startOfDay(createdAt)
 
 			const state = (fm?.state as string) || 'backlog'
+			const isCompleted = state === board.completedColumn.id
+			const end =
+				historyEnd ||
+				(isCompleted ? startOfDay(modifiedAt) : startOfDay(new Date()))
 			const column = board.columns.find((c) => c.id === state)
 			const color = column?.color || '#666'
 
@@ -162,7 +187,8 @@ function parseTasks(notes: TFile[], board: IBoard, app: App): GanttTask[] {
 			}
 		})
 		.filter(
-			(task) => !isNaN(task.start.getTime()) && !isNaN(task.end.getTime()),
+			(task) =>
+				!isNaN(task.start.getTime()) && !isNaN(task.end.getTime()),
 		)
 }
 
@@ -225,7 +251,6 @@ function renderTimelineHeader(
 	totalWidthPx: number,
 	zoom: GanttZoom,
 ): void {
-
 	if (columns.length === 0) return
 
 	if (zoom === GanttZoom.month) {
@@ -248,7 +273,7 @@ function renderTimelineHeader(
 			}
 		})
 
-		const row1 = container.createEl('div', {
+		const row1 = container.createDiv({
 			cls: 'gantt-timeline-row',
 			attr: {
 				style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -256,12 +281,11 @@ function renderTimelineHeader(
 		})
 
 		months.forEach(({ startIdx, endIdx, label }) => {
-			const widthDays =
-				columns
-					.slice(startIdx, endIdx + 1)
-					.reduce((sum, c) => sum + c.widthDays, 0)
+			const widthDays = columns
+				.slice(startIdx, endIdx + 1)
+				.reduce((sum, c) => sum + c.widthDays, 0)
 			const cellWidth = (widthDays / totalDays) * 100
-			const cell = row1.createEl('div', {
+			const cell = row1.createDiv({
 				cls: 'gantt-timeline-cell',
 				text: label,
 				attr: { style: `width: ${cellWidth}%;` },
@@ -272,7 +296,7 @@ function renderTimelineHeader(
 			}
 		})
 
-		const row2 = container.createEl('div', {
+		const row2 = container.createDiv({
 			cls: 'gantt-timeline-row',
 			attr: {
 				style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -292,8 +316,8 @@ function renderTimelineHeader(
 				const daysInWeek = daysBetween(weekStart, actualEnd) + 1
 				const cellWidth = (daysInWeek / totalDays) * 100
 
-				row2.createEl('div', {
-					cls: 'gantt-timeline-cell gantt-timeline-cell--small',
+				row2.createDiv({
+					cls: 'gantt-timeline-cell',
 					text: `${startDay}-${endDay}`,
 					attr: { style: `width: ${cellWidth}%;` },
 				})
@@ -302,7 +326,7 @@ function renderTimelineHeader(
 			}
 		})
 	} else if (zoom === GanttZoom.week) {
-		const row1 = container.createEl('div', {
+		const row1 = container.createDiv({
 			cls: 'gantt-timeline-row',
 			attr: {
 				style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -330,17 +354,16 @@ function renderTimelineHeader(
 		})
 
 		weeks.forEach(({ startIdx, endIdx, label }) => {
-			const widthDays =
-				(endIdx - startIdx + 1) * 7
+			const widthDays = (endIdx - startIdx + 1) * 7
 			const cellWidth = (widthDays / totalDays) * 100
-			row1.createEl('div', {
+			row1.createDiv({
 				cls: 'gantt-timeline-cell',
 				text: label,
 				attr: { style: `width: ${cellWidth}%;` },
 			})
 		})
 
-		const row2 = container.createEl('div', {
+		const row2 = container.createDiv({
 			cls: 'gantt-timeline-row',
 			attr: {
 				style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -349,10 +372,8 @@ function renderTimelineHeader(
 
 		columns.forEach((col) => {
 			const cellWidth = (col.widthDays / totalDays) * 100
-			const dayName = col.date.toLocaleDateString(undefined, {
-				weekday: 'short',
-			})
-			row2.createEl('div', {
+			const dayName = window.moment(col.date).format('dd')
+			row2.createDiv({
 				cls: `gantt-timeline-cell gantt-timeline-cell--small${isWeekend(col.date) ? ' gantt-timeline-cell--weekend' : ''}`,
 				text: dayName.substring(0, 2),
 				attr: { style: `width: ${cellWidth}%;` },
@@ -373,15 +394,12 @@ function renderTimelineHeader(
 				months.set(key, {
 					startIdx: idx,
 					endIdx: idx,
-					label: col.date.toLocaleDateString(undefined, {
-						month: 'long',
-						year: 'numeric',
-					}),
+					label: window.moment(col.date).format('MMMM'),
 				})
 			}
 		})
 
-		const row1 = container.createEl('div', {
+		const row1 = container.createDiv({
 			cls: 'gantt-timeline-row',
 			attr: {
 				style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -391,7 +409,7 @@ function renderTimelineHeader(
 		months.forEach(({ startIdx, endIdx, label }) => {
 			const daysInMonth = endIdx - startIdx + 1
 			const cellWidth = (daysInMonth / totalDays) * 100
-			const cell = row1.createEl('div', {
+			const cell = row1.createDiv({
 				cls: 'gantt-timeline-cell',
 				text: label,
 				attr: { style: `width: ${cellWidth}%;` },
@@ -402,7 +420,7 @@ function renderTimelineHeader(
 			}
 		})
 
-		const row2 = container.createEl('div', {
+		const row2 = container.createDiv({
 			cls: 'gantt-timeline-row',
 			attr: {
 				style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -414,7 +432,7 @@ function renderTimelineHeader(
 			const today = isToday(col.date)
 			const isSun = col.date.getDay() === 0
 			const isSat = col.date.getDay() === 6
-			row2.createEl('div', {
+			row2.createDiv({
 				cls: `gantt-timeline-cell gantt-timeline-cell--small${isSun || isSat ? ' gantt-timeline-cell--weekend' : ''}${today ? ' gantt-timeline-cell--today' : ''}`,
 				text: `${col.date.getDate()}`,
 				attr: { style: `width: ${cellWidth}%;` },
@@ -437,7 +455,7 @@ function addTodayLine(
 
 	const lineX = daysSinceStart * dayWidth
 
-	rightBody.createEl('div', {
+	rightBody.createDiv({
 		cls: 'gantt-today-line',
 		attr: {
 			style: `left: ${lineX}px; height: ${taskCount * 40 + 8}px;`,
@@ -450,7 +468,7 @@ export function renderGantt(
 	notes: TFile[],
 	config: GanttConfig,
 ): void {
-	const header = container.createEl('div', {
+	const header = container.createDiv({
 		cls: 'gantt-header',
 	})
 
@@ -459,7 +477,7 @@ export function renderGantt(
 		cls: 'gantt-header__title',
 	})
 
-	const zoomContainer = header.createEl('div', {
+	const zoomContainer = header.createDiv({
 		cls: 'gantt-header__zoom',
 	})
 
@@ -479,7 +497,7 @@ export function renderGantt(
 	})
 
 	if (notes.length === 0) {
-		container.createEl('div', {
+		container.createDiv({
 			text: t('GANTT_EMPTY'),
 			cls: 'gantt-empty',
 		})
@@ -492,32 +510,33 @@ export function renderGantt(
 
 	const columns = buildTimeline(minDate, maxDate, config.zoom)
 	const dayWidth = getDayWidth(config.zoom)
-	const totalWidthPx = totalDays * dayWidth
+	const MIN_TIMELINE_WIDTH = 600
+	const totalWidthPx = Math.max(totalDays * dayWidth, MIN_TIMELINE_WIDTH)
 
-	const wrapper = container.createEl('div', {
+	const wrapper = container.createDiv({
 		cls: 'gantt-wrapper',
 	})
 
-	const leftPane = wrapper.createEl('div', {
+	const leftPane = wrapper.createDiv({
 		cls: 'gantt-left-pane',
 	})
 
-	const rightPane = wrapper.createEl('div', {
+	const rightPane = wrapper.createDiv({
 		cls: 'gantt-right-pane',
 	})
 
-	const leftHeader = leftPane.createEl('div', {
+	const leftHeader = leftPane.createDiv({
 		cls: 'gantt-left-header',
 	})
-	leftHeader.createEl('span', {
+	leftHeader.createSpan({
 		text: t('GANTT_TITLE'),
 		cls: 'gantt-left-header__label',
 	})
 
-	const rightHeader = rightPane.createEl('div', {
+	const rightHeader = rightPane.createDiv({
 		cls: 'gantt-right-header',
 	})
-	rightHeader.createEl('div', {
+	rightHeader.createDiv({
 		cls: 'gantt-timeline-header',
 		attr: {
 			style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -535,11 +554,11 @@ export function renderGantt(
 		)
 	}
 
-	const leftBody = leftPane.createEl('div', {
+	const leftBody = leftPane.createDiv({
 		cls: 'gantt-left-body',
 	})
 
-	const rightBody = rightPane.createEl('div', {
+	const rightBody = rightPane.createDiv({
 		cls: 'gantt-right-body',
 		attr: {
 			style: `min-width: ${totalWidthPx}px; width: ${totalWidthPx}px;`,
@@ -553,17 +572,17 @@ export function renderGantt(
 	tasks.forEach((task, index) => {
 		const isOdd = index % 2 === 1
 
-		const taskRow = leftBody.createEl('div', {
+		const taskRow = leftBody.createDiv({
 			cls: `gantt-task-row${isOdd ? ' gantt-task-row--alt' : ''}`,
 			attr: { style: `height: ${ROW_HEIGHT}px;` },
 		})
 
-		taskRow.createEl('div', {
+		taskRow.createDiv({
 			cls: 'gantt-task-dot',
 			attr: { style: `background-color: ${task.color};` },
 		})
 
-		const taskTitle = taskRow.createEl('div', {
+		const taskTitle = taskRow.createDiv({
 			cls: 'gantt-task-title',
 			text: task.title,
 		})
@@ -572,7 +591,7 @@ export function renderGantt(
 			config.onTaskClick(task.note)
 		})
 
-		const barRow = rightBody.createEl('div', {
+		const barRow = rightBody.createDiv({
 			cls: `gantt-bar-row${isOdd ? ' gantt-bar-row--alt' : ''}`,
 			attr: { style: `height: ${ROW_HEIGHT}px;` },
 		})
@@ -583,17 +602,17 @@ export function renderGantt(
 		const barLeft = startOffsetDays * dayWidth
 		const barWidth = Math.max(durationDays * dayWidth, dayWidth)
 
-		const bar = barRow.createEl('div', {
+		const bar = barRow.createDiv({
 			cls: 'gantt-bar',
 			attr: {
 				style: `left: ${barLeft}px; width: ${barWidth}px; background-color: ${task.color};`,
-				title: `${task.title}: ${task.start.toLocaleDateString()} - ${task.end.toLocaleDateString()} (${durationDays}d)`,
+				title: `${task.title}: ${window.moment(task.start).format('D MMM')} - ${window.moment(task.end).format('D MMM')} (${durationDays}d)`,
 			},
 		})
 
 		if (barWidth > 60) {
 			const textColor = getContrastColor(task.color)
-			bar.createEl('span', {
+			bar.createSpan({
 				cls: 'gantt-bar-label',
 				text: task.title,
 				attr: { style: `color: ${textColor};` },
@@ -603,6 +622,6 @@ export function renderGantt(
 
 	addTodayLine(rightBody, minDate, totalDays, dayWidth, tasks.length)
 
-	leftBody.createEl('div', { cls: 'gantt-spacer' })
-	rightBody.createEl('div', { cls: 'gantt-spacer' })
+	leftBody.createDiv({ cls: 'gantt-spacer' })
+	rightBody.createDiv({ cls: 'gantt-spacer' })
 }

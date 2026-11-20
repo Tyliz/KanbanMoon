@@ -86,19 +86,19 @@ export class HistoryModal extends Modal {
 		event: HistoryEvent,
 		board: { columns: Array<{ id: string; title: string; color: string }> },
 	) {
-		const eventEl = container.createEl('div', {
+		const eventEl = container.createDiv({
 			cls: 'kanban-history-event',
 		})
 
-		const iconEl = eventEl.createEl('div', {
+		const iconEl = eventEl.createDiv({
 			cls: 'kanban-history-event__icon',
 		})
 
-		const contentEl = eventEl.createEl('div', {
+		const contentEl = eventEl.createDiv({
 			cls: 'kanban-history-event__content',
 		})
 
-		eventEl.createEl('div', {
+		eventEl.createDiv({
 			cls: 'kanban-history-event__date',
 			text: event.date,
 		})
@@ -106,11 +106,11 @@ export class HistoryModal extends Modal {
 		switch (event.type) {
 			case 'created': {
 				setIcon(iconEl, 'plus-circle')
-				contentEl.createEl('span', {
+				contentEl.createSpan({
 					text: t('HISTORY_CREATED'),
 					cls: 'kanban-history-event__label',
 				})
-				contentEl.createEl('span', {
+				contentEl.createSpan({
 					text: event.column,
 					cls: 'kanban-history-event__detail',
 				})
@@ -121,7 +121,7 @@ export class HistoryModal extends Modal {
 				const text = t('HISTORY_STATE_CHANGED')
 					.replace('{from}', event.from)
 					.replace('{to}', event.to)
-				contentEl.createEl('span', {
+				contentEl.createSpan({
 					text,
 					cls: 'kanban-history-event__label',
 				})
@@ -129,14 +129,14 @@ export class HistoryModal extends Modal {
 			}
 			case 'assignee_changed': {
 				setIcon(iconEl, 'users')
-				contentEl.createEl('span', {
+				contentEl.createSpan({
 					text: t('HISTORY_ASSIGNEE_CHANGED'),
 					cls: 'kanban-history-event__label',
 				})
 
 				if (event.added.length > 0) {
 					const names = this.resolvePersonNames(event.added)
-					contentEl.createEl('div', {
+					contentEl.createDiv({
 						text: t('HISTORY_ASSIGNEE_ADDED').replace(
 							'{names}',
 							names,
@@ -147,7 +147,7 @@ export class HistoryModal extends Modal {
 
 				if (event.removed.length > 0) {
 					const names = this.resolvePersonNames(event.removed)
-					contentEl.createEl('div', {
+					contentEl.createDiv({
 						text: t('HISTORY_ASSIGNEE_REMOVED').replace(
 							'{names}',
 							names,
@@ -162,7 +162,18 @@ export class HistoryModal extends Modal {
 				const text = t('HISTORY_CATEGORY_CHANGED')
 					.replace('{from}', event.from || '—')
 					.replace('{to}', event.to || '—')
-				contentEl.createEl('span', {
+				contentEl.createSpan({
+					text,
+					cls: 'kanban-history-event__label',
+				})
+				break
+			}
+			case 'priority_changed': {
+				setIcon(iconEl, 'flag')
+				const text = t('HISTORY_PRIORITY_CHANGED')
+					.replace('{from}', event.from || '—')
+					.replace('{to}', event.to || '—')
+				contentEl.createSpan({
 					text,
 					cls: 'kanban-history-event__label',
 				})
@@ -171,7 +182,7 @@ export class HistoryModal extends Modal {
 			case 'comment': {
 				setIcon(iconEl, 'sticky-note')
 				contentEl.createSpan({
-					text: `${event.note}`,
+					text: t('HISTORY_COMMENT'),
 					cls: 'kanban-history-event__label',
 				})
 				contentEl.createDiv({
