@@ -32,21 +32,6 @@ function isNewFormat(
 	return Array.isArray(data.boards) && typeof data.activeBoardId === 'string'
 }
 
-/**
- * Valida un valor desconocido contra los valores de un enum de string.
- * El type guard `isNewFormat` no garantiza que estos campos tengan el tipo
- * correcto en runtime (vienen de JSON), así que hay que validarlos igual.
- */
-function matchEnumValue<T extends string>(
-	value: unknown,
-	values: readonly T[],
-	fallback: T,
-): T {
-	return typeof value === 'string' && values.includes(value as T)
-		? (value as T)
-		: fallback
-}
-
 export function migrateSettings(
 	raw: Record<string, unknown> | null,
 ): IKanbanSettings {
