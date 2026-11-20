@@ -29,10 +29,7 @@ function isLegacyFormat(
 function isNewFormat(
 	data: Record<string, unknown>,
 ): data is Record<string, unknown> & IKanbanSettings {
-	return (
-		Array.isArray(data.boards) &&
-		typeof data.activeBoardId === 'string'
-	)
+	return Array.isArray(data.boards) && typeof data.activeBoardId === 'string'
 }
 
 export function migrateSettings(
@@ -71,7 +68,8 @@ export function migrateSettings(
 					(boardData.persons as IPerson[]).length > 0
 				) {
 					people = boardData.persons as IPerson[]
-					peopleFolder = (boardData.personsFolder as string) || 'people'
+					peopleFolder =
+						(boardData.personsFolder as string) || 'people'
 					break
 				}
 			}
@@ -84,23 +82,25 @@ export function migrateSettings(
 			if (existingStartCol && typeof existingStartCol === 'string') {
 				startColumnId = existingStartCol
 			} else {
-				const cols = boardData.columns as Array<{ id: string }> | undefined
-				const hasWorkingOn = Array.isArray(cols) &&
+				const cols = boardData.columns as
+					| Array<{ id: string }>
+					| undefined
+				const hasWorkingOn =
+					Array.isArray(cols) &&
 					cols.some((c) => c.id === 'workingOn')
-				startColumnId = hasWorkingOn ? 'workingOn' : (cols?.[0]?.id) || 'backlog'
+				startColumnId = hasWorkingOn
+					? 'workingOn'
+					: cols?.[0]?.id || 'backlog'
 			}
 			return {
 				...board,
-				propertyAssignee:
-					boardData.propertyAssignee || 'assignee',
-				propertyPriority:
-					boardData.propertyPriority || 'priority',
-				propertyStartDate:
-					boardData.propertyStartDate || 'startDate',
-				propertyDueDate:
-					boardData.propertyDueDate || 'dueDate',
+				propertyAssignee: boardData.propertyAssignee || 'assignee',
+				propertyPriority: boardData.propertyPriority || 'priority',
+				propertyStartDate: boardData.propertyStartDate || 'startDate',
+				propertyDueDate: boardData.propertyDueDate || 'dueDate',
 				priorities:
-					Array.isArray(boardData.priorities) && boardData.priorities.length > 0
+					Array.isArray(boardData.priorities) &&
+					boardData.priorities.length > 0
 						? boardData.priorities
 						: DEFAULT_BOARD.priorities,
 				startColumnId,
@@ -125,11 +125,13 @@ export function migrateSettings(
 					? raw.globalHistoryLimit
 					: 20,
 			defaultView:
-				typeof raw.defaultView === 'string' && (Object.values(ViewType) as string[]).includes(raw.defaultView)
+				typeof raw.defaultView === 'string' &&
+				(Object.values(ViewType) as string[]).includes(raw.defaultView)
 					? raw.defaultView
 					: ViewType.kanban,
 			ganttZoom:
-				typeof raw.ganttZoom === 'string' && (Object.values(GanttZoom) as string[]).includes(raw.ganttZoom)
+				typeof raw.ganttZoom === 'string' &&
+				(Object.values(GanttZoom) as string[]).includes(raw.ganttZoom)
 					? raw.ganttZoom
 					: GanttZoom.week,
 			lastSeenVersion:
@@ -143,8 +145,7 @@ export function migrateSettings(
 		const migratedBoard: IBoard = {
 			id: 'default',
 			name: 'Default',
-			tagNotes:
-				(raw.tagNotes as string) || DEFAULT_BOARD.tagNotes,
+			tagNotes: (raw.tagNotes as string) || DEFAULT_BOARD.tagNotes,
 			folderNotes:
 				(raw.folderNotes as string) || DEFAULT_BOARD.folderNotes,
 			propertyState:
@@ -165,9 +166,7 @@ export function migrateSettings(
 					: DEFAULT_BOARD_COLUMNS,
 			categories: raw.categories || [],
 			priorities: DEFAULT_BOARD.priorities,
-			completedColumn:
-				raw.completedColumn ||
-				DEFAULT_COMPLETED_COLUMN,
+			completedColumn: raw.completedColumn || DEFAULT_COMPLETED_COLUMN,
 			startColumnId: DEFAULT_BOARD.startColumnId,
 		}
 

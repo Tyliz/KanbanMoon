@@ -1146,6 +1146,16 @@ button.btn-delete:hover svg {
 	max-height: 70vh;
 }
 
+.kanban-history-modal__actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 8px;
+}
+
+.kanban-history-modal__actions .kanban-new-task-btn {
+	margin-left: 0;
+}
+
 .kanban-history-empty {
 	text-align: center;
 	color: var(--text-muted);
@@ -1213,6 +1223,29 @@ button.btn-delete:hover svg {
 
 .kanban-history-event__detail--removed {
 	color: var(--text-error);
+}
+
+.kanban-history-event__detail--comment {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+/* Comment Modal */
+.kanban-comment-modal textarea {
+	width: 100%;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	color: var(--text-normal);
+	padding: 8px;
+	font-size: 13px;
+	resize: vertical;
+	min-height: 100px;
+}
+
+.kanban-comment-modal textarea:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
 }
 
 .kanban-history-event__date {

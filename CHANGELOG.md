@@ -4,6 +4,12 @@ All notable changes to Kanban Moonlight will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+- **Task comments**: Add comments to a task's history with the **Add comment** button in the task history modal. Comments show up in the task timeline and in the activity log.
+
 ## [1.4.0] - 13/08/2026
 
 ### Added
