@@ -1,13 +1,16 @@
-import { App, Modal, setIcon, TFile } from 'obsidian'
+import { App, EventRef, Modal, setIcon, TFile } from 'obsidian'
 import { t } from '../lang/helpers'
 import type KanbanMoonlightPlugin from '../main'
 import { toSafeFm } from '../utils/frontmatter'
 import { getHistory } from '../utils/history'
 import type { HistoryEvent } from '../types/history'
+import { CommentModal } from './commentModal'
 
 export class HistoryModal extends Modal {
 	plugin: KanbanMoonlightPlugin
 	file: TFile
+	private timelineHost!: HTMLElement
+	private changedRef: EventRef | null = null
 
 	constructor(app: App, plugin: KanbanMoonlightPlugin, file: TFile) {
 		super(app)
@@ -21,20 +24,53 @@ export class HistoryModal extends Modal {
 		contentEl.addClass('kanban-history-modal')
 		this.titleEl.setText(t('HISTORY_TITLE'))
 
+		const actionsEl = contentEl.createDiv({
+			cls: 'kanban-history-modal__actions',
+		})
+
+		const addCommentBtn = actionsEl.createEl('button', {
+			cls: 'kanban-new-task-btn',
+			text: t('HISTORY_COMMENT_ADD'),
+		})
+		addCommentBtn.addEventListener('click', () => {
+			new CommentModal(this.app, this.plugin, this.file, () =>
+				this.renderTimeline(),
+			).open()
+		})
+
+		this.timelineHost = contentEl.createDiv({
+			cls: 'kanban-history-modal__timeline',
+		})
+
+		this.changedRef = this.plugin.app.metadataCache.on(
+			'changed',
+			(file) => {
+				if (file.path === this.file.path) {
+					this.renderTimeline()
+				}
+			},
+		)
+
+		this.renderTimeline()
+	}
+
+	private renderTimeline() {
+		this.timelineHost.empty()
+
 		const board = this.plugin.getActiveBoard()
 		const noteCache = this.plugin.app.metadataCache.getFileCache(this.file)
 		const fm = toSafeFm(noteCache)
 		const history = getHistory(fm)
 
 		if (history.length === 0) {
-			contentEl.createEl('p', {
+			this.timelineHost.createEl('p', {
 				text: t('HISTORY_EMPTY'),
 				cls: 'kanban-history-empty',
 			})
 			return
 		}
 
-		const timelineEl = contentEl.createEl('div', {
+		const timelineEl = this.timelineHost.createDiv({
 			cls: 'kanban-history-timeline',
 		})
 
@@ -132,6 +168,18 @@ export class HistoryModal extends Modal {
 				})
 				break
 			}
+			case 'comment': {
+				setIcon(iconEl, 'sticky-note')
+				contentEl.createSpan({
+					text: `${event.note}`,
+					cls: 'kanban-history-event__label',
+				})
+				contentEl.createDiv({
+					text: event.note,
+					cls: 'kanban-history-event__detail kanban-history-event__detail--comment',
+				})
+				break
+			}
 		}
 	}
 
@@ -146,6 +194,11 @@ export class HistoryModal extends Modal {
 	}
 
 	onClose() {
+		if (this.changedRef) {
+			this.plugin.app.metadataCache.offref(this.changedRef)
+			this.changedRef = null
+		}
+
 		const { contentEl } = this
 		contentEl.empty()
 	}

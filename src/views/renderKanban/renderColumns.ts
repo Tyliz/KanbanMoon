@@ -102,7 +102,7 @@ export const renderKanbanColumns = (
 			cls: 'kanban-history-global__title',
 		})
 
-		const historyList = historySection.createEl('div', {
+		const historyList = historySection.createDiv({
 			cls: 'kanban-history-global__container',
 		})
 

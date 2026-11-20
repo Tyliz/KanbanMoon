@@ -136,5 +136,10 @@ function renderGlobalEvent(
 				.replace('{title}', '')
 			break
 		}
+		case 'comment': {
+			setIcon(iconEl, 'sticky-note')
+			textEl.textContent = `${event.note}`
+			break
+		}
 	}
 }
