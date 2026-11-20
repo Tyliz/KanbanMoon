@@ -186,10 +186,11 @@ export class BoardModal extends Modal {
 				name: data.name.trim(),
 				tagNotes: data.tagNotes.trim(),
 				folderNotes: data.folderNotes.trim(),
-				propertyState: 'state',
-				propertyDescription: 'description',
-				propertyCategory: 'category',
-				propertyAssignee: 'assignee',
+			propertyState: 'state',
+			propertyDescription: 'description',
+			propertyCategory: 'category',
+			propertyPriority: 'priority',
+			propertyAssignee: 'assignee',
 				propertyStartDate: 'startDate',
 				propertyDueDate: 'dueDate',
 				columns: [
@@ -219,6 +220,7 @@ export class BoardModal extends Modal {
 					},
 				],
 				categories: [],
+				priorities: [],
 				completedColumn: {
 					id: 'completed',
 					icon: 'check-check',

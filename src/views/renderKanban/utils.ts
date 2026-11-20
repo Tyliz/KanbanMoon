@@ -2,6 +2,18 @@ import { TFile, App } from 'obsidian'
 import type { IBoard } from '../../settings/kanbanSettings'
 import { toSafeFm, getFmStringArray, getFmString } from '../../utils/frontmatter'
 
+export interface BoardFilters {
+	category: string
+	priority: string
+	assignee: string
+}
+
+export const DEFAULT_FILTERS: BoardFilters = {
+	category: '',
+	priority: '',
+	assignee: '',
+}
+
 export const normalizeTag = (tag: string): string => tag.replace(/^#/, '')
 
 export const sortByMtime = (a: TFile, b: TFile) => {
@@ -45,12 +57,21 @@ export function searchNotes(
 	app: App,
 	board: IBoard,
 	searchTerm: string,
+	filters: BoardFilters = DEFAULT_FILTERS,
 ): TFile[] {
-	if (!searchTerm) return notes
+	const hasActiveFilter =
+		searchTerm ||
+		filters.category ||
+		filters.priority ||
+		filters.assignee
+
+	if (!hasActiveFilter) return notes
 
 	const normalizedFolder = board.folderNotes
 		? board.folderNotes.replace(/^\/+/, '').replace(/\/?$/, '/')
 		: ''
+
+	const normalizedSearch = searchTerm.toLowerCase()
 
 	return notes.filter((note) => {
 		const cache = app.metadataCache.getFileCache(note)
@@ -61,34 +82,50 @@ export function searchNotes(
 
 		const hasTag = board.tagNotes.trim()
 			? getFmStringArray(fm, 'tags').some((tag) => {
-				const normalizedSearch = normalizeTag(board.tagNotes).toLowerCase()
-				return normalizeTag(tag).toLowerCase().includes(normalizedSearch)
+				const tagNorm = normalizeTag(board.tagNotes).toLowerCase()
+				return normalizeTag(tag).toLowerCase().includes(tagNorm)
 			})
 			: false
 
 		const isProjectNote = hasTag || inFolder
 		if (!isProjectNote) return false
 
+		const category = getFmString(
+			fm,
+			board.propertyCategory || 'category',
+		)
+		const priority = getFmString(
+			fm,
+			board.propertyPriority || 'priority',
+		)
+		const assigneeIds = getFmStringArray(
+			fm,
+			board.propertyAssignee || 'assignee',
+		)
+
+		if (filters.category && category !== filters.category) return false
+		if (filters.priority && priority !== filters.priority) return false
+		if (filters.assignee && !assigneeIds.includes(filters.assignee))
+			return false
+
+		if (!searchTerm) return true
+
 		const title = note.basename.toLowerCase()
 		const description = getFmString(
 			fm,
 			board.propertyDescription || 'description',
 		)
-		const category = getFmString(
-			fm,
-			board.propertyCategory || 'category',
-		)
-
 		const tags = getFmStringArray(fm, 'tags').map((t) =>
 			t.toLowerCase(),
 		)
 
 		return (
-			title.includes(searchTerm) ||
-			description.toLowerCase().includes(searchTerm) ||
-			category.toLowerCase().includes(searchTerm) ||
+			title.includes(normalizedSearch) ||
+			description.toLowerCase().includes(normalizedSearch) ||
+			category.toLowerCase().includes(normalizedSearch) ||
+			priority.toLowerCase().includes(normalizedSearch) ||
 			tags.some((tag: string) =>
-				tag.toLowerCase().includes(searchTerm),
+				tag.toLowerCase().includes(normalizedSearch),
 			)
 		)
 	})

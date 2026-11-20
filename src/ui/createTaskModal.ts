@@ -23,6 +23,7 @@ export class CreateTaskModal extends Modal {
 		let title = ''
 		let description = ''
 		let category = ''
+		let priority = ''
 		let state = board.columns[0]?.id || 'backlog'
 		let selectedPersons: string[] = []
 
@@ -68,6 +69,18 @@ export class CreateTaskModal extends Modal {
 				})
 				dropdown.onChange((value) => {
 					category = value
+				})
+			})
+
+		new Setting(contentEl)
+			.setName(t('CREATE_TASK_PRIORITY_LABEL'))
+			.addDropdown((dropdown) => {
+				dropdown.addOption('', t('CREATE_TASK_PRIORITY_NONE'))
+				board.priorities.forEach((pri) => {
+					dropdown.addOption(pri.name, pri.name)
+				})
+				dropdown.onChange((value) => {
+					priority = value
 				})
 			})
 
@@ -191,10 +204,14 @@ export class CreateTaskModal extends Modal {
 							fm[board.propertyDescription || 'description'] =
 								description.trim()
 						}
-						if (category.trim()) {
-							fm[board.propertyCategory || 'category'] =
-								category.trim()
-						}
+					if (category.trim()) {
+						fm[board.propertyCategory || 'category'] =
+							category.trim()
+					}
+					if (priority.trim()) {
+						fm[board.propertyPriority || 'priority'] =
+							priority.trim()
+					}
 						if (selectedPersons.length > 0) {
 							fm[board.propertyAssignee || 'assignee'] =
 								selectedPersons

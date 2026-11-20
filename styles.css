@@ -197,6 +197,41 @@
 	margin: 0 auto;
 }
 
+.kanban-filter-bar {
+	display: flex;
+	gap: 12px;
+	padding: 0 15px;
+	margin-bottom: 10px;
+	flex-wrap: wrap;
+}
+
+.kanban-filter-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.kanban-filter-label {
+	font-size: 12px;
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.kanban-filter-select {
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 12px;
+	cursor: pointer;
+	outline: none;
+}
+
+.kanban-filter-select:focus {
+	border-color: var(--interactive-accent);
+}
+
 .kanban-column {
 	position: relative;
 	min-width: 280px;
@@ -432,6 +467,17 @@ a.kanban-card__title.internal-link {
 .kanban-card__tag-icon svg {
 	width: 10px;
 	height: 10px;
+}
+
+.kanban-card__priority-tag {
+	margin-left: 2px;
+}
+
+input.kanban-card-input--small {
+	flex: 0 0 50px;
+	min-width: 0;
+	width: 50px;
+	text-align: center;
 }
 
 .kanban-card__date {
@@ -1049,7 +1095,8 @@ button.btn-delete:hover svg {
 	color: var(--text-normal);
 }
 
-.kanban-person-modal .kanban-create-task-textarea {
+.kanban-person-modal .kanban-create-task-textarea,
+.kanban-create-task-textarea {
 	width: 100%;
 	background: var(--background-secondary);
 	border: 1px solid var(--background-modifier-border);
@@ -1060,7 +1107,8 @@ button.btn-delete:hover svg {
 	resize: vertical;
 }
 
-.kanban-person-modal .kanban-create-task-textarea:focus {
+.kanban-person-modal .kanban-create-task-textarea:focus,
+.kanban-create-task-textarea:focus {
 	border-color: var(--interactive-accent);
 	outline: none;
 }
@@ -1096,6 +1144,16 @@ button.btn-delete:hover svg {
 /* History Modal */
 .kanban-history-modal {
 	max-height: 70vh;
+}
+
+.kanban-history-modal__actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 8px;
+}
+
+.kanban-history-modal__actions .kanban-new-task-btn {
+	margin-left: 0;
 }
 
 .kanban-history-empty {
@@ -1165,6 +1223,29 @@ button.btn-delete:hover svg {
 
 .kanban-history-event__detail--removed {
 	color: var(--text-error);
+}
+
+.kanban-history-event__detail--comment {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+/* Comment Modal */
+.kanban-comment-modal textarea {
+	width: 100%;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	color: var(--text-normal);
+	padding: 8px;
+	font-size: 13px;
+	resize: vertical;
+	min-height: 100px;
+}
+
+.kanban-comment-modal textarea:focus {
+	border-color: var(--interactive-accent);
+	outline: none;
 }
 
 .kanban-history-event__date {
